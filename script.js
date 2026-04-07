@@ -349,32 +349,31 @@ function startLogoPhysics() {
   }, 120);
 }
 
-// --- 模块 3（续）：何时启动物理 — 进入视口后启动 + resize 重置 ---
+// --- 模块 3（续）：何时启动物理 — 每次进入视口都重播 + resize 重置 ---
 if (logoWall) {
   setupLogoParticles();
 
-  let observer = null;
-  let scrollBound = false;
-
-  const maybeStartPhysics = () => {
-    if (physicsStarted) return;
-    const rect = logoWall.getBoundingClientRect();
-    if (rect.top < window.innerHeight * 0.9 && rect.bottom > 0) {
-      startLogoPhysics();
-      if (physicsStarted && observer) observer.disconnect();
-      if (physicsStarted && scrollBound) {
-        window.removeEventListener("scroll", maybeStartPhysics);
-        scrollBound = false;
-      }
+  const restartLogoPhysics = () => {
+    if (physicsRafId) {
+      cancelAnimationFrame(physicsRafId);
+      physicsRafId = null;
     }
+    physicsStarted = false;
+    setupLogoParticles();
+    startLogoPhysics();
   };
 
-  observer = new IntersectionObserver(
+  let hasPlayedInCurrentViewport = false;
+  const observer = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
-          startLogoPhysics();
-          observer.disconnect();
+          if (!hasPlayedInCurrentViewport) {
+            hasPlayedInCurrentViewport = true;
+            restartLogoPhysics();
+          }
+        } else {
+          hasPlayedInCurrentViewport = false;
         }
       });
     },
@@ -384,20 +383,12 @@ if (logoWall) {
 
   observer.observe(logoWall);
 
-  window.addEventListener("scroll", maybeStartPhysics, { passive: true });
-  scrollBound = true;
-
   let resizeTimer;
   window.addEventListener("resize", () => {
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(() => {
-      if (physicsRafId) {
-        cancelAnimationFrame(physicsRafId);
-        physicsRafId = null;
-      }
-      physicsStarted = false;
-      setupLogoParticles();
-      maybeStartPhysics();
+      hasPlayedInCurrentViewport = false;
+      restartLogoPhysics();
     }, 160);
   });
 }
