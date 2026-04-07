@@ -110,6 +110,41 @@ document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
 });
 
 // =============================================================================
+// 模块 2.5：首屏小视频 — 初次与每次回到视口都播放一次
+// =============================================================================
+const heroBadgeVideo = document.querySelector(".hero-img2-video");
+
+if (heroBadgeVideo) {
+  let hasPlayedInCurrentViewport = false;
+
+  const playHeroBadgeVideo = () => {
+    heroBadgeVideo.currentTime = 0;
+    const playPromise = heroBadgeVideo.play();
+    if (playPromise && typeof playPromise.catch === "function") {
+      playPromise.catch(() => {});
+    }
+  };
+
+  const heroBadgeObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          if (!hasPlayedInCurrentViewport) {
+            hasPlayedInCurrentViewport = true;
+            playHeroBadgeVideo();
+          }
+        } else {
+          hasPlayedInCurrentViewport = false;
+        }
+      });
+    },
+    { threshold: 0.55 }
+  );
+
+  heroBadgeObserver.observe(heroBadgeVideo);
+}
+
+// =============================================================================
 // 模块 3：技能 Logo 墙 — 2D 简易物理（重力 + 边界 + 粒子碰撞）
 // =============================================================================
 const logoWall = document.querySelector(".logo-wall");
