@@ -399,16 +399,29 @@ if (logoWall) {
   };
 
   let hasPlayedInCurrentViewport = false;
+  let hasPlayedOnceOnMobile = false;
   const observer = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
+        const isMobileViewport = window.innerWidth <= 768;
         if (entry.isIntersecting) {
+          // 移动端：只播放一次，后续再次进入不重播。
+          if (isMobileViewport) {
+            if (hasPlayedOnceOnMobile) return;
+            hasPlayedOnceOnMobile = true;
+            restartLogoPhysics();
+            return;
+          }
+
+          // 桌面端：每次离开后再次进入都重播。
           if (!hasPlayedInCurrentViewport) {
             hasPlayedInCurrentViewport = true;
             restartLogoPhysics();
           }
         } else {
-          hasPlayedInCurrentViewport = false;
+          if (!isMobileViewport) {
+            hasPlayedInCurrentViewport = false;
+          }
         }
       });
     },
