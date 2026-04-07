@@ -256,14 +256,29 @@ body.menu-open {
   left: -250px;
 }
 
-.hero .r1 img:nth-of-type(2) {
+.hero .r1 .hero-img2-video-wrap {
   position: absolute;
-  width: 69px;
   top: 40px;
   right: 360px;
+  width: 69px;
+  height: 148px;
+  overflow: hidden;
+  border-radius: 200px;
+  border: 1px solid #0F172A;
+  z-index: 3;
+  pointer-events: none;
 }
 
-.hero .r1 img:nth-of-type(3) {
+.hero .r1 .hero-img2-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.hero .r1 img:nth-of-type(2) {
   width: 280px;
   position: absolute;
   top: -100px;
