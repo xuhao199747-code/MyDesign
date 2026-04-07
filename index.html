@@ -1,0 +1,536 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>网页导航示例</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Great+Vibes&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <!-- GSAP 鼠标轨迹装饰（参考 CodePen: https://codepen.io/GreenSock/pen/WbbEGmp — flair cursor follower） -->
+    <div class="flair-trail" aria-hidden="true">
+      <img class="flair" src="./imag/trajectory/trajectory1.png" alt="" />
+      <img class="flair" src="./imag/trajectory/trajectory2.png" alt="" />
+      <img class="flair" src="./imag/trajectory/trajectory3.png" alt="" />
+      <img class="flair" src="./imag/trajectory/trajectory6.png" alt="" />
+      <img class="flair" src="./imag/trajectory/trajectory4.png" alt="" />
+      <img class="flair" src="./imag/trajectory/trajectory5.png" alt="" />
+      <img class="flair" src="./imag/trajectory/trajectory7.png" alt="" />
+      <img class="flair" src="./imag/trajectory/trajectory2.png" alt="" />
+      <img class="flair" src="./imag/trajectory/trajectory1.png" alt="" />
+      <img class="flair" src="./imag/trajectory/trajectory2.png" alt="" />
+      <img class="flair" src="./imag/trajectory/trajectory4.png" alt="" />
+      <img class="flair" src="./imag/trajectory/trajectory5.png" alt="" />
+    </div>
+
+    <!-- 网页导航 -->
+    <header class="navbar">
+        <a class="brand" href="#">
+          <svg
+            width="117"
+            height="12"
+            viewBox="0 0 117 12"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M0 0.460206V0.156006H2.5974L7.1916 4.32121L11.8092 0.156006H14.3832V0.460206L8.658 5.65501L14.3052 10.7718V11.076H11.6454L7.176 6.99661L2.6754 11.076H0.0390003V10.7718L5.7018 5.66281L0 0.460206Z"
+              fill="#0F172A"
+            />
+            <path
+              d="M16.3832 0.155998H18.5672V4.5864H29.3546V0.155998H31.5386V11.076H29.3546V6.5676H18.5672V11.076H16.3832V0.155998Z"
+              fill="#0F172A"
+            />
+            <path
+              d="M44.8174 0.155998C46.8376 0.155998 47.7814 1.0998 47.7814 3.12V8.112C47.7814 10.1322 46.8376 11.076 44.8174 11.076H33.5386V9.1026H44.3494C45.4102 9.1026 45.5974 8.9154 45.5974 7.8546V3.3774C45.5974 2.3166 45.4102 2.1294 44.3494 2.1294H33.5386V0.155998H44.8174Z"
+              fill="#0F172A"
+            />
+            <path
+              d="M49.8984 4.6254H54.6096V6.6066H49.8984V4.6254ZM49.7814 11.076V9.1026H63.0492V11.076H49.7814ZM49.7814 2.1294V0.155998H62.862V2.1294H49.7814Z"
+              fill="#0F172A"
+            />
+            <path
+              d="M78.4106 0.155998V2.1294H68.5592C67.4984 2.1294 67.3112 2.3166 67.3112 3.3618C67.3112 4.407 67.4984 4.5864 68.5592 4.5864H76.0784C78.0908 4.5864 79.0346 5.5302 79.0346 7.5504V8.112C79.0346 10.1322 78.0908 11.076 76.0784 11.076H65.0492V9.1026H75.6104C76.6712 9.1026 76.8506 8.9154 76.8506 7.8546V7.8156C76.8506 6.747 76.6712 6.5676 75.6104 6.5676H68.0912C66.071 6.5676 65.1272 5.6238 65.1272 3.6036V3.12C65.1272 1.0998 66.071 0.155998 68.0912 0.155998H78.4106Z"
+              fill="#0F172A"
+            />
+            <path
+              d="M81.0347 0.155998H83.2187V11.076H81.0347V0.155998Z"
+              fill="#0F172A"
+            />
+            <path
+              d="M99.5784 0.155998V2.1294H88.6506C87.5898 2.1294 87.4026 2.3166 87.4026 3.3774V7.8546C87.4026 8.9154 87.5898 9.1026 88.6506 9.1026H97.3944V6.5676H92.4024V4.5864H99.5784V11.076H88.1826C86.1624 11.076 85.2186 10.1322 85.2186 8.112V3.12C85.2186 1.0998 86.1624 0.155998 88.1826 0.155998H99.5784Z"
+              fill="#0F172A"
+            />
+            <path
+              d="M115.213 11.232L103.762 3.1902V11.076H101.578V0H102.67L114.121 7.9794V0.156H116.305V11.232H115.213Z"
+              fill="#0F172A"
+            />
+          </svg>
+        </a>
+        <button class="menu-toggle" id="menuToggle" aria-label="切换导航菜单">
+          菜单
+        </button>
+        <nav class="menu-wrap" id="menuWrap" aria-label="主导航">
+          <ul class="menu">
+            <li><a href="#about">简历</a></li>
+            <li><a href="#portfolio">作品</a></li>
+            <li><a href="#experience">经历</a></li>
+            <li>
+              <a href="#contact">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                >
+                  <path
+                    d="M12.9737 7.19808C13.1693 7.19808 13.3622 7.21239 13.5532 7.23316C13.0327 4.83452 10.4407 3.05195 7.48239 3.05195C4.17471 3.05195 1.46509 5.28306 1.46509 8.1159C1.46509 9.75083 2.36676 11.0936 3.87294 12.1351L3.2712 13.9267L5.3745 12.8827C6.12759 13.0299 6.73114 13.1817 7.48239 13.1817C7.67112 13.1817 7.85799 13.1725 8.04397 13.1577C7.92629 12.76 7.85799 12.3428 7.85799 11.9104C7.85801 9.30923 10.1154 7.19808 12.9737 7.19808ZM9.73888 5.58348C10.192 5.58348 10.4919 5.8788 10.4919 6.32687C10.4919 6.77309 10.192 7.07211 9.73888 7.07211C9.28756 7.07211 8.83535 6.77309 8.83535 6.32687C8.83535 5.8788 9.28758 5.58348 9.73888 5.58348ZM5.52769 7.07209C5.07638 7.07209 4.62139 6.77307 4.62139 6.32685C4.62139 5.87878 5.07638 5.58346 5.52769 5.58346C5.97851 5.58346 6.27892 5.87878 6.27892 6.32685C6.27892 6.77309 5.97851 7.07209 5.52769 7.07209ZM18.4658 11.8389C18.4658 9.45827 16.0584 7.51786 13.3548 7.51786C10.4919 7.51786 8.23732 9.45827 8.23732 11.8389C8.23732 14.223 10.4919 16.1592 13.3548 16.1592C13.9538 16.1592 14.5583 16.0106 15.16 15.8611L16.8106 16.7554L16.3579 15.2677C17.566 14.3706 18.4658 13.1817 18.4658 11.8389ZM11.6954 11.0936C11.396 11.0936 11.0937 10.7988 11.0937 10.4979C11.0937 10.2012 11.396 9.90265 11.6954 9.90265C12.1504 9.90265 12.4485 10.2012 12.4485 10.4979C12.4485 10.7988 12.1504 11.0936 11.6954 11.0936ZM15.0049 11.0936C14.7078 11.0936 14.4074 10.7988 14.4074 10.4979C14.4074 10.2012 14.7078 9.90265 15.0049 9.90265C15.4562 9.90265 15.758 10.2012 15.758 10.4979C15.758 10.7988 15.4562 11.0936 15.0049 11.0936Z"
+                    fill="#0F172A"
+                  />
+                </svg>
+              </a>
+            </li>
+            <li>
+              <a href="#contact">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                >
+                  <path
+                    d="M13.5433 19H13.4639C11.5971 18.898 9.07573 16.9746 6.71653 13.8587L5.84612 12.7149C3.48691 9.599 2.25131 6.55479 2.54183 4.5755C2.74485 3.17907 4.64551 2 5.73177 2C6.26615 2 6.461 2.29021 6.53101 2.46507C7.14123 3.66114 7.90196 5.73636 7.90779 6.48071V6.53293L7.89029 6.58271C7.75378 6.97371 7.45159 7.16071 7.18323 7.32707C6.8297 7.54564 6.63018 7.68771 6.60452 8.09936C6.59868 8.22321 6.69669 8.79271 8.25199 10.8861L8.91705 11.7641C10.4782 13.7774 10.9682 13.9935 11.0814 14.0105C11.4583 14.07 11.6379 13.8939 11.9075 13.5673C12.1128 13.3159 12.3462 13.0379 12.73 12.9771L12.7814 12.9674L12.828 12.9844C13.5094 13.1362 15.2433 14.3602 16.235 15.2709C16.375 15.3729 16.6235 15.6814 16.4275 16.3577C16.1195 17.4202 14.7742 19 13.5433 19Z"
+                    fill="#0F172A"
+                  />
+                </svg>
+              </a>
+            </li>
+          </ul>
+        </nav>
+    </header>
+    <main>
+      <!-- 内容区域1：首屏；≤1200px 用整图 Header Imagebg，更宽视口用 hero-scale 排版 -->
+      <section id="home" class="container hero">
+        <div class="hero-banner-mobile">
+          <img
+            src="./imag/Header Imagebg.png"
+            alt="DESIGN MORE HUMANIZED"
+            decoding="async"
+          />
+        </div>
+        <div class="hero-scale">
+        <div class="hero-in">
+          <div class="r1">
+            <img src="./imag/Header Image1.png" alt="" />
+            <p>DES</p>
+            <img src="./imag/Header Image2.png" alt="" />
+            <p>GN</p>
+            <img src="./imag/Header Image3.png" alt="" />
+          </div>
+          <div class="r2">
+            <p>M</p>
+            <div class="sw">
+              <input type="checkbox" id="mr" />
+              <label for="mr" aria-label="装饰开关"></label>
+            </div>
+            <p>RE</p>
+          </div>
+          <div class="r3">
+            <p>HUMANIZED</p>
+          </div>
+        </div>
+        </div>
+      </section>
+
+      <!-- 内容区域2：介绍与技能 -->
+      <section id="about" class="container section-two">
+        <div class="section-two-head">
+          <img src="./imag/Image2.png" alt="自我介绍文案" />
+        </div>
+        <div id="works" class="logo-wall" aria-label="技能工具图标列表">
+          <img src="./imag/logo/logo1.png" alt="工具图标 1" />
+          <img src="./imag/logo/logo2.png" alt="工具图标 2" />
+          <img src="./imag/logo/logo3.png" alt="工具图标 3" />
+          <img src="./imag/logo/logo4.png" alt="工具图标 4" />
+          <img src="./imag/logo/logo5.png" alt="工具图标 5" />
+          <img src="./imag/logo/logo6.png" alt="工具图标 6" />
+          <img src="./imag/logo/logo7.png" alt="工具图标 7" />
+          <img src="./imag/logo/logo8.png" alt="工具图标 8" />
+          <img src="./imag/logo/logo9.png" alt="工具图标 9" />
+          <img src="./imag/logo/logo10.png" alt="工具图标 10" />
+          <img src="./imag/logo/logo11.png" alt="工具图标 11" />
+          <img src="./imag/logo/logo12.png" alt="工具图标 12" />
+          <img src="./imag/logo/logo13.png" alt="工具图标 13" />
+          <img src="./imag/logo/logo14.png" alt="工具图标 14" />
+          <img src="./imag/logo/logo15.png" alt="工具图标 15" />
+        </div>
+      </section>
+
+      <!-- 内容区域3：个人照片 -->
+      <section id="photo" class="container section-three">
+        <img class="photo-top" src="./imag/photo Top.png" alt="个人照片" />
+        <div class="photo-content">
+          <dl class="photo-meta">
+            <dt>BASED</dt>
+            <dd>杭州</dd>
+          </dl>
+          <div class="photo-images">
+            <img
+              class="photo-image photo-image-front"
+              src="./imag/photo1.png"
+              alt=""
+            />
+            <img
+              class="photo-image photo-image-back"
+              src="./imag/photo2.png"
+              alt=""
+            />
+          </div>
+          <dl class="photo-meta">
+            <dt>Designer</dt>
+            <dd>UI/UX</dd>
+          </dl>
+        </div>
+        <div class="photo-content-bottom">
+          <p>用逻辑构建界面，以温度传递品牌基因！</p>
+          <p>让界面更有逻辑，让设计更有温度!</p>
+        </div>
+      </section>
+
+      <!-- 内容区域4：作品 — 无限滚动卡片（CodePen GreenSock RwKwLWK） -->
+      <section
+        id="portfolio"
+        class="container section-portfolio portfolio-cards-section"
+        aria-label="作品展示"
+      >
+        <img class="portfolio-top" src="./imag/design top.png" alt="作品展示" />
+        <div class="portfolio-gallery">
+          <ul class="portfolio-cards">
+            <li
+              style="
+                background-image: url(https://assets.codepen.io/16327/portrait-number-01.png);
+              "
+            ></li>
+            <li
+              style="
+                background-image: url(https://assets.codepen.io/16327/portrait-number-02.png);
+              "
+            ></li>
+            <li
+              style="
+                background-image: url(https://assets.codepen.io/16327/portrait-number-03.png);
+              "
+            ></li>
+            <li
+              style="
+                background-image: url(https://assets.codepen.io/16327/portrait-number-04.png);
+              "
+            ></li>
+            <li
+              style="
+                background-image: url(https://assets.codepen.io/16327/portrait-number-05.png);
+              "
+            ></li>
+            <li
+              style="
+                background-image: url(https://assets.codepen.io/16327/portrait-number-06.png);
+              "
+            ></li>
+            <li
+              style="
+                background-image: url(https://assets.codepen.io/16327/portrait-number-07.png);
+              "
+            ></li>
+            <li
+              style="
+                background-image: url(https://assets.codepen.io/16327/portrait-number-01.png);
+              "
+            ></li>
+            <li
+              style="
+                background-image: url(https://assets.codepen.io/16327/portrait-number-02.png);
+              "
+            ></li>
+            <li
+              style="
+                background-image: url(https://assets.codepen.io/16327/portrait-number-03.png);
+              "
+            ></li>
+            <li
+              style="
+                background-image: url(https://assets.codepen.io/16327/portrait-number-04.png);
+              "
+            ></li>
+            <li
+              style="
+                background-image: url(https://assets.codepen.io/16327/portrait-number-05.png);
+              "
+            ></li>
+            <li
+              style="
+                background-image: url(https://assets.codepen.io/16327/portrait-number-06.png);
+              "
+            ></li>
+            <li
+              style="
+                background-image: url(https://assets.codepen.io/16327/portrait-number-07.png);
+              "
+            ></li>
+          </ul>
+          <!-- 仅该区域触发横向拖拽卡片，缩小热区便于垂直滚动整页 -->
+          <div class="portfolio-drag-hit" aria-hidden="true"></div>
+          <div class="portfolio-actions">
+            <button type="button" class="portfolio-prev">上一张</button>
+            <button type="button" class="portfolio-next">下一张</button>
+          </div>
+        </div>
+        <div class="portfolio-drag-proxy" aria-hidden="true"></div>
+      </section>
+
+      <!-- 内容区域5：工作经历（悬停行时大图跟随指针，GSAP） -->
+      <section
+        id="experience"
+        class="container section-five works-swipe-section"
+        aria-label="工作经历"
+      >
+        <header class="works-swipe-head">
+          <h2 class="works-swipe-head__title">
+            WORK<br />
+            EXPERIENCE
+          </h2>
+          <p class="works-swipe-head__intro">
+            5 年 UI / 交互设计经验，覆盖 Web、移动端、数据可视化与 B
+            端产品等多端场景，擅长将业务目标转化为清晰可用的界面与体验。
+          </p>
+        </header>
+        <ul class="works-swipe-list">
+          <li>
+            <div class="works-swipe-item">
+              <div class="works-swipe-item__meta">
+                <div class="works-swipe-dots" aria-hidden="true">
+                  <span class="works-swipe-dot works-swipe-dot--on"></span>
+                  <span class="works-swipe-dot works-swipe-dot--on"></span>
+                  <span class="works-swipe-dot"></span>
+                  <span class="works-swipe-dot"></span>
+                  <span class="works-swipe-dot"></span>
+                  <span class="works-swipe-dot"></span>
+                </div>
+                <p class="works-swipe-item__date">2020.02 — 2021.06</p>
+              </div>
+              <div class="works-swipe-item__body">
+                <h3 class="works-swipe-item__company">瞳善网络科技有限公司</h3>
+                <p class="works-swipe-item__projects">
+                  涉及项目：电商平台、宣传物料、电商 app 设计
+                </p>
+              </div>
+              <img
+                class="swipeimage"
+                src="./imag/photo1.png"
+                alt=""
+                width="350"
+                height="350"
+              />
+            </div>
+          </li>
+          <li>
+            <div class="works-swipe-item">
+              <div class="works-swipe-item__meta">
+                <div class="works-swipe-dots" aria-hidden="true">
+                  <span class="works-swipe-dot works-swipe-dot--on"></span>
+                  <span class="works-swipe-dot works-swipe-dot--on"></span>
+                  <span class="works-swipe-dot"></span>
+                  <span class="works-swipe-dot"></span>
+                  <span class="works-swipe-dot"></span>
+                  <span class="works-swipe-dot"></span>
+                </div>
+                <p class="works-swipe-item__date">2021.06 — 2021.11</p>
+              </div>
+              <div class="works-swipe-item__body">
+                <h3 class="works-swipe-item__company">
+                  杭州辰上星辰信息科技有限公司
+                </h3>
+                <p class="works-swipe-item__projects">
+                  涉及项目：C 端项目、心理咨询、医疗官网等
+                </p>
+              </div>
+              <img
+                class="swipeimage"
+                src="./imag/photo2.png"
+                alt=""
+                width="350"
+                height="350"
+              />
+            </div>
+          </li>
+          <li>
+            <div class="works-swipe-item">
+              <div class="works-swipe-item__meta">
+                <div class="works-swipe-dots" aria-hidden="true">
+                  <span class="works-swipe-dot works-swipe-dot--on"></span>
+                  <span class="works-swipe-dot works-swipe-dot--on"></span>
+                  <span class="works-swipe-dot works-swipe-dot--on"></span>
+                  <span class="works-swipe-dot"></span>
+                  <span class="works-swipe-dot"></span>
+                  <span class="works-swipe-dot"></span>
+                </div>
+                <p class="works-swipe-item__date">2021.11 — 2023.04</p>
+              </div>
+              <div class="works-swipe-item__body">
+                <h3 class="works-swipe-item__company">阿里-企业智能-德科</h3>
+                <p class="works-swipe-item__projects">
+                  涉及项目：酒店钉钉工作台、智慧酒店小程序后台、智慧公寓小程序前后台、可视化
+                </p>
+              </div>
+              <img
+                class="swipeimage"
+                src="./imag/Image2.png"
+                alt=""
+                width="350"
+                height="350"
+              />
+            </div>
+          </li>
+          <li>
+            <div class="works-swipe-item">
+              <div class="works-swipe-item__meta">
+                <div class="works-swipe-dots" aria-hidden="true">
+                  <span class="works-swipe-dot works-swipe-dot--on"></span>
+                  <span class="works-swipe-dot works-swipe-dot--on"></span>
+                  <span class="works-swipe-dot works-swipe-dot--on"></span>
+                  <span class="works-swipe-dot works-swipe-dot--on"></span>
+                  <span class="works-swipe-dot"></span>
+                  <span class="works-swipe-dot"></span>
+                </div>
+                <p class="works-swipe-item__date">2023.04 — 2024.10</p>
+              </div>
+              <div class="works-swipe-item__body">
+                <h3 class="works-swipe-item__company">
+                  杭州赛兴航科技有限公司
+                </h3>
+                <p class="works-swipe-item__projects">
+                  涉及项目：低代码平台、公司官网、西溪湿地、余杭文旅、浙江省博物馆
+                </p>
+              </div>
+              <img
+                class="swipeimage"
+                src="./imag/Header Image.png"
+                alt=""
+                width="350"
+                height="350"
+              />
+            </div>
+          </li>
+          <li>
+            <div class="works-swipe-item">
+              <div class="works-swipe-item__meta">
+                <div class="works-swipe-dots" aria-hidden="true">
+                  <span class="works-swipe-dot works-swipe-dot--on"></span>
+                  <span class="works-swipe-dot works-swipe-dot--on"></span>
+                  <span class="works-swipe-dot works-swipe-dot--on"></span>
+                  <span class="works-swipe-dot works-swipe-dot--on"></span>
+                  <span class="works-swipe-dot works-swipe-dot--on"></span>
+                  <span class="works-swipe-dot"></span>
+                </div>
+                <p class="works-swipe-item__date">2024.12 — 2025.4</p>
+              </div>
+              <div class="works-swipe-item__body">
+                <h3 class="works-swipe-item__company">阿里-领羊-软通</h3>
+                <p class="works-swipe-item__projects">
+                  涉及项目：Quick BI
+                  平台搭建、制造业电力大屏、物流综合分析大屏、Dataphin
+                  平台搭建等
+                </p>
+              </div>
+              <img
+                class="swipeimage"
+                src="./imag/photo1.png"
+                alt=""
+                width="350"
+                height="350"
+              />
+            </div>
+          </li>
+          <li>
+            <div class="works-swipe-item">
+              <div class="works-swipe-item__meta">
+                <div class="works-swipe-dots" aria-hidden="true">
+                  <span class="works-swipe-dot works-swipe-dot--on"></span>
+                  <span class="works-swipe-dot works-swipe-dot--on"></span>
+                  <span class="works-swipe-dot works-swipe-dot--on"></span>
+                  <span class="works-swipe-dot works-swipe-dot--on"></span>
+                  <span class="works-swipe-dot works-swipe-dot--on"></span>
+                  <span class="works-swipe-dot works-swipe-dot--on"></span>
+                </div>
+                <p class="works-swipe-item__date">2025.5 — 至今</p>
+              </div>
+              <div class="works-swipe-item__body">
+                <h3 class="works-swipe-item__company">
+                  阿里-阿里国际-AI 创新-博彦
+                </h3>
+                <p class="works-swipe-item__projects">
+                  涉及项目：Quick BI
+                  平台搭建、制造业电力大屏、物流综合分析大屏、Dataphin
+                  平台搭建等
+                </p>
+              </div>
+              <img
+                class="swipeimage"
+                src="./imag/photo2.png"
+                alt=""
+                width="350"
+                height="350"
+              />
+            </div>
+          </li>
+        </ul>
+      </section>
+    </main>
+
+    <!-- 页脚 Demo：联系信息 + Xuhao；中间区背景图在 styles.css → .footer-demo__stage -->
+    <footer id="contact" class="footer-demo">
+      <div class="footer-demo__panel">
+        <div class="footer-demo__contain">
+          <div class="footer-demo__grid">
+            <div>
+              <p class="footer-demo__label">FOLLOW ME</p>
+              <p class="footer-demo__value">wechat →</p>
+            </div>
+            <div>
+              <p class="footer-demo__label">CURRENT LOCATION</p>
+              <p class="footer-demo__value">浙江杭州市余杭区 →</p>
+            </div>
+            <div>
+              <p class="footer-demo__label">Phone</p>
+              <p class="footer-demo__value">15004700137</p>
+            </div>
+            <div>
+              <p class="footer-demo__label">EMAIL me</p>
+              <p class="footer-demo__value">
+                <a href="mailto:961407086@qq.com">961407086@qq.com</a>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="footer-demo__bar">
+        <div class="footer-demo__contain footer-demo__bar-inner">
+          <span class="footer-demo__copy">©2026 XUHAO DESIGN</span>
+          <a class="footer-demo__top-link" href="#home">Back To Top</a>
+        </div>
+      </div>
+    </footer>
+
+    <!-- 使用本地 GSAP，避免仅 CDN 时断网 / file:// 打开导致整段交互失效 -->
+    <script src="./vendor/gsap.min.js"></script>
+    <script src="./vendor/Draggable.min.js"></script>
+    <script src="./script.js"></script>
+  </body>
+</html>
