@@ -432,9 +432,18 @@ if (logoWall) {
   observer.observe(logoWall);
 
   let resizeTimer;
+  let lastViewportWidth = window.innerWidth;
   window.addEventListener("resize", () => {
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(() => {
+      const currentWidth = window.innerWidth;
+      const widthChanged = Math.abs(currentWidth - lastViewportWidth) > 8;
+      lastViewportWidth = currentWidth;
+
+      // 移动端滚动时浏览器 UI 伸缩会触发 resize（高度变化）。
+      // 仅在宽度真实变化时重置动画，避免“滚动误触发重播”。
+      if (!widthChanged) return;
+
       hasPlayedInCurrentViewport = false;
       restartLogoPhysics();
     }, 160);
