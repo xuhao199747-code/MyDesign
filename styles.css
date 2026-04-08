@@ -134,7 +134,7 @@ body.menu-open {
   margin-bottom: 160px;
 }
 
-/* 首屏整图：默认隐藏；视口 ≤1200px 起显示（与版心开始收缩一致），大屏保持排版版 */
+/* 首屏整图：默认隐藏；视口 ≤768px（手机）显示，PC 保持排版版 */
 .hero-banner-mobile {
   display: none;
   width: 100%;
@@ -147,27 +147,6 @@ body.menu-open {
   width: 100%;
   height: auto;
   display: block;
-}
-
-@media (max-width: 1200px) {
-  .hero-banner-mobile {
-    display: block;
-  }
-
-  .hero-scale {
-    display: none;
-  }
-
-  /* 作品区卡片：≤1200 即缩小；画廊高度须 ≥ 卡片(宽×16/9)+按钮区，否则 overflow 会裁切 */
-  .section-portfolio .portfolio-gallery {
-    min-height: clamp(340px, 52vw, 540px);
-    padding-bottom: 8px;
-  }
-
-  .section-portfolio .portfolio-cards,
-  .section-portfolio .portfolio-drag-hit {
-    width: min(64vw, 208px);
-  }
 }
 
 /* 大屏：与原先 .hero-in 同宽 */
@@ -740,6 +719,10 @@ body.menu-open {
   margin-bottom: 160px;
 }
 
+#experience {
+  padding-bottom: 0;
+}
+
 .section-five.works-swipe-section .works-swipe-head {
   display: flex;
   flex-wrap: wrap;
@@ -856,27 +839,6 @@ body.menu-open {
   color: #64748b;
 }
 
-@media (max-width: 640px) {
-  .section-five.works-swipe-section .works-swipe-head {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .section-five.works-swipe-section .works-swipe-head__intro {
-    flex: 0 1 auto;
-    max-width: none;
-  }
-
-  .section-five.works-swipe-section .works-swipe-item {
-    flex-direction: column;
-    gap: 16px;
-  }
-
-  .section-five.works-swipe-section .works-swipe-item__meta {
-    width: 100%;
-  }
-}
-
 .section-five.works-swipe-section img.swipeimage {
   position: fixed;
   left: 0;
@@ -959,7 +921,7 @@ body.menu-open {
 }
 
 .footer-demo__bar {
-  padding: 40px 0 32px;
+  padding: 24px 0 24px;
   background: #fff;
 }
 
@@ -989,17 +951,19 @@ body.menu-open {
   color: #ff4d00;
 }
 
-@media (max-width: 900px) {
-  .footer-demo__grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
 @media (max-width: 768px) {
   /*
-   * 小屏模块垂直间距：随视口收紧（宽屏仍为 160px，仅在此断点生效）
+   * 手机端：模块垂直间距随视口收紧（PC 仍为 160px，仅在此断点生效）
    * 勿在 html/body 设 overflow-x: hidden —— 会破坏 position: sticky 的顶栏。
    */
+  .hero-banner-mobile {
+    display: block;
+  }
+
+  .hero-scale {
+    display: none;
+  }
+
   html {
     --section-gap-y-sm: clamp(48px, 11vw, 88px);
     scroll-padding-top: max(
@@ -1022,9 +986,9 @@ body.menu-open {
     max-width: 100%;
     /* fixed 顶栏不占文档流：safe + 栏高 + 与原 main 一致的顶距（对齐原先 sticky+padding） */
     padding-top: calc(
-      env(safe-area-inset-top, 0px) + 48px + clamp(28px, 6vw, 56px)
+      env(safe-area-inset-top, 0px) + 48px + clamp(32px, 6vw, 56px)
     );
-    padding-bottom: clamp(32px, 8vw, 64px);
+    padding-bottom: 24px;
     box-sizing: border-box;
   }
 
@@ -1131,7 +1095,7 @@ body.menu-open {
   }
 
   /*
-   * 内容区域1：顶距交给 padding，避免与 margin 叠成双份空白（整图见 max-width:1200px）
+   * 内容区域1：顶距交给 padding，避免与 margin 叠成双份空白（首屏整图见 .hero-banner-mobile）
    */
   .hero {
     margin-top: 0;
@@ -1166,6 +1130,7 @@ body.menu-open {
     width: 100%;
     max-width: 100%;
     height: auto;
+    max-height: min(220px, 30vh);
     border-radius: 6px;
   }
 
@@ -1173,16 +1138,16 @@ body.menu-open {
     margin-top: 0;
     position: relative;
     width: 100%;
-    height: 140px;
-    max-height: min(280px, 38vh);
+    height: 120px;
+    max-height: min(240px, 32vh);
     padding-bottom: 0;
     overflow: hidden;
     box-sizing: border-box;
   }
 
   .section-two .logo-wall img {
-    width: 36px;
-    height: 36px;
+    width: 30px;
+    height: 30px;
     opacity: 0;
   }
   .section-three {
@@ -1256,15 +1221,15 @@ body.menu-open {
   }
 
   .section-portfolio .portfolio-gallery {
-    min-height: clamp(360px, 92vw, 520px);
+    min-height: clamp(340px, 96vw, 480px);
     padding-bottom: max(12px, env(safe-area-inset-bottom, 0px));
     box-sizing: border-box;
   }
 
-  /* 卡片再缩一档：min(rem,vw) 在手机上常被 rem 限制，看不出变化，故用 vw+px */
+  /* 卡片：min(rem,vw) 在手机上常被 rem 限制，故用 vw+px */
   .section-portfolio .portfolio-cards,
   .section-portfolio .portfolio-drag-hit {
-    width: min(54vw, 168px);
+    width: min(48vw, 148px);
   }
 
   /* 手机允许横向拖拽切卡 */
@@ -1304,7 +1269,7 @@ body.menu-open {
     padding-right: max(16px, env(safe-area-inset-right, 0px));
   }
 
-  /* 641～768px 仍沿用桌面 max-width:26rem 会导致文案挤在左侧；小屏统一通栏 */
+  /* 手机端统一通栏，避免标题区与 intro 左右挤压 */
   .section-five.works-swipe-section .works-swipe-head {
     flex-direction: column;
     align-items: center;
@@ -1317,6 +1282,7 @@ body.menu-open {
     max-width: none;
     width: 100%;
     text-align: center;
+    font-size: clamp(2rem, 10vw, 2.75rem);
   }
 
   .section-five.works-swipe-section .works-swipe-head__intro {
@@ -1330,12 +1296,14 @@ body.menu-open {
   }
 
   .section-five.works-swipe-section .works-swipe-item {
+    flex-direction: column;
     padding: 16px 0;
     gap: 16px;
   }
 
   .section-five.works-swipe-section .works-swipe-item__meta {
     gap: 8px;
+    width: 100%;
   }
 
   .section-five.works-swipe-section img.swipeimage {
@@ -1345,13 +1313,16 @@ body.menu-open {
   .footer-demo__panel {
     width: auto;
     max-width: none;
-    margin-top: 40px;
+    margin-top: 0;
     margin-bottom: 24px;
     margin-left: max(16px, env(safe-area-inset-left, 0px));
     margin-right: max(16px, env(safe-area-inset-right, 0px));
-    padding: clamp(28px, 7vw, 40px) 0 clamp(24px, 6vw, 36px);
+    padding: 24px 0 32px;
     height: auto;
-    min-height: 0;
+    min-height: 320px;
+    border-radius: 28px 28px 0 0;
+    background-size: contain;
+    background-position: center bottom;
   }
 
   .footer-demo__contain {
@@ -1362,72 +1333,21 @@ body.menu-open {
 
   .footer-demo__grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 14px 12px;
-    margin-bottom: 20px;
-  }
-
-  .footer-demo__value {
-    margin: 4px 0 0;
-  }
-
-  .footer-demo__bar {
-    padding: 32px 0 32px;
-    padding-bottom: max(32px, env(safe-area-inset-bottom, 0px));
-  }
-}
-
-@media (max-width: 480px) {
-  .section-two .section-two-head img {
-    max-height: min(220px, 30vh);
-  }
-
-  .section-two .logo-wall {
-    height: 120px;
-    max-height: min(240px, 32vh);
-  }
-
-  .section-two .logo-wall img {
-    width: 30px;
-    height: 30px;
-  }
-
-  .section-portfolio .portfolio-cards,
-  .section-portfolio .portfolio-drag-hit {
-    width: min(48vw, 148px);
-  }
-
-  .section-portfolio .portfolio-gallery {
-    min-height: clamp(340px, 96vw, 480px);
-  }
-
-  .section-five.works-swipe-section .works-swipe-head__title {
-    font-size: clamp(2rem, 10vw, 2.75rem);
+    gap: 12px 10px;
+    margin-bottom: 16px;
   }
 
   .footer-demo__label {
     font-size: 10px;
   }
-}
-
-@media (max-width: 520px) {
-  .footer-demo__panel {
-    margin-top: 0px;
-    padding: 24px 0 32px;
-    border-radius: 28px 28px 0 0;
-    height: auto;
-    min-height: 320px;
-    background-size: contain;
-    background-position: center bottom;
-  }
-
-  .footer-demo__grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px 10px;
-    margin-bottom: 16px;
-  }
 
   .footer-demo__value {
     margin: 3px 0 0;
+  }
+
+  .footer-demo__bar {
+    padding: 24px 0 24px;
+    padding-bottom: max(24px, env(safe-area-inset-bottom, 0px));
   }
 }
 
