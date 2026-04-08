@@ -704,37 +704,49 @@ if (typeof gsap !== "undefined" && !flairReducedMotion) {
   const snapTime = gsap.utils.snap(spacing);
 
   /**
-   * CodePen 原版：与横移同时，scale/opacity 先出现再 yoyo 收回 → 逐渐变小隐藏。
-   * 与 xPercent 同起点(t=0)叠放。
+   * RwKwLWK 同源无缝环 + 观感恢复：入场抬层/放大/渐显，横向匀速，末段渐隐并落层。
+   * 不用 scale/opacity 的 yoyo（易与环接缝叠加闪跳）；末段单独 to() 做「消失渐隐」。
    */
   const animateFunc = (element) => {
     const tl = gsap.timeline();
     tl.fromTo(
       element,
-      { scale: 0, opacity: 0 },
+      { scale: 0, opacity: 0, zIndex: 1 },
       {
         scale: 1,
         opacity: 1,
         zIndex: 100,
         duration: 0.5,
-        yoyo: true,
-        repeat: 1,
         ease: "power1.in",
         immediateRender: false,
         force3D: true,
       }
-    ).fromTo(
-      element,
-      { xPercent: 400 },
-      {
-        xPercent: -400,
-        duration: 1,
-        ease: "none",
-        immediateRender: false,
-        force3D: true,
-      },
-      0
-    );
+    )
+      .fromTo(
+        element,
+        { xPercent: 400 },
+        {
+          xPercent: -400,
+          duration: 1,
+          ease: "none",
+          immediateRender: false,
+          force3D: true,
+        },
+        0
+      )
+      .to(
+        element,
+        {
+          opacity: 0,
+          scale: 0,
+          zIndex: 1,
+          duration: 0.5,
+          ease: "power1.in",
+          immediateRender: false,
+          force3D: true,
+        },
+        0.5
+      );
     return tl;
   };
 
@@ -751,10 +763,10 @@ if (typeof gsap !== "undefined" && !flairReducedMotion) {
     seamlessLoop.time(wrapTime(playhead.offset));
   }
 
-  /** 对齐 CodePen scrollToOffset：snap 后写回 offset，再映射到环 */
+  /** 与 Demo 一致：snap(spacing) 对齐步进，减少浮点误差导致的环接缝跳帧 */
   function scrollToOffset(offset) {
     const snapped = snapTime(offset);
-    playhead.offset = snapped;
+    playhead.offset = Math.round(snapped / spacing) * spacing;
     syncLoopToPlayhead();
   }
 
@@ -763,7 +775,6 @@ if (typeof gsap !== "undefined" && !flairReducedMotion) {
       portfolioBtnTween.kill();
       portfolioBtnTween = null;
     }
-    gsap.killTweensOf(playhead);
     if (!Number.isFinite(loopDur) || loopDur <= 0) return;
 
     const start = playhead.offset;
@@ -771,9 +782,9 @@ if (typeof gsap !== "undefined" && !flairReducedMotion) {
 
     portfolioBtnTween = gsap.to(proxy, {
       v: start + delta,
-      duration: 0.52,
+      duration: 0.45,
       ease: "none",
-      overwrite: true,
+      overwrite: "auto",
       onUpdate: () => {
         playhead.offset = proxy.v;
         syncLoopToPlayhead();
@@ -831,7 +842,6 @@ if (typeof gsap !== "undefined" && !flairReducedMotion) {
           portfolioBtnTween.kill();
           portfolioBtnTween = null;
         }
-        gsap.killTweensOf(playhead);
         this.startOffset = playhead.offset;
       },
       onDrag() {
