@@ -789,6 +789,7 @@ if (typeof gsap !== "undefined" && !flairReducedMotion) {
 
   const playhead = { offset: 0 };
   let portfolioBtnTween = null;
+  let portfolioSettleTween = null;
 
   function syncLoopToPlayhead() {
     seamlessLoop.time(wrapTime(playhead.offset));
@@ -801,10 +802,39 @@ if (typeof gsap !== "undefined" && !flairReducedMotion) {
     syncLoopToPlayhead();
   }
 
+  /** 拖拽/滚轮结束后缓动归位，避免“瞬间跳到卡位” */
+  function settleToNearestOffset(offset, duration = 0.32) {
+    const target = Math.round(snapTime(offset) / spacing) * spacing;
+    if (portfolioSettleTween) {
+      portfolioSettleTween.kill();
+      portfolioSettleTween = null;
+    }
+    const proxy = { v: playhead.offset };
+    portfolioSettleTween = gsap.to(proxy, {
+      v: target,
+      duration,
+      ease: "power3.out",
+      overwrite: "auto",
+      onUpdate: () => {
+        playhead.offset = proxy.v;
+        syncLoopToPlayhead();
+      },
+      onComplete: () => {
+        playhead.offset = target;
+        syncLoopToPlayhead();
+        portfolioSettleTween = null;
+      },
+    });
+  }
+
   function stepCarouselByButton(delta) {
     if (portfolioBtnTween) {
       portfolioBtnTween.kill();
       portfolioBtnTween = null;
+    }
+    if (portfolioSettleTween) {
+      portfolioSettleTween.kill();
+      portfolioSettleTween = null;
     }
     if (!Number.isFinite(loopDur) || loopDur <= 0) return;
 
@@ -822,7 +852,7 @@ if (typeof gsap !== "undefined" && !flairReducedMotion) {
       },
       onComplete: () => {
         portfolioBtnTween = null;
-        scrollToOffset(proxy.v);
+        settleToNearestOffset(proxy.v, 0.28);
       },
     });
   }
@@ -839,6 +869,7 @@ if (typeof gsap !== "undefined" && !flairReducedMotion) {
   }
 
   if (!isNarrowScreen) {
+    let wheelSettleTimer = null;
     gallery.addEventListener(
       "wheel",
       (e) => {
@@ -848,6 +879,10 @@ if (typeof gsap !== "undefined" && !flairReducedMotion) {
         e.preventDefault();
         playhead.offset -= dh * 0.0011;
         syncLoopToPlayhead();
+        if (wheelSettleTimer) clearTimeout(wheelSettleTimer);
+        wheelSettleTimer = setTimeout(() => {
+          settleToNearestOffset(playhead.offset, 0.3);
+        }, 90);
       },
       { passive: false }
     );
@@ -873,6 +908,10 @@ if (typeof gsap !== "undefined" && !flairReducedMotion) {
           portfolioBtnTween.kill();
           portfolioBtnTween = null;
         }
+        if (portfolioSettleTween) {
+          portfolioSettleTween.kill();
+          portfolioSettleTween = null;
+        }
         this.startOffset = playhead.offset;
       },
       onDrag() {
@@ -880,7 +919,7 @@ if (typeof gsap !== "undefined" && !flairReducedMotion) {
         syncLoopToPlayhead();
       },
       onDragEnd() {
-        scrollToOffset(playhead.offset);
+        settleToNearestOffset(playhead.offset, 0.34);
       },
     });
   }
