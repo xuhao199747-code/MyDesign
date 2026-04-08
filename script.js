@@ -693,60 +693,91 @@ if (typeof gsap !== "undefined" && !flairReducedMotion) {
   if (!cards.length) return;
   const isNarrowScreen = window.matchMedia("(max-width: 768px)").matches;
 
+  /**
+   * 两侧：明显更小 + 更淡。中间仅在横移的一小段保持 1，否则邻居卡会长时间处在
+   * scale 插值中段，看起来「都一样大」。
+   */
+  const edgeScale = 0.18;
+  const edgeOpacity = 0.18;
+
   gsap.set(cards, {
     xPercent: 400,
-    opacity: 0,
-    scale: 0,
+    opacity: edgeOpacity,
+    scale: edgeScale,
+    transformOrigin: "50% 50%",
     force3D: true,
   });
 
   const spacing = 0.1;
   const snapTime = gsap.utils.snap(spacing);
 
-  /**
-   * RwKwLWK 同源无缝环 + 观感恢复：入场抬层/放大/渐显，横向匀速，末段渐隐并落层。
-   * 不用 scale/opacity 的 yoyo（易与环接缝叠加闪跳）；末段单独 to() 做「消失渐隐」。
-   */
   const animateFunc = (element) => {
     const tl = gsap.timeline();
     tl.fromTo(
       element,
-      { scale: 0, opacity: 0, zIndex: 1 },
+      { xPercent: 400 },
+      {
+        xPercent: -400,
+        duration: 1,
+        ease: "none",
+        immediateRender: false,
+        force3D: true,
+      },
+      0
+    );
+    /* 0.00–0.34：保持两侧小+淡；0.34–0.50：抬到中间大+实；0.50–1.00：再收回两侧 */
+    tl.fromTo(
+      element,
+      { scale: edgeScale, opacity: edgeOpacity, zIndex: 1 },
+      {
+        scale: edgeScale,
+        opacity: edgeOpacity,
+        zIndex: 1,
+        duration: 0.34,
+        ease: "none",
+        immediateRender: false,
+        force3D: true,
+      },
+      0
+    );
+    tl.to(
+      element,
       {
         scale: 1,
         opacity: 1,
         zIndex: 100,
-        duration: 0.5,
-        ease: "power1.in",
+        duration: 0.16,
+        ease: "power2.out",
         immediateRender: false,
         force3D: true,
-      }
-    )
-      .fromTo(
-        element,
-        { xPercent: 400 },
-        {
-          xPercent: -400,
-          duration: 1,
-          ease: "none",
-          immediateRender: false,
-          force3D: true,
-        },
-        0
-      )
-      .to(
-        element,
-        {
-          opacity: 0,
-          scale: 0,
-          zIndex: 1,
-          duration: 0.5,
-          ease: "power1.in",
-          immediateRender: false,
-          force3D: true,
-        },
-        0.5
-      );
+      },
+      0.34
+    );
+    tl.to(
+      element,
+      {
+        scale: edgeScale,
+        opacity: edgeOpacity,
+        zIndex: 1,
+        duration: 0.16,
+        ease: "power2.in",
+        immediateRender: false,
+        force3D: true,
+      },
+      0.5
+    );
+    tl.to(
+      element,
+      {
+        scale: edgeScale,
+        opacity: edgeOpacity,
+        duration: 0.34,
+        ease: "none",
+        immediateRender: false,
+        force3D: true,
+      },
+      0.66
+    );
     return tl;
   };
 
