@@ -29,6 +29,7 @@ jobs:
           cp -r imag/* dist/imag/
           cp -r vendor/* dist/vendor/
           cp script.js dist/
+          cp styles.css dist/
           cp skills-lock.json dist/
 
       - name: Deploy to GitHub Pages
