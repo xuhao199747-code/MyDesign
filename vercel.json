@@ -1,0 +1,6 @@
+{
+  "buildCommand": "npm run build && mkdir -p dist/imag dist/vendor && cp -r imag/* dist/imag/ && cp -r vendor/* dist/vendor/ && cp script.js dist/ && cp styles.css dist/ && cp skills-lock.json dist/",
+  "outputDirectory": "dist",
+  "framework": null,
+  "installCommand": "npm install"
+}
