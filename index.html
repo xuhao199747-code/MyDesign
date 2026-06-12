@@ -13,6 +13,38 @@
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
+    <svg class="liquid-glass-filter" aria-hidden="true" focusable="false">
+      <filter
+        id="liquid-glass-nav"
+        color-interpolation-filters="sRGB"
+        x="-18%"
+        y="-140%"
+        width="136%"
+        height="380%"
+      >
+        <feTurbulence
+          type="turbulence"
+          baseFrequency="0.006 0.026"
+          numOctaves="1"
+          seed="13"
+          result="noise"
+        />
+        <feGaussianBlur in="noise" stdDeviation="0.55" result="softNoise" />
+        <feDisplacementMap
+          in="SourceGraphic"
+          in2="softNoise"
+          scale="22"
+          xChannelSelector="R"
+          yChannelSelector="G"
+          result="displaced"
+        />
+        <feColorMatrix
+          in="displaced"
+          type="matrix"
+          values="1.06 0 0 0 0  0 1.05 0 0 0  0 0 1.07 0 0  0 0 0 1 0"
+        />
+      </filter>
+    </svg>
     <!-- 1去GSAP 鼠标轨迹装饰（参考 CodePen: https://codepen.io/GreenSock/pen/WbbEGmp — flair cursor follower） -->
     <div class="flair-trail" aria-hidden="true">
       <img class="flair" src="./imag/trajectory/trajectory1.webp" alt="" />
@@ -187,7 +219,7 @@
 
       <!-- 内容区域3：个人照片 -->
       <section id="photo" class="container section-three">
-        <img class="photo-top" src="./imag/photo Top.png" alt="个人照片" />
+        <h2 class="section-title photo-top">LET'S WORK</h2>
         <div class="photo-content">
           <dl class="photo-meta">
             <dt>BASED</dt>
@@ -222,50 +254,88 @@
         class="container section-portfolio portfolio-cards-section"
         aria-label="作品展示"
       >
-        <img class="portfolio-top" src="./imag/design top.png" alt="作品展示" />
-        <div class="portfolio-gallery">
-          <ul class="portfolio-cards">
-            <li
-              style="
-                background-image: url('./imag/portfolio-cards1.webp');
-              "
-            ></li>
-            <li
-              style="
-                background-image: url(https://assets.codepen.io/16327/portrait-number-02.png);
-              "
-            ></li>
-            <li
-              style="
-                background-image: url(https://assets.codepen.io/16327/portrait-number-03.png);
-              "
-            ></li>
-            <li
-              style="
-                background-image: url(https://assets.codepen.io/16327/portrait-number-04.png);
-              "
-            ></li>
-            <li
-              style="
-                background-image: url(https://assets.codepen.io/16327/portrait-number-05.png);
-              "
-            ></li>
-            <li
-              style="
-                background-image: url(https://assets.codepen.io/16327/portrait-number-06.png);
-              "
-            ></li>
-            <li
-              style="
-                background-image: url(https://assets.codepen.io/16327/portrait-number-07.png);
-              "
-            ></li>
-          </ul>
-          <!-- 仅该区域触发横向拖拽卡片，缩小热区便于垂直滚动整页 -->
-          <div class="portfolio-drag-hit" aria-hidden="true"></div>
-          <div class="portfolio-actions">
-            <button type="button" class="portfolio-prev">上一张</button>
-            <button type="button" class="portfolio-next">下一张</button>
+        <h2 class="section-title portfolio-top">VIBE CODING</h2>
+        <div class="portfolio-gallery portfolio-gallery--bounce">
+          <div id="portfolioBounceCardsRoot"></div>
+        </div>
+
+        <header class="portfolio-featured__head">
+          <h2>MY DESIGN</h2>
+        </header>
+        <div
+          class="portfolio-featured"
+          aria-label="作品展示对比版本"
+          data-active-index="0"
+        >
+          <div class="portfolio-featured__stage">
+            <button
+              type="button"
+              class="portfolio-featured__card"
+              data-featured-card
+              data-index="0"
+              data-title="Sneakers"
+              data-href="./imag/portfolio-cards1.webp"
+              aria-label="查看 Sneakers"
+            >
+              <img src="./imag/portfolio-cards1.webp" alt="Sneakers 项目" />
+            </button>
+            <button
+              type="button"
+              class="portfolio-featured__card"
+              data-featured-card
+              data-index="1"
+              data-title="Header"
+              data-href="./imag/Header Imagebg.webp"
+              aria-label="查看 Header"
+            >
+              <img src="./imag/Header Imagebg.webp" alt="Header 项目" />
+            </button>
+            <button
+              type="button"
+              class="portfolio-featured__card"
+              data-featured-card
+              data-index="2"
+              data-title="Profile"
+              data-href="./imag/photo1.png"
+              aria-label="查看 Profile"
+            >
+              <img src="./imag/photo1.png" alt="Profile 项目" />
+            </button>
+            <button
+              type="button"
+              class="portfolio-featured__card"
+              data-featured-card
+              data-index="3"
+              data-title="About"
+              data-href="./imag/Image2.webp"
+              aria-label="查看 About"
+            >
+              <img src="./imag/Image2.webp" alt="About 项目" />
+            </button>
+          </div>
+          <div class="portfolio-featured__actions">
+            <button
+              type="button"
+              class="portfolio-featured__nav portfolio-featured__nav--prev"
+              aria-label="上一张"
+            >
+              上一张
+            </button>
+            <a
+              href="./imag/portfolio-cards1.webp"
+              target="_blank"
+              rel="noreferrer noopener"
+              class="portfolio-featured__title"
+            >
+              Sneakers
+            </a>
+            <button
+              type="button"
+              class="portfolio-featured__nav portfolio-featured__nav--next"
+              aria-label="下一张"
+            >
+              下一张
+            </button>
           </div>
         </div>
         <div class="portfolio-drag-proxy" aria-hidden="true"></div>
@@ -507,6 +577,7 @@
     <!-- 使用本地 GSAP，避免仅 CDN 时断网 / file:// 打开导致整段交互失效 -->
     <script src="./vendor/gsap.min.js"></script>
     <script src="./vendor/Draggable.min.js"></script>
+    <script type="module" src="./src/portfolio-bounce-cards.jsx"></script>
     <script src="./script.js"></script>
   </body>
 </html>

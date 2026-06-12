@@ -65,6 +65,7 @@ if (menuToggle && menuWrap) {
 
 // 导航栏：仅在页面滚动后出现边框与背景（与顶部透明态区分）
 const NAVBAR_SCROLL_THRESHOLD = 8;
+window.NAVBAR_SCROLL_THRESHOLD = NAVBAR_SCROLL_THRESHOLD;
 
 function updateNavbarScrolledState() {
   if (!navbar) return;
@@ -78,6 +79,159 @@ if (navbar) {
   updateNavbarScrolledState();
   window.addEventListener("scroll", updateNavbarScrolledState, { passive: true });
 }
+
+// =============================================================================
+// 模块 1.5：标题悬停 — 字符弹性偏移与换色（避开首屏组合标题）
+// =============================================================================
+(function initPlayfulTitleHover() {
+  const titleSelectors = [
+    ".photo-top",
+    ".portfolio-top",
+    ".portfolio-featured__head h2",
+    ".works-swipe-head__title",
+  ];
+
+  document.querySelectorAll(titleSelectors.join(",")).forEach((title) => {
+    if (title.dataset.playTitleReady === "true") return;
+
+    const originalText = title.textContent || "";
+    const accessibleText = originalText.replace(/\s+/g, " ").trim();
+    if (!accessibleText) return;
+
+    title.dataset.playTitleReady = "true";
+    title.classList.add("play-title");
+    title.setAttribute("aria-label", accessibleText);
+
+    const fragment = document.createDocumentFragment();
+    const isPhotoTitle = title.matches(".photo-top");
+    const isPortfolioTitle = title.matches(".portfolio-top");
+    const isFeaturedTitle = title.matches(".portfolio-featured__head h2");
+    let charIndex = 0;
+    let iCountForPortfolio = 0;
+
+    Array.from(title.childNodes).forEach((node) => {
+      if (node.nodeType === Node.ELEMENT_NODE && node.nodeName === "BR") {
+        fragment.appendChild(document.createElement("br"));
+        return;
+      }
+
+      const text = node.textContent || "";
+      Array.from(text).forEach((char) => {
+        if (char === "\n") return;
+
+        if (isPhotoTitle && char === "O") {
+          const sticker = document.createElement("span");
+          const stickerImage = document.createElement("img");
+
+          sticker.className =
+            "play-title__sticker play-title__sticker--work-face";
+          sticker.setAttribute("aria-hidden", "true");
+          sticker.style.setProperty("--title-char-index", String(charIndex));
+          sticker.style.setProperty(
+            "--title-char-drift",
+            `${(charIndex % 5) - 2}px`
+          );
+          sticker.style.setProperty(
+            "--title-char-rotate",
+            `${[-5, 4, -2, 5, -4, 3][charIndex % 6]}deg`
+          );
+          stickerImage.src = "./imag/Group 1940699207.png";
+          stickerImage.alt = "";
+          sticker.appendChild(stickerImage);
+          fragment.appendChild(sticker);
+          charIndex += 1;
+          return;
+        }
+
+        if (isPortfolioTitle && char === "I") {
+          iCountForPortfolio++;
+          if (iCountForPortfolio === 2) {
+            const group = document.createElement("span");
+            const charSpan = document.createElement("span");
+            const sticker = document.createElement("span");
+            const stickerImage = document.createElement("img");
+
+            group.className = "play-title__fire-group";
+            group.style.setProperty("--title-char-index", String(charIndex));
+            group.style.setProperty("--title-char-drift", `${(charIndex % 5) - 2}px`);
+            group.style.setProperty(
+              "--title-char-rotate",
+              `${[-5, 4, -2, 5, -4, 3][charIndex % 6]}deg`
+            );
+
+            charSpan.className = "play-title__char play-title__char--fire-anchor";
+            charSpan.setAttribute("aria-hidden", "true");
+            charSpan.textContent = char;
+
+            sticker.className =
+              "play-title__sticker play-title__sticker--light-bulb";
+            sticker.setAttribute("aria-hidden", "true");
+            stickerImage.src = "./imag/灯泡 1.png";
+            stickerImage.alt = "";
+            sticker.appendChild(stickerImage);
+            group.append(charSpan, sticker);
+            fragment.appendChild(group);
+            charIndex += 1;
+            return;
+          }
+        }
+
+        if (isFeaturedTitle && char === "I") {
+          const group = document.createElement("span");
+          const charSpan = document.createElement("span");
+          const sticker = document.createElement("span");
+          const stickerImage = document.createElement("img");
+
+          group.className = "play-title__fire-group";
+          group.style.setProperty("--title-char-index", String(charIndex));
+          group.style.setProperty("--title-char-drift", `${(charIndex % 5) - 2}px`);
+          group.style.setProperty(
+            "--title-char-rotate",
+            `${[-5, 4, -2, 5, -4, 3][charIndex % 6]}deg`
+          );
+
+          charSpan.className = "play-title__char play-title__char--fire-anchor";
+          charSpan.setAttribute("aria-hidden", "true");
+          charSpan.textContent = char;
+
+          sticker.className =
+            "play-title__sticker play-title__sticker--design-fire";
+          sticker.setAttribute("aria-hidden", "true");
+          stickerImage.src = "./imag/Group 1940699208.png";
+          stickerImage.alt = "";
+          sticker.appendChild(stickerImage);
+          group.append(charSpan, sticker);
+          fragment.appendChild(group);
+          charIndex += 1;
+          return;
+        }
+
+        const span = document.createElement("span");
+        span.className =
+          char.trim() === "" ? "play-title__space" : "play-title__char";
+        span.setAttribute("aria-hidden", "true");
+        span.textContent = char === " " ? "\u00a0" : char;
+        span.style.setProperty("--title-char-index", String(charIndex));
+        span.style.setProperty("--title-char-drift", `${(charIndex % 5) - 2}px`);
+        span.style.setProperty(
+          "--title-char-rotate",
+          `${[-5, 4, -2, 5, -4, 3][charIndex % 6]}deg`
+        );
+        fragment.appendChild(span);
+        if (char.trim() !== "") charIndex += 1;
+      });
+    });
+
+    title.replaceChildren(fragment);
+
+    title.addEventListener("mouseenter", () => {
+      title.classList.add("is-hovering");
+    });
+    title.addEventListener("mouseleave", () => {
+      title.classList.remove("is-hovering");
+    });
+  });
+})();
 
 // =============================================================================
 // 模块 2：锚点平滑滚动（a[href^="#"]）
@@ -974,4 +1128,312 @@ if (typeof gsap !== "undefined" && !flairReducedMotion) {
 
     return seamlessLoop;
   }
+})();
+
+// =============================================================================
+// 模块 7.5：作品对比版 — Featured Work 风格舞台（保留原轮播用于对比）
+// =============================================================================
+(function initPortfolioFeaturedShowcase() {
+  const root = document.querySelector(".portfolio-featured");
+  if (!root) return;
+
+  const stage = root.querySelector(".portfolio-featured__stage");
+  const prevButton = root.querySelector(".portfolio-featured__nav--prev");
+  const nextButton = root.querySelector(".portfolio-featured__nav--next");
+  if (!stage) return;
+
+  const items = Array.from(stage.querySelectorAll("[data-featured-card]")).map(
+    (card, index) => {
+      const image = card.querySelector("img");
+      return {
+        index,
+        title: card.dataset.title || `Project ${index + 1}`,
+        href: card.dataset.href || "#portfolio",
+        src: image?.getAttribute("src") || "",
+        alt: image?.getAttribute("alt") || "",
+      };
+    }
+  );
+  if (!items.length) return;
+
+  const loopCopies = 15;
+  const loopMiddle = Math.floor(loopCopies / 2);
+  let activeSlot = loopMiddle * items.length;
+  let isAnimating = false;
+  let dragStartX = 0;
+  let dragStartY = 0;
+  let isPointerDown = false;
+  let dragMoved = false;
+  let wheelResetTimer = null;
+  let motionFrame = null;
+  let stepFallbackTimer = null;
+
+  const wrapIndex = (index) => (index + items.length) % items.length;
+  const getSlotPitch = () => {
+    if (cells.length < 2) return cells[0]?.offsetWidth || 1;
+    return cells[1].offsetLeft - cells[0].offsetLeft || cells[0].offsetWidth || 1;
+  };
+
+  stage.innerHTML = "";
+  const track = document.createElement("div");
+  track.className = "portfolio-featured__track";
+  stage.appendChild(track);
+
+  const cells = Array.from({ length: items.length * loopCopies }, (_, slot) => {
+    const item = items[wrapIndex(slot)];
+    const cell = document.createElement("a");
+    cell.className = "portfolio-featured__cell";
+    cell.dataset.slot = String(slot);
+    cell.dataset.itemIndex = String(item.index);
+    cell.dataset.href = item.href;
+    cell.dataset.title = item.title;
+    cell.href = item.href;
+    cell.target = "_blank";
+    cell.rel = "noreferrer noopener";
+    cell.setAttribute("aria-label", `查看 ${item.title}`);
+    cell.innerHTML =
+      '<span class="portfolio-featured__media"><img alt="" /></span><span class="portfolio-featured__badge"></span>';
+    const image = cell.querySelector("img");
+    const badge = cell.querySelector(".portfolio-featured__badge");
+    if (image) {
+      image.setAttribute("src", item.src);
+      image.setAttribute("alt", item.alt);
+    }
+    if (badge) {
+      badge.textContent = item.title;
+    }
+    track.appendChild(cell);
+    return cell;
+  });
+
+  function updateCellStates() {
+    const roundedSlot = Math.round(activeSlot);
+    root.dataset.activeIndex = String(wrapIndex(roundedSlot));
+    cells.forEach((cell, slot) => {
+      const offset = slot - activeSlot;
+      const roundedOffset = slot - roundedSlot;
+      cell.classList.toggle("is-active", roundedOffset === 0);
+      cell.classList.toggle("is-prev", roundedOffset === -1);
+      cell.classList.toggle("is-next", roundedOffset === 1);
+      cell.classList.toggle("is-near", Math.abs(roundedOffset) === 2);
+      cell.classList.toggle("is-far", Math.abs(roundedOffset) > 2);
+      cell.style.setProperty("--featured-cell-offset", String(offset));
+    });
+  }
+
+  function updateCellMotion() {
+    const slotPitch = getSlotPitch();
+    cells.forEach((cell, slot) => {
+      const offset = slot - activeSlot;
+      const distance = offset * slotPitch;
+      const rotation = Math.max(-25, Math.min(25, distance * 0.042));
+      const normalizedDistance = Math.min(1.35, Math.abs(distance) / 560);
+      const curveY = 6 + normalizedDistance * normalizedDistance * 66;
+      const badgeOpacity = Math.max(0, Math.min(1, Math.cos(distance * Math.PI / 600)));
+      const badgeY = (1 - badgeOpacity) * 14;
+      const badgeScale = 0.94 + badgeOpacity * 0.06;
+      const badgeBlur = (1 - badgeOpacity) * 0.8;
+
+      cell.style.setProperty("--featured-rotation", `${rotation.toFixed(3)}deg`);
+      cell.style.setProperty("--featured-curve-y", `${curveY.toFixed(3)}px`);
+      cell.style.setProperty("--featured-badge-opacity", badgeOpacity.toFixed(3));
+      cell.style.setProperty("--featured-badge-y", `${badgeY.toFixed(3)}px`);
+      cell.style.setProperty("--featured-badge-scale", badgeScale.toFixed(3));
+      cell.style.setProperty("--featured-badge-blur", `${badgeBlur.toFixed(3)}px`);
+    });
+  }
+
+  function startMotionLoop(duration = 960) {
+    if (motionFrame) {
+      window.cancelAnimationFrame(motionFrame);
+    }
+    const endAt = performance.now() + duration;
+    const tick = () => {
+      updateCellMotion();
+      if (performance.now() < endAt) {
+        motionFrame = window.requestAnimationFrame(tick);
+      } else {
+        motionFrame = null;
+        updateCellMotion();
+      }
+    };
+    tick();
+  }
+
+  function centerActiveCell(animate = true) {
+    const baseSlot = Math.floor(activeSlot);
+    const activeCell = cells[baseSlot];
+    if (!activeCell) return;
+    updateCellStates();
+    const slotProgress = activeSlot - baseSlot;
+    const activeCenter =
+      activeCell.offsetLeft + activeCell.offsetWidth / 2 + slotProgress * getSlotPitch();
+    const stageCenter = stage.clientWidth / 2;
+    track.style.transition = animate
+      ? "transform 1.05s cubic-bezier(0.18, 1, 0.22, 1)"
+      : "none";
+    track.style.transform = `translate3d(${stageCenter - activeCenter}px, 0, 0)`;
+    if (!animate) {
+      void track.offsetWidth;
+      track.style.transition = "";
+    }
+    startMotionLoop(animate ? 1180 : 120);
+  }
+
+  function resetLoopPosition() {
+    const minSafeSlot = items.length * 3;
+    const maxSafeSlot = items.length * (loopCopies - 3);
+    if (activeSlot < minSafeSlot || activeSlot >= maxSafeSlot) {
+      const realIndex = wrapIndex(activeSlot);
+      activeSlot = loopMiddle * items.length + realIndex;
+      root.classList.add("is-loop-resetting");
+      centerActiveCell(false);
+      window.requestAnimationFrame(() => {
+        root.classList.remove("is-loop-resetting");
+      });
+    }
+    root.classList.remove(
+      "is-animating",
+      "is-rolling-left",
+      "is-rolling-right"
+    );
+    updateCellMotion();
+    isAnimating = false;
+  }
+
+  function finishStep() {
+    if (!isAnimating) return;
+    if (stepFallbackTimer) {
+      window.clearTimeout(stepFallbackTimer);
+      stepFallbackTimer = null;
+    }
+    resetLoopPosition();
+  }
+
+  function stepFeaturedShowcase(direction) {
+    if (isAnimating) return;
+    isAnimating = true;
+    root.classList.remove("is-rolling-left", "is-rolling-right");
+    root.classList.add(
+      "is-animating",
+      direction > 0 ? "is-rolling-left" : "is-rolling-right"
+    );
+
+    activeSlot = Math.round(activeSlot) + direction;
+    centerActiveCell(true);
+
+    const onTrackEnd = (event) => {
+      if (event.target !== track || event.propertyName !== "transform") return;
+      track.removeEventListener("transitionend", onTrackEnd);
+      finishStep();
+    };
+    track.addEventListener("transitionend", onTrackEnd);
+    stepFallbackTimer = window.setTimeout(() => {
+      track.removeEventListener("transitionend", onTrackEnd);
+      finishStep();
+    }, 1240);
+  }
+
+  cells.forEach((cell) => {
+    cell.addEventListener("click", (event) => {
+      if (dragMoved) {
+        event.preventDefault();
+      }
+    });
+  });
+
+  prevButton?.addEventListener("click", () => stepFeaturedShowcase(-1));
+  nextButton?.addEventListener("click", () => stepFeaturedShowcase(1));
+
+  root.addEventListener("keydown", (event) => {
+    if (event.key === "ArrowLeft") {
+      event.preventDefault();
+      stepFeaturedShowcase(-1);
+    }
+    if (event.key === "ArrowRight") {
+      event.preventDefault();
+      stepFeaturedShowcase(1);
+    }
+  });
+
+  root.addEventListener("pointerdown", (event) => {
+    isPointerDown = true;
+    dragMoved = false;
+    dragStartX = event.clientX;
+    dragStartY = event.clientY;
+    initialActiveSlot = activeSlot;
+    document.body.classList.add("portfolio-featured-dragging");
+  });
+
+  root.addEventListener("pointermove", (event) => {
+    if (!isPointerDown) return;
+    const deltaX = event.clientX - dragStartX;
+    const deltaY = event.clientY - dragStartY;
+    if (Math.abs(deltaX) > 12 || Math.abs(deltaY) > 12) {
+      dragMoved = true;
+    }
+    
+    const dragProgress = deltaX / getSlotPitch();
+    activeSlot = initialActiveSlot - dragProgress;
+    centerActiveCell(false);
+  });
+
+  root.addEventListener("pointerup", (event) => {
+    if (!isPointerDown) return;
+    isPointerDown = false;
+    document.body.classList.remove("portfolio-featured-dragging");
+
+    const deltaX = event.clientX - dragStartX;
+    const deltaY = event.clientY - dragStartY;
+    
+    root.classList.remove("is-animating", "is-rolling-left", "is-rolling-right");
+    centerActiveCell(true);
+
+    if (wheelResetTimer) {
+      window.clearTimeout(wheelResetTimer);
+    }
+    wheelResetTimer = window.setTimeout(() => {
+      resetLoopPosition();
+    }, 140);
+
+    window.setTimeout(() => {
+      dragMoved = false;
+    }, 0);
+  });
+
+  root.addEventListener("pointercancel", () => {
+    isPointerDown = false;
+    dragMoved = false;
+    document.body.classList.remove("portfolio-featured-dragging");
+  });
+
+  root.addEventListener(
+    "wheel",
+    (event) => {
+      if (isAnimating) {
+        event.preventDefault();
+        return;
+      }
+
+      const horizontalDelta =
+        Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : 0;
+      if (Math.abs(horizontalDelta) < 4) return;
+
+      event.preventDefault();
+      activeSlot += horizontalDelta / getSlotPitch();
+      root.classList.remove("is-animating", "is-rolling-left", "is-rolling-right");
+      centerActiveCell(false);
+
+      if (wheelResetTimer) {
+        window.clearTimeout(wheelResetTimer);
+      }
+      wheelResetTimer = window.setTimeout(() => {
+        resetLoopPosition();
+      }, 140);
+    },
+    { passive: false }
+  );
+
+  window.addEventListener("resize", () => centerActiveCell(false));
+  centerActiveCell(false);
 })();
