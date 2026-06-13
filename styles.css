@@ -475,6 +475,204 @@ body.portfolio-featured-dragging *::selection {
   transition: left 0.45s cubic-bezier(0.34, 1.2, 0.64, 1);
 }
 
+.motion3d-section {
+  position: relative;
+  width: 100%;
+  height: min(760px, 86vh);
+  min-height: 560px;
+  margin: -40px 0 160px;
+  overflow: hidden;
+  background: #000000;
+  color: #f8fafc;
+  isolation: isolate;
+  cursor: crosshair;
+}
+
+.motion3d-canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.motion3d-links {
+  position: absolute;
+  left: 50%;
+  top: 48%;
+  z-index: 3;
+  display: flex;
+  gap: clamp(46px, 10vw, 140px);
+  transform: translate3d(-50%, -50%, 0);
+}
+
+.motion3d-links a {
+  position: relative;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: clamp(34px, 5.4vw, 78px);
+  font-weight: 800;
+  line-height: 0.92;
+  letter-spacing: -0.02em;
+  text-decoration: none;
+  text-shadow: 0 18px 52px rgba(0, 0, 0, 0.72);
+  transition:
+    opacity 0.2s ease,
+    transform 0.24s ease;
+}
+
+.motion3d-links a::first-letter {
+  color: #9cff2f;
+}
+
+.motion3d-links a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -0.12em;
+  height: 0.06em;
+  border-radius: 999px;
+  background: currentColor;
+  opacity: 0;
+  transform: scaleX(0.4);
+  transform-origin: left center;
+  transition:
+    opacity 0.2s ease,
+    transform 0.24s ease;
+}
+
+.motion3d-links a:hover {
+  opacity: 0.86;
+  transform: translateY(-0.08em);
+}
+
+.motion3d-links a:hover::after {
+  opacity: 0.78;
+  transform: scaleX(1);
+}
+
+.motion3d-case {
+  position: absolute;
+  left: max(24px, calc((100vw - 1200px) / 2));
+  right: max(24px, calc((100vw - 1200px) / 2));
+  bottom: clamp(18px, 4vh, 36px);
+  z-index: 2;
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr) 48px;
+  gap: 18px;
+  align-items: center;
+  max-width: 500px;
+  min-height: 92px;
+  padding: 10px 12px 10px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.075);
+  color: #ffffff;
+  text-decoration: none;
+  backdrop-filter: blur(18px) saturate(1.1);
+  box-shadow: 0 26px 80px rgba(0, 0, 0, 0.35);
+  transition:
+    background 0.22s ease,
+    transform 0.22s ease;
+}
+
+.motion3d-case:hover {
+  background: rgba(255, 255, 255, 0.16);
+  transform: translateY(-3px);
+}
+
+.motion3d-case__media {
+  display: block;
+  width: 76px;
+  height: 72px;
+  overflow: hidden;
+  border-radius: 18px;
+  background: #9cff2f;
+}
+
+.motion3d-case__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.motion3d-case__text {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.motion3d-case__text span {
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.motion3d-case__text strong {
+  color: #ffffff;
+  font-size: 18px;
+  line-height: 1.1;
+}
+
+.motion3d-case__text em {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 13px;
+  font-style: normal;
+}
+
+.motion3d-case__arrow {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #05070d;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.motion3d-hint {
+  position: absolute;
+  right: max(24px, calc((100vw - 1200px) / 2));
+  bottom: clamp(22px, 5vh, 42px);
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 14px;
+  border: 1px solid rgba(248, 250, 252, 0.22);
+  border-radius: 999px;
+  background: rgba(248, 250, 252, 0.08);
+  color: rgba(248, 250, 252, 0.82);
+  font-size: 13px;
+  font-weight: 700;
+  backdrop-filter: blur(10px);
+}
+
+.motion3d-section::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 36%;
+  background: linear-gradient(180deg, transparent, rgba(5, 7, 13, 0.82));
+  pointer-events: none;
+  z-index: 1;
+}
+
+.motion3d-section.is-loading .motion3d-hint span::after {
+  content: " ...";
+}
+
+.motion3d-section.is-fallback {
+  background:
+    radial-gradient(circle at 72% 26%, rgba(156, 255, 47, 0.26), transparent 24%),
+    radial-gradient(circle at 24% 62%, rgba(95, 212, 242, 0.22), transparent 28%),
+    #05070d;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .hero .sw label,
   .hero .sw label::before {
@@ -513,6 +711,7 @@ body.portfolio-featured-dragging *::selection {
   display: flex;
   justify-content: center;
   align-items: center;
+  width: 100%;
 }
 
 .section-two .section-two-head img {
@@ -527,6 +726,66 @@ body.portfolio-featured-dragging *::selection {
 }
 
 /* logo 墙高度 = 动画可视区域（与 script.js logoWall.clientHeight 一致，勿过小） */
+.section-two-intro {
+  margin: 0;
+  width: 100%;
+  max-width: 1200px;
+  font-family:
+    "Archivo Black Local",
+    "DM Sans",
+    "PingFang SC",
+    "Microsoft YaHei",
+    sans-serif;
+  font-size: clamp(28px, 2.65vw, 40px);
+  font-weight: 900;
+  line-height: 1.34;
+  letter-spacing: 0;
+  color: #071023;
+}
+
+.section-two-intro__sticker {
+  display: inline-block;
+  width: 1.46em;
+  height: 1.46em;
+  margin: 0 0.1em;
+  object-fit: contain;
+  vertical-align: -0.14em;
+}
+
+.section-two .section-two-head .section-two-intro__sticker {
+  display: inline-block;
+  width: 1.46em;
+  max-width: none;
+  height: 1.46em;
+  max-height: none;
+  object-fit: contain;
+  border-radius: 0;
+}
+
+.section-two-intro__sticker--avatar {
+  border-radius: 10px;
+}
+
+.section-two-intro__sticker--emoji {
+  width: 1.1em;
+  height: 1.1em;
+  margin-left: 0.04em;
+  vertical-align: -0.1em;
+}
+
+.section-two .section-two-head .section-two-intro__sticker--avatar {
+  border-radius: 10px;
+}
+
+.section-two .section-two-head .section-two-intro__sticker--emoji {
+  width: 1.1em;
+  height: 1.1em;
+}
+
+.section-two-intro__nowrap {
+  white-space: normal;
+}
+
 .section-two .logo-wall {
   position: relative;
   z-index: -1;
@@ -882,24 +1141,25 @@ body.portfolio-featured-dragging *::selection {
   position: absolute;
   z-index: 3;
   left: 50%;
-  bottom: 0.86em;
-  width: 0.75em;
-  transform: translate3d(-50%, 0, 0) rotate(1deg);
+  bottom: 0.78em;
+  width: 0.64em;
+  transform: translate3d(-50%, 0.08em, 0) rotate(1deg);
 }
 
 .play-title__sticker--light-bulb {
   position: absolute;
   z-index: 3;
   left: 50%;
-  bottom: 0.9em;
+  bottom: 0.68em;
   width: 0.92em;
-  transform: translate3d(-50%, 0.1em, 0) rotate(1deg);
+  transform: translate3d(-50%, 0, 0) rotate(1deg);
 }
 
 .play-title__sticker--work-face {
   position: relative;
   z-index: 2;
   display: inline-block;
+  pointer-events: auto;
   width: 0.72em;
   height: 0.78em;
   margin: 0 -0.06em 0 0.08em;
@@ -916,7 +1176,8 @@ body.portfolio-featured-dragging *::selection {
   transform: translateX(-50%);
 }
 
-.play-title:hover .play-title__fire-group,
+.play-title:has(.play-title__char:hover) .play-title__fire-group,
+.play-title:has(.play-title__sticker--work-face:hover) .play-title__fire-group,
 .play-title.is-hovering .play-title__fire-group {
   color: var(--play-title-cream);
   text-shadow:
@@ -929,19 +1190,22 @@ body.portfolio-featured-dragging *::selection {
     scaleY(1.08);
 }
 
-.play-title:hover .play-title__fire-group .play-title__sticker--design-fire,
+.play-title:has(.play-title__char:hover) .play-title__fire-group .play-title__sticker--design-fire,
+.play-title:has(.play-title__sticker--work-face:hover) .play-title__fire-group .play-title__sticker--design-fire,
 .play-title.is-hovering .play-title__fire-group .play-title__sticker--design-fire {
   filter: saturate(1.1);
-  transform: translate3d(-50%, -0.12em, 0) rotate(7deg) scale(1.05);
+  transform: translate3d(-50%, 0, 0) rotate(7deg) scale(1.05);
 }
 
-.play-title:hover .play-title__fire-group .play-title__sticker--light-bulb,
+.play-title:has(.play-title__char:hover) .play-title__fire-group .play-title__sticker--light-bulb,
+.play-title:has(.play-title__sticker--work-face:hover) .play-title__fire-group .play-title__sticker--light-bulb,
 .play-title.is-hovering .play-title__fire-group .play-title__sticker--light-bulb {
   filter: saturate(1.1);
-  transform: translate3d(-50%, 0.1em, 0) rotate(calc(var(--title-char-rotate) * 0.6)) scale(1.05);
+  transform: translate3d(-50%, 0, 0) rotate(calc(var(--title-char-rotate) * 0.6)) scale(1.05);
 }
 
-.play-title:hover .play-title__sticker--work-face,
+.play-title:has(.play-title__char:hover) .play-title__sticker--work-face,
+.play-title:has(.play-title__sticker--work-face:hover) .play-title__sticker--work-face,
 .play-title.is-hovering .play-title__sticker--work-face {
   filter: saturate(1.08);
   transform:
@@ -950,7 +1214,8 @@ body.portfolio-featured-dragging *::selection {
     scale(1.04);
 }
 
-.play-title:hover .play-title__char,
+.play-title:has(.play-title__char:hover) .play-title__char,
+.play-title:has(.play-title__sticker--work-face:hover) .play-title__char,
 .play-title.is-hovering .play-title__char {
   color: var(--play-title-green);
   text-shadow:
@@ -963,7 +1228,8 @@ body.portfolio-featured-dragging *::selection {
     scaleY(0.96);
 }
 
-.play-title:hover .play-title__char:nth-of-type(4n + 2),
+.play-title:has(.play-title__char:hover) .play-title__char:nth-of-type(4n + 2),
+.play-title:has(.play-title__sticker--work-face:hover) .play-title__char:nth-of-type(4n + 2),
 .play-title.is-hovering .play-title__char:nth-of-type(4n + 2) {
   color: var(--play-title-pink);
   transform:
@@ -973,7 +1239,8 @@ body.portfolio-featured-dragging *::selection {
     scaleY(1.06);
 }
 
-.play-title:hover .play-title__char:nth-of-type(5n + 3),
+.play-title:has(.play-title__char:hover) .play-title__char:nth-of-type(5n + 3),
+.play-title:has(.play-title__sticker--work-face:hover) .play-title__char:nth-of-type(5n + 3),
 .play-title.is-hovering .play-title__char:nth-of-type(5n + 3) {
   color: var(--play-title-cream);
   transform:
@@ -983,7 +1250,8 @@ body.portfolio-featured-dragging *::selection {
     scaleY(1.08);
 }
 
-.play-title:hover .play-title__char:nth-of-type(7n),
+.play-title:has(.play-title__char:hover) .play-title__char:nth-of-type(7n),
+.play-title:has(.play-title__sticker--work-face:hover) .play-title__char:nth-of-type(7n),
 .play-title.is-hovering .play-title__char:nth-of-type(7n) {
   color: var(--play-title-blue);
   transform:
@@ -1604,7 +1872,7 @@ body.portfolio-featured-dragging *::selection {
    */
   .hero {
     margin-top: 0;
-    margin-bottom: var(--section-gap-y-sm);
+    margin-bottom: clamp(32px, 8vw, 56px);
     min-height: 0;
     padding-left: 0;
     padding-right: 0;
@@ -1614,6 +1882,26 @@ body.portfolio-featured-dragging *::selection {
     justify-content: flex-start;
     overflow-x: hidden;
     box-sizing: border-box;
+  }
+
+  .motion3d-section {
+    height: min(620px, 78vh);
+    min-height: 420px;
+    margin: 0 0 var(--section-gap-y-sm);
+  }
+
+  .motion3d-copy {
+    left: 16px;
+    bottom: 24px;
+    width: calc(100% - 32px);
+  }
+
+  .motion3d-copy h2 {
+    font-size: clamp(42px, 16vw, 72px);
+  }
+
+  .motion3d-status {
+    margin-top: 14px;
   }
 
   .section-two {
@@ -1639,6 +1927,31 @@ body.portfolio-featured-dragging *::selection {
     border-radius: 6px;
   }
 
+  .section-two-intro {
+    width: 100%;
+    max-width: 100%;
+    font-size: clamp(25px, 8.1vw, 34px);
+    line-height: 1.38;
+  }
+
+  .section-two .section-two-head .section-two-intro__sticker {
+    width: 1.38em;
+    height: 1.38em;
+    max-width: none;
+    max-height: none;
+    vertical-align: -0.12em;
+  }
+
+  .section-two .section-two-head .section-two-intro__sticker--avatar {
+    border-radius: 8px;
+  }
+
+  .section-two .section-two-head .section-two-intro__sticker--emoji {
+    width: 1.08em;
+    height: 1.08em;
+    vertical-align: -0.08em;
+  }
+
   .section-two .logo-wall {
     margin-top: 0;
     position: relative;
@@ -1654,6 +1967,29 @@ body.portfolio-featured-dragging *::selection {
     width: 30px;
     height: 30px;
     opacity: 0;
+  }
+
+  @media (max-width: 480px) {
+    .section-two .section-two-head {
+      padding: 0;
+    }
+
+    .section-two-intro {
+      font-size: clamp(22px, 7.2vw, 28px);
+      line-height: 1.42;
+    }
+
+    .section-two .section-two-head .section-two-intro__sticker {
+      width: 1.28em;
+      height: 1.28em;
+      vertical-align: -0.1em;
+    }
+
+    .section-two .section-two-head .section-two-intro__sticker--emoji {
+      width: 1em;
+      height: 1em;
+      vertical-align: -0.06em;
+    }
   }
   .section-three {
     min-height: 0;

@@ -112,7 +112,6 @@
           <ul class="menu">
             <li><a href="#about">简历</a></li>
             <li><a href="#portfolio">作品</a></li>
-            <li><a href="#experience">经历</a></li>
             <li>
               <a href="#contact">
                 <svg
@@ -194,7 +193,23 @@
       <!-- 内容区域2：介绍与技能 -->
       <section id="about" class="container section-two">
         <div class="section-two-head">
-          <img src="./imag/Image2.webp" alt="自我介绍文案" />
+          <p class="section-two-intro" aria-label="大家好，我是徐浩，从事设计工作，专注于设计和构建数字产品、品牌和体验。">
+            大家好， 我是
+            <img
+              class="section-two-intro__sticker section-two-intro__sticker--avatar"
+              src="./imag/Frame 2085668692.png"
+              alt=""
+            />
+            徐浩
+            <img
+              class="section-two-intro__sticker section-two-intro__sticker--emoji"
+              src="./imag/Group 1940698323.png"
+              alt=""
+            />，
+            <span class="section-two-intro__nowrap">从事设计工作💻，</span>
+            专注于设计和构建<span class="section-two-intro__nowrap">数字产品🌐、</span>
+            <span class="section-two-intro__nowrap">品牌和体验❤️。</span>
+          </p>
         </div>
         <div id="works" class="logo-wall" aria-label="技能工具图标列表">
           <img src="./imag/logo/logo1.webp" alt="工具图标 1" />
@@ -341,203 +356,6 @@
         <div class="portfolio-drag-proxy" aria-hidden="true"></div>
       </section>
 
-      <!-- 内容区域5：工作经历（悬停行时大图跟随指针，GSAP） -->
-      <section
-        id="experience"
-        class="container section-five works-swipe-section"
-        aria-label="工作经历"
-      >
-        <header class="works-swipe-head">
-          <h2 class="works-swipe-head__title">
-            WORK<br />
-            EXPERIENCE
-          </h2>
-          <p class="works-swipe-head__intro">
-            5 年 UI / 交互设计经验，覆盖 Web、移动端、数据可视化与 B
-            端产品等多端场景，擅长将业务目标转化为清晰可用的界面与体验。
-          </p>
-        </header>
-        <ul class="works-swipe-list">
-          <li>
-            <div class="works-swipe-item">
-              <div class="works-swipe-item__meta">
-                <div class="works-swipe-dots" aria-hidden="true">
-                  <span class="works-swipe-dot works-swipe-dot--on"></span>
-                  <span class="works-swipe-dot works-swipe-dot--on"></span>
-                  <span class="works-swipe-dot"></span>
-                  <span class="works-swipe-dot"></span>
-                  <span class="works-swipe-dot"></span>
-                  <span class="works-swipe-dot"></span>
-                </div>
-                <p class="works-swipe-item__date">2020.02 — 2021.06</p>
-              </div>
-              <div class="works-swipe-item__body">
-                <h3 class="works-swipe-item__company">瞳善网络科技有限公司</h3>
-                <p class="works-swipe-item__projects">
-                  涉及项目：电商平台、宣传物料、电商 app 设计
-                </p>
-              </div>
-              <img
-                class="swipeimage"
-                src="./imag/photo1.png"
-                alt=""
-                width="350"
-                height="350"
-              />
-            </div>
-          </li>
-          <li>
-            <div class="works-swipe-item">
-              <div class="works-swipe-item__meta">
-                <div class="works-swipe-dots" aria-hidden="true">
-                  <span class="works-swipe-dot works-swipe-dot--on"></span>
-                  <span class="works-swipe-dot works-swipe-dot--on"></span>
-                  <span class="works-swipe-dot"></span>
-                  <span class="works-swipe-dot"></span>
-                  <span class="works-swipe-dot"></span>
-                  <span class="works-swipe-dot"></span>
-                </div>
-                <p class="works-swipe-item__date">2021.06 — 2021.11</p>
-              </div>
-              <div class="works-swipe-item__body">
-                <h3 class="works-swipe-item__company">
-                  杭州辰上星辰信息科技有限公司
-                </h3>
-                <p class="works-swipe-item__projects">
-                  涉及项目：C 端项目、心理咨询、医疗官网等
-                </p>
-              </div>
-              <img
-                class="swipeimage"
-                src="./imag/photo2.png"
-                alt=""
-                width="350"
-                height="350"
-              />
-            </div>
-          </li>
-          <li>
-            <div class="works-swipe-item">
-              <div class="works-swipe-item__meta">
-                <div class="works-swipe-dots" aria-hidden="true">
-                  <span class="works-swipe-dot works-swipe-dot--on"></span>
-                  <span class="works-swipe-dot works-swipe-dot--on"></span>
-                  <span class="works-swipe-dot works-swipe-dot--on"></span>
-                  <span class="works-swipe-dot"></span>
-                  <span class="works-swipe-dot"></span>
-                  <span class="works-swipe-dot"></span>
-                </div>
-                <p class="works-swipe-item__date">2021.11 — 2023.04</p>
-              </div>
-              <div class="works-swipe-item__body">
-                <h3 class="works-swipe-item__company">阿里-企业智能-德科</h3>
-                <p class="works-swipe-item__projects">
-                  涉及项目：酒店钉钉工作台、智慧酒店小程序后台、智慧公寓小程序前后台、可视化
-                </p>
-              </div>
-              <img
-                class="swipeimage"
-                src="./imag/Image2.png"
-                alt=""
-                width="350"
-                height="350"
-              />
-            </div>
-          </li>
-          <li>
-            <div class="works-swipe-item">
-              <div class="works-swipe-item__meta">
-                <div class="works-swipe-dots" aria-hidden="true">
-                  <span class="works-swipe-dot works-swipe-dot--on"></span>
-                  <span class="works-swipe-dot works-swipe-dot--on"></span>
-                  <span class="works-swipe-dot works-swipe-dot--on"></span>
-                  <span class="works-swipe-dot works-swipe-dot--on"></span>
-                  <span class="works-swipe-dot"></span>
-                  <span class="works-swipe-dot"></span>
-                </div>
-                <p class="works-swipe-item__date">2023.04 — 2024.10</p>
-              </div>
-              <div class="works-swipe-item__body">
-                <h3 class="works-swipe-item__company">
-                  杭州赛兴航科技有限公司
-                </h3>
-                <p class="works-swipe-item__projects">
-                  涉及项目：低代码平台、公司官网、西溪湿地、余杭文旅、浙江省博物馆
-                </p>
-              </div>
-              <img
-                class="swipeimage"
-                src="./imag/Header Image.png"
-                alt=""
-                width="350"
-                height="350"
-              />
-            </div>
-          </li>
-          <li>
-            <div class="works-swipe-item">
-              <div class="works-swipe-item__meta">
-                <div class="works-swipe-dots" aria-hidden="true">
-                  <span class="works-swipe-dot works-swipe-dot--on"></span>
-                  <span class="works-swipe-dot works-swipe-dot--on"></span>
-                  <span class="works-swipe-dot works-swipe-dot--on"></span>
-                  <span class="works-swipe-dot works-swipe-dot--on"></span>
-                  <span class="works-swipe-dot works-swipe-dot--on"></span>
-                  <span class="works-swipe-dot"></span>
-                </div>
-                <p class="works-swipe-item__date">2024.12 — 2025.4</p>
-              </div>
-              <div class="works-swipe-item__body">
-                <h3 class="works-swipe-item__company">阿里-领羊-软通</h3>
-                <p class="works-swipe-item__projects">
-                  涉及项目：Quick BI
-                  平台搭建、制造业电力大屏、物流综合分析大屏、Dataphin
-                  平台搭建等
-                </p>
-              </div>
-              <img
-                class="swipeimage"
-                src="./imag/photo1.png"
-                alt=""
-                width="350"
-                height="350"
-              />
-            </div>
-          </li>
-          <li>
-            <div class="works-swipe-item">
-              <div class="works-swipe-item__meta">
-                <div class="works-swipe-dots" aria-hidden="true">
-                  <span class="works-swipe-dot works-swipe-dot--on"></span>
-                  <span class="works-swipe-dot works-swipe-dot--on"></span>
-                  <span class="works-swipe-dot works-swipe-dot--on"></span>
-                  <span class="works-swipe-dot works-swipe-dot--on"></span>
-                  <span class="works-swipe-dot works-swipe-dot--on"></span>
-                  <span class="works-swipe-dot works-swipe-dot--on"></span>
-                </div>
-                <p class="works-swipe-item__date">2025.5 — 至今</p>
-              </div>
-              <div class="works-swipe-item__body">
-                <h3 class="works-swipe-item__company">
-                  阿里-阿里国际-AI 创新-博彦
-                </h3>
-                <p class="works-swipe-item__projects">
-                  涉及项目：Quick BI
-                  平台搭建、制造业电力大屏、物流综合分析大屏、Dataphin
-                  平台搭建等
-                </p>
-              </div>
-              <img
-                class="swipeimage"
-                src="./imag/photo2.png"
-                alt=""
-                width="350"
-                height="350"
-              />
-            </div>
-          </li>
-        </ul>
-      </section>
     </main>
 
     <!-- 页脚 Demo：联系信息 + Xuhao；中间区背景图在 styles.css → .footer-demo__stage -->

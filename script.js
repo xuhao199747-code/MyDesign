@@ -88,7 +88,6 @@ if (navbar) {
     ".photo-top",
     ".portfolio-top",
     ".portfolio-featured__head h2",
-    ".works-swipe-head__title",
   ];
 
   document.querySelectorAll(titleSelectors.join(",")).forEach((title) => {
@@ -224,8 +223,27 @@ if (navbar) {
 
     title.replaceChildren(fragment);
 
-    title.addEventListener("mouseenter", () => {
-      title.classList.add("is-hovering");
+    const updateTitleHover = (event) => {
+      const hoverTargets = title.querySelectorAll(
+        ".play-title__char, .play-title__sticker--work-face"
+      );
+      const isOverText = Array.from(hoverTargets).some((target) => {
+        const rect = target.getBoundingClientRect();
+        return (
+          event.clientX >= rect.left &&
+          event.clientX <= rect.right &&
+          event.clientY >= rect.top &&
+          event.clientY <= rect.bottom
+        );
+      });
+
+      title.classList.toggle("is-hovering", isOverText);
+    };
+
+    title.addEventListener("pointermove", updateTitleHover);
+    title.addEventListener("mousemove", updateTitleHover);
+    title.addEventListener("pointerleave", () => {
+      title.classList.remove("is-hovering");
     });
     title.addEventListener("mouseleave", () => {
       title.classList.remove("is-hovering");
@@ -755,73 +773,6 @@ if (typeof gsap !== "undefined" && !flairReducedMotion) {
 // =============================================================================
 // 模块 6：工作经历 — 悬停行时大图跟随指针（GSAP quickTo，需 gsap.min.js）
 // =============================================================================
-(function initWorksSwipePreview() {
-  if (typeof gsap === "undefined" || !gsap.utils || !gsap.quickTo) return;
-
-  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-  if (reduceMotion.matches) return;
-
-  const section = document.querySelector(".works-swipe-section");
-  if (!section) return;
-
-  const items = gsap.utils.toArray(".works-swipe-item");
-  if (!items.length) return;
-
-  gsap.set(section.querySelectorAll("img.swipeimage"), {
-    xPercent: -50,
-    yPercent: -50,
-  });
-
-  items.forEach((el) => {
-    const image = el.querySelector("img.swipeimage");
-    if (!image) return;
-
-    let firstEnter = false;
-
-    const setX = gsap.quickTo(image, "x", {
-      duration: 0.4,
-      ease: "power3.out",
-    });
-    const setY = gsap.quickTo(image, "y", {
-      duration: 0.4,
-      ease: "power3.out",
-    });
-
-    const stopFollow = () => {
-      el.removeEventListener("mousemove", moveImage);
-    };
-
-    const moveImage = (e) => {
-      setX(e.clientX);
-      setY(e.clientY);
-    };
-
-    const fade = gsap.to(image, {
-      autoAlpha: 1,
-      paused: true,
-      duration: 0.1,
-      onReverseComplete: stopFollow,
-    });
-
-    el.addEventListener("mouseenter", (e) => {
-      if (firstEnter) {
-        setX(e.clientX);
-        setY(e.clientY);
-      } else {
-        firstEnter = true;
-        setX(e.clientX);
-        setY(e.clientY);
-      }
-      fade.play();
-      el.addEventListener("mousemove", moveImage);
-    });
-
-    el.addEventListener("mouseleave", () => {
-      fade.reverse();
-    });
-  });
-})();
-
 // =============================================================================
 // 模块 7：作品 — 无限卡片（CodePen RwKwLWK 核心逻辑：wrapTime + seamlessLoop；
 // 本站无 ScrollTrigger pin，保留横向滚轮与独立 drag-hit；类名 portfolio-*）
