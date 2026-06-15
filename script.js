@@ -625,12 +625,13 @@ if (logoWall) {
 // =============================================================================
 // 模块 4：#photo 双图揭幕（方块格子消散效果）
 // =============================================================================
-const photoSection = document.querySelector("#photo");
-const photoImagesWrap = document.querySelector("#photo .photo-images");
-const frontPhotoImage = document.querySelector("#photo .photo-image-front");
-const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const initPhotoReveal = () => {
+  const photoSection = document.querySelector("#photo");
+  const photoImagesWrap = document.querySelector("#photo .photo-images");
+  const frontPhotoImage = document.querySelector("#photo .photo-image-front");
+  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-if (photoSection && photoImagesWrap && frontPhotoImage && !prefersReducedMotion) {
+  if (photoSection && photoImagesWrap && frontPhotoImage && !prefersReducedMotion) {
   let revealRafId = null;
 
   const hoverHitbox = document.createElement('div');
@@ -769,6 +770,14 @@ if (photoSection && photoImagesWrap && frontPhotoImage && !prefersReducedMotion)
   
   hoverHitbox.addEventListener('mousemove', handleMouseMove);
   hoverHitbox.addEventListener('mouseleave', resetPhotoTilt);
+  }
+}
+
+// 确保DOM完全加载后再初始化
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initPhotoReveal);
+} else {
+  initPhotoReveal();
 }
 
 // =============================================================================
