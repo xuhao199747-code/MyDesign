@@ -759,8 +759,8 @@ if (photoSection && photoImagesWrap && frontPhotoImage && !prefersReducedMotion)
     const centerY = rect.top + rect.height / 2;
     
     // 计算鼠标相对于中心的位置（-1 到 1）并限制范围
-    targetRotateX = Math.max(-12, Math.min(12, (e.clientY - centerY) / (rect.height / 2) * 12));
-    targetRotateY = Math.max(-12, Math.min(12, (e.clientX - centerX) / (rect.width / 2) * -12));
+    targetRotateX = Math.max(-12, Math.min(12, (e.clientY - centerY) / (rect.height / 2) * -12));
+    targetRotateY = Math.max(-12, Math.min(12, (e.clientX - centerX) / (rect.width / 2) * 12));
     
     if (!rafId) {
       rafId = requestAnimationFrame(updateTransform);
@@ -1315,11 +1315,11 @@ if (photoSection && photoImagesWrap && frontPhotoImage && !prefersReducedMotion)
       const centerY = rect.top + rect.height / 2;
       const rotateX = Math.max(
         -10,
-        Math.min(10, ((event.clientY - centerY) / (rect.height / 2)) * 10)
+        Math.min(10, ((event.clientY - centerY) / (rect.height / 2)) * -10)
       );
       const rotateY = Math.max(
         -10,
-        Math.min(10, ((event.clientX - centerX) / (rect.width / 2)) * -10)
+        Math.min(10, ((event.clientX - centerX) / (rect.width / 2)) * 10)
       );
       cell.style.setProperty("--featured-tilt-x", `${rotateX.toFixed(3)}deg`);
       cell.style.setProperty("--featured-tilt-y", `${rotateY.toFixed(3)}deg`);

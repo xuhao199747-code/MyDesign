@@ -200,11 +200,11 @@ export default function BounceCards({
     const centerY = rect.top + rect.height / 2;
     const rotateX = Math.max(
       -10,
-      Math.min(10, ((event.clientY - centerY) / (rect.height / 2)) * 10)
+      Math.min(10, ((event.clientY - centerY) / (rect.height / 2)) * -10)
     );
     const rotateY = Math.max(
       -10,
-      Math.min(10, ((event.clientX - centerX) / (rect.width / 2)) * -10)
+      Math.min(10, ((event.clientX - centerX) / (rect.width / 2)) * 10)
     );
 
     const target = containerRef.current?.querySelector(`.card-${idx}`);
