@@ -179,6 +179,49 @@ export default function BounceCards({
     });
   };
 
+  const updateCardTilt = (event, idx) => {
+    if (!enableHover) return;
+
+    const card = event.currentTarget;
+    const rect = card.getBoundingClientRect();
+    const edgeInset = 10;
+    const isInsideStableHoverZone =
+      event.clientX >= rect.left + edgeInset &&
+      event.clientX <= rect.right - edgeInset &&
+      event.clientY >= rect.top + edgeInset &&
+      event.clientY <= rect.bottom - edgeInset;
+
+    if (!isInsideStableHoverZone) {
+      resetCardTilt(idx);
+      return;
+    }
+
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    const rotateX = Math.max(
+      -10,
+      Math.min(10, ((event.clientY - centerY) / (rect.height / 2)) * -10)
+    );
+    const rotateY = Math.max(
+      -10,
+      Math.min(10, ((event.clientX - centerX) / (rect.width / 2)) * 10)
+    );
+
+    const target = containerRef.current?.querySelector(`.card-${idx}`);
+    if (!target) return;
+    target.style.setProperty("--card-tilt-x", `${rotateX.toFixed(3)}deg`);
+    target.style.setProperty("--card-tilt-y", `${rotateY.toFixed(3)}deg`);
+    target.style.setProperty("--card-tilt-scale", "1.025");
+  };
+
+  const resetCardTilt = (idx) => {
+    const target = containerRef.current?.querySelector(`.card-${idx}`);
+    if (!target) return;
+    target.style.setProperty("--card-tilt-x", "0deg");
+    target.style.setProperty("--card-tilt-y", "0deg");
+    target.style.setProperty("--card-tilt-scale", "1");
+  };
+
   useEffect(() => {
     if (!containerRef.current) return;
     
@@ -219,9 +262,15 @@ export default function BounceCards({
             top: isMobileDevice ? "45%" : "50%",
           }}
           onMouseEnter={() => pushSiblings(idx)}
-          onMouseLeave={resetSiblings}
+          onMouseMove={(event) => updateCardTilt(event, idx)}
+          onMouseLeave={() => {
+            resetCardTilt(idx);
+            resetSiblings();
+          }}
         >
-          <img className="image" src={src} alt={`card-${idx}`} />
+          <div className="cardTiltSurface">
+            <img className="image" src={src} alt={`card-${idx}`} />
+          </div>
         </div>
       ))}
     </div>

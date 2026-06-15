@@ -623,7 +623,7 @@ if (logoWall) {
 }
 
 // =============================================================================
-// 模块 4：#photo 双图揭幕（上层固定叠放，clip-path 裁切露出下层，非视差、非透明度）
+// 模块 4：#photo 双图揭幕（方块格子消散效果）
 // =============================================================================
 const photoSection = document.querySelector("#photo");
 const photoImagesWrap = document.querySelector("#photo .photo-images");
@@ -633,22 +633,82 @@ const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)
 if (photoSection && photoImagesWrap && frontPhotoImage && !prefersReducedMotion) {
   let revealRafId = null;
 
-  /** 根据区块在视口中的滚动进度（0~1），从下往上裁切上层图，露出同位置叠放的下层 */
+  const hoverHitbox = document.createElement('div');
+  hoverHitbox.className = 'photo-hover-hitbox';
+  photoImagesWrap.parentNode.insertBefore(hoverHitbox, photoImagesWrap);
+  hoverHitbox.appendChild(photoImagesWrap);
+
+  const tiltSurface = document.createElement('div');
+  tiltSurface.className = 'photo-tilt-surface';
+  while (photoImagesWrap.firstChild) {
+    tiltSurface.appendChild(photoImagesWrap.firstChild);
+  }
+  photoImagesWrap.appendChild(tiltSurface);
+  
+  // 隐藏原始的上层图片，用方块格子代替
+  frontPhotoImage.style.display = 'none';
+  
+  // 创建方块格子容器
+  const gridContainer = document.createElement('div');
+  gridContainer.className = 'photo-grid-container';
+  tiltSurface.appendChild(gridContainer);
+  
+  // 获取上层图片的 URL
+  const frontImageUrl = frontPhotoImage.src;
+  
+  // 生成方块格子
+  const gridSize = 25;
+  const wrapWidth = photoImagesWrap.offsetWidth || 300;
+  const wrapHeight = photoImagesWrap.offsetHeight || 400;
+  const cols = Math.ceil(wrapWidth / gridSize);
+  const rows = Math.ceil(wrapHeight / gridSize);
+  
+  for (let row = 0; row < rows; row++) {
+    for (let col = 0; col < cols; col++) {
+      const cell = document.createElement('div');
+      cell.className = 'grid-cell';
+      cell.style.left = `${col * gridSize}px`;
+      cell.style.top = `${row * gridSize}px`;
+      cell.style.width = `${gridSize}px`;
+      cell.style.height = `${gridSize}px`;
+      cell.style.backgroundImage = `url(${frontImageUrl})`;
+      cell.style.backgroundSize = `${wrapWidth}px ${wrapHeight}px`;
+      cell.style.backgroundPosition = `-${col * gridSize}px -${row * gridSize}px`;
+      cell.dataset.row = row;
+      cell.dataset.col = col;
+      gridContainer.appendChild(cell);
+    }
+  }
+
+  /** 根据滚动进度实现方块格子消散效果 */
   const renderPhotoReveal = () => {
     const rect = photoSection.getBoundingClientRect();
     const vh = window.innerHeight;
-    // 裁切进度 0→1 对应区块上沿从 start 滚到 end。(start−end) 越大，同样手势下变化越慢
     const start = vh * 0.72;
     const end = vh * -0.18;
     const progressRaw = (start - rect.top) / (start - end);
     const progress = Math.max(0, Math.min(1, progressRaw));
-    // 指数越小，全程越均匀；过大则前慢后快、末尾容易显得「一下裁完」
     const easedProgress = Math.pow(progress, 2.6);
-    // inset(top right bottom left)：从下侧向内 inset，越大上层可见越少，下层露出越多
-    const bottomInsetPct = (easedProgress * 100).toFixed(2);
-    const clip = `inset(0 0 ${bottomInsetPct}% 0)`;
-    frontPhotoImage.style.clipPath = clip;
-    frontPhotoImage.style.webkitClipPath = clip;
+    
+    // 更新每个方块的透明度和缩放
+    const cells = gridContainer.querySelectorAll('.grid-cell');
+    cells.forEach(cell => {
+      const row = parseInt(cell.dataset.row);
+      const col = parseInt(cell.dataset.col);
+      const cellProgress = (row + col * 0.1) / rows;
+      
+      // 方块从下往上逐渐消失，带有随机延迟和交错效果
+      const randomDelay = Math.sin(col * 0.5) * 0.1 + (Math.random() - 0.5) * 0.1;
+      const adjustedProgress = cellProgress + randomDelay;
+      
+      if (easedProgress > adjustedProgress) {
+        cell.style.opacity = 0;
+        cell.style.transform = 'scale(0.6) translateY(10px)';
+      } else {
+        cell.style.opacity = 1;
+        cell.style.transform = 'scale(1) translateY(0)';
+      }
+    });
 
     revealRafId = null;
   };
@@ -662,116 +722,57 @@ if (photoSection && photoImagesWrap && frontPhotoImage && !prefersReducedMotion)
   requestPhotoReveal();
   window.addEventListener("scroll", requestPhotoReveal, { passive: true });
   window.addEventListener("resize", requestPhotoReveal);
-}
+  
+  // 添加鼠标跟随3D效果
+  let rafId = null;
+  let targetRotateX = 0;
+  let targetRotateY = 0;
+  
+  const updateTransform = () => {
+    photoImagesWrap.style.transform = `perspective(1000px) rotateX(${targetRotateX}deg) rotateY(${targetRotateY}deg) scale3d(${targetRotateX === 0 && targetRotateY === 0 ? 1 : 1.02}, ${targetRotateX === 0 && targetRotateY === 0 ? 1 : 1.02}, 1)`;
+    rafId = null;
+  };
 
-// =============================================================================
-// 模块 5：GSAP Flair 鼠标轨迹
-// 参考：https://codepen.io/GreenSock/pen/WbbEGmp
-// 依赖：index.html 中先于本文件引入 gsap.min.js；无 gsap 或用户偏好减少动效则跳过
-// 原理：鼠标移动超过一定距离时轮流使用固定数量的 .flair 图片，在指针处播放
-//       弹出 → 随机旋转 → 落出视口的动画，形成拖尾感。
-// =============================================================================
-const flairReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-if (typeof gsap !== "undefined" && !flairReducedMotion) {
-  /**
-   * 单个 flair 图形的入场与离场时间轴（与 CodePen 原版一致）
-   * @param {HTMLElement} shape - 带 .flair 类的 img 元素
-   */
-  function playAnimation(shape) {
-    const tl = gsap.timeline();
-    tl.from(shape, {
-      opacity: 0,
-      scale: 0,
-      ease: "elastic.out(1,0.3)",
-    })
-      .to(
-        shape,
-        {
-          rotation: "random([-360, 360])",
-        },
-        "<"
-      )
-      .to(
-        shape,
-        {
-          y: "120vh",
-          ease: "back.in(.4)",
-          duration: 1,
-        },
-        0
-      );
-  }
-
-  // --- 多张小图轮流复用；gap 为两次触发之间的最小鼠标位移（像素）---
-  const flair = gsap.utils.toArray(".flair");
-  // 鼠标累计移动超过该像素距离才触发一次动画，数值越大「粒子」越稀疏
-  let gap = 100;
-  let index = 0;
-  const wrapper = gsap.utils.wrap(0, flair.length);
-
-  gsap.defaults({ duration: 1 });
-
-  let mousePos = { x: 0, y: 0 };
-  let lastMousePos = mousePos;
-  const cachedMousePos = mousePos;
-
-  window.addEventListener("mousemove", (e) => {
-    mousePos = { x: e.clientX, y: e.clientY };
-  });
-
-  /**
-   * 每帧在 GSAP ticker 中执行：根据鼠标位移决定是否播放下一个 flair
-   *（原版里 cachedMousePos 插值保留，与 CodePen 行为一致）
-   */
-  function imageTrail() {
-    const travelDistance = Math.hypot(
-      lastMousePos.x - mousePos.x,
-      lastMousePos.y - mousePos.y
-    );
-
-    cachedMousePos.x = gsap.utils.interpolate(
-      cachedMousePos.x || mousePos.x,
-      mousePos.x,
-      0.1
-    );
-    cachedMousePos.y = gsap.utils.interpolate(
-      cachedMousePos.y || mousePos.y,
-      mousePos.y,
-      0.1
-    );
-
-    if (travelDistance > gap) {
-      animateImage();
-      lastMousePos = mousePos;
+  const resetPhotoTilt = () => {
+    targetRotateX = 0;
+    targetRotateY = 0;
+    if (!rafId) {
+      rafId = requestAnimationFrame(updateTransform);
     }
-  }
+  };
+  
+  const handleMouseMove = (e) => {
+    const rect = hoverHitbox.getBoundingClientRect();
+    const edgeInset = 14;
+    const isInsideStableHoverZone =
+      e.clientX >= rect.left + edgeInset &&
+      e.clientX <= rect.right - edgeInset &&
+      e.clientY >= rect.top + edgeInset &&
+      e.clientY <= rect.bottom - edgeInset;
 
-  /** 取下一个轮询到的 .flair 元素，重置到指针处并播放 playAnimation */
-  function animateImage() {
-    const wrappedIndex = wrapper(index);
-    const img = flair[wrappedIndex];
+    if (!isInsideStableHoverZone) {
+      resetPhotoTilt();
+      return;
+    }
 
-    gsap.killTweensOf(img);
-    gsap.set(img, { clearProps: "all" });
-
-    gsap.set(img, {
-      opacity: 1,
-      left: mousePos.x,
-      top: mousePos.y,
-      xPercent: -50,
-      yPercent: -50,
-    });
-
-    playAnimation(img);
-    index += 1;
-  }
-
-  gsap.ticker.add(imageTrail);
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    
+    // 计算鼠标相对于中心的位置（-1 到 1）并限制范围
+    targetRotateX = Math.max(-12, Math.min(12, (e.clientY - centerY) / (rect.height / 2) * -12));
+    targetRotateY = Math.max(-12, Math.min(12, (e.clientX - centerX) / (rect.width / 2) * 12));
+    
+    if (!rafId) {
+      rafId = requestAnimationFrame(updateTransform);
+    }
+  };
+  
+  hoverHitbox.addEventListener('mousemove', handleMouseMove);
+  hoverHitbox.addEventListener('mouseleave', resetPhotoTilt);
 }
 
 // =============================================================================
-// 模块 6：工作经历 — 悬停行时大图跟随指针（GSAP quickTo，需 gsap.min.js）
+// 模块 5：工作经历 — 悬停行时大图跟随指针（GSAP quickTo，需 gsap.min.js）
 // =============================================================================
 // =============================================================================
 // 模块 7：作品 — 无限卡片（CodePen RwKwLWK 核心逻辑：wrapTime + seamlessLoop；
@@ -1143,7 +1144,7 @@ if (typeof gsap !== "undefined" && !flairReducedMotion) {
     cell.rel = "noreferrer noopener";
     cell.setAttribute("aria-label", `查看 ${item.title}`);
     cell.innerHTML =
-      '<span class="portfolio-featured__media"><img alt="" /></span><span class="portfolio-featured__badge"></span>';
+      '<span class="portfolio-featured__tilt"><span class="portfolio-featured__media"><img alt="" /></span></span><span class="portfolio-featured__badge"></span>';
     const image = cell.querySelector("img");
     const badge = cell.querySelector(".portfolio-featured__badge");
     if (image) {
@@ -1291,6 +1292,45 @@ if (typeof gsap !== "undefined" && !flairReducedMotion) {
         event.preventDefault();
       }
     });
+
+    cell.addEventListener("pointermove", (event) => {
+      if (isPointerDown || dragMoved) return;
+
+      const rect = cell.getBoundingClientRect();
+      const edgeInset = 14;
+      const isInsideStableHoverZone =
+        event.clientX >= rect.left + edgeInset &&
+        event.clientX <= rect.right - edgeInset &&
+        event.clientY >= rect.top + edgeInset &&
+        event.clientY <= rect.bottom - edgeInset;
+
+      if (!isInsideStableHoverZone) {
+        cell.style.setProperty("--featured-tilt-x", "0deg");
+        cell.style.setProperty("--featured-tilt-y", "0deg");
+        cell.style.setProperty("--featured-tilt-scale", "1");
+        return;
+      }
+
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      const rotateX = Math.max(
+        -10,
+        Math.min(10, ((event.clientY - centerY) / (rect.height / 2)) * -10)
+      );
+      const rotateY = Math.max(
+        -10,
+        Math.min(10, ((event.clientX - centerX) / (rect.width / 2)) * 10)
+      );
+      cell.style.setProperty("--featured-tilt-x", `${rotateX.toFixed(3)}deg`);
+      cell.style.setProperty("--featured-tilt-y", `${rotateY.toFixed(3)}deg`);
+      cell.style.setProperty("--featured-tilt-scale", "1.02");
+    });
+
+    cell.addEventListener("pointerleave", () => {
+      cell.style.setProperty("--featured-tilt-x", "0deg");
+      cell.style.setProperty("--featured-tilt-y", "0deg");
+      cell.style.setProperty("--featured-tilt-scale", "1");
+    });
   });
 
   prevButton?.addEventListener("click", () => stepFeaturedShowcase(-1));
@@ -1387,4 +1427,104 @@ if (typeof gsap !== "undefined" && !flairReducedMotion) {
 
   window.addEventListener("resize", () => centerActiveCell(false));
   centerActiveCell(false);
+})();
+
+// =============================================================================
+// 模块 8：空白点击惊喜贴纸 — 点击非交互区域时生成短暂 emoji / 文案反馈
+// =============================================================================
+(function initClickSurpriseBurst() {
+  if (prefersReducedMotion) return;
+
+  const stickerSets = [
+    ["🌟", "✨", "🎨", "🪄", "💫"],
+    ["⭐", "🌈", "🧠", "💡", "🎯"],
+    ["🪐", "🌙", "🔥", "🎁", "🫧"],
+  ];
+  const messages = [
+    "哇，你变帅了！",
+    "好事正在发生",
+    "今天也灵感满格",
+    "灵感捕获成功",
+  ];
+
+  const layer = document.createElement("div");
+  layer.className = "click-surprise-layer";
+  layer.setAttribute("aria-hidden", "true");
+  document.body.appendChild(layer);
+
+  let burstIndex = 0;
+  let selectionLockTimer = null;
+
+  const lockSelectionBriefly = () => {
+    document.body.classList.add("is-click-surprise-active");
+    if (selectionLockTimer) {
+      window.clearTimeout(selectionLockTimer);
+    }
+    selectionLockTimer = window.setTimeout(() => {
+      document.body.classList.remove("is-click-surprise-active");
+      selectionLockTimer = null;
+    }, 520);
+  };
+
+  const clearCurrentSelection = () => {
+    const selection = window.getSelection?.();
+    if (selection && selection.rangeCount > 0) {
+      selection.removeAllRanges();
+    }
+  };
+
+  document.addEventListener("selectstart", (event) => {
+    if (!document.body.classList.contains("is-click-surprise-active")) return;
+    event.preventDefault();
+  });
+
+  document.addEventListener("pointerdown", lockSelectionBriefly, { passive: true });
+  document.addEventListener("pointerup", clearCurrentSelection);
+
+  document.addEventListener("click", (event) => {
+    lockSelectionBriefly();
+    clearCurrentSelection();
+
+    const stickers = stickerSets[burstIndex % stickerSets.length];
+    const bubbleText = messages[burstIndex % messages.length];
+    burstIndex += 1;
+
+    const burst = document.createElement("div");
+    burst.className = "click-surprise-burst";
+    burst.style.left = `${event.clientX}px`;
+    burst.style.top = `${event.clientY - 28}px`;
+
+    stickers.forEach((sticker, index) => {
+      const item = document.createElement("span");
+      const angle = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI * 0.94;
+      const distance = 28 + Math.random() * 42;
+      const startX = (Math.random() - 0.5) * 22;
+      const startY = (Math.random() - 0.5) * 14;
+      item.className = "click-surprise-sticker";
+      item.textContent = sticker;
+      item.style.setProperty("--burst-start-x", `${startX}px`);
+      item.style.setProperty("--burst-start-y", `${startY}px`);
+      item.style.setProperty("--burst-x", `${Math.cos(angle) * distance}px`);
+      item.style.setProperty(
+        "--burst-y",
+        `${Math.sin(angle) * distance - 24 - Math.random() * 28}px`
+      );
+      item.style.setProperty("--burst-rotate", `${-26 + Math.random() * 52}deg`);
+      item.style.setProperty("--burst-delay", `${index * 28}ms`);
+      burst.appendChild(item);
+    });
+
+    const bubble = document.createElement("span");
+    bubble.className = "click-surprise-bubble";
+    bubble.textContent = bubbleText;
+    bubble.style.setProperty("--bubble-y", `${-58 - Math.random() * 24}px`);
+    bubble.style.setProperty("--bubble-x", `${-10 + Math.random() * 20}px`);
+    bubble.style.setProperty("--bubble-drift-x", `${-10 + Math.random() * 20}px`);
+    bubble.style.setProperty("--bubble-rotate", `${-4 + Math.random() * 8}deg`);
+    bubble.style.setProperty("--bubble-delay", "58ms");
+    burst.appendChild(bubble);
+
+    layer.appendChild(burst);
+    burst.addEventListener("animationend", () => burst.remove(), { once: true });
+  });
 })();

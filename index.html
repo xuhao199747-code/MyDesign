@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
+    <div id="ribbonsRoot" class="ribbons-cursor-layer" aria-hidden="true"></div>
     <svg class="liquid-glass-filter" aria-hidden="true" focusable="false">
       <filter
         id="liquid-glass-nav"
@@ -45,22 +46,6 @@
         />
       </filter>
     </svg>
-    <!-- 1去GSAP 鼠标轨迹装饰（参考 CodePen: https://codepen.io/GreenSock/pen/WbbEGmp — flair cursor follower） -->
-    <div class="flair-trail" aria-hidden="true">
-      <img class="flair" src="./imag/trajectory/trajectory1.webp" alt="" />
-      <img class="flair" src="./imag/trajectory/trajectory2.webp" alt="" />
-      <img class="flair" src="./imag/trajectory/trajectory3.webp" alt="" />
-      <img class="flair" src="./imag/trajectory/trajectory6.webp" alt="" />
-      <img class="flair" src="./imag/trajectory/trajectory4.webp" alt="" />
-      <img class="flair" src="./imag/trajectory/trajectory5.webp" alt="" />
-      <img class="flair" src="./imag/trajectory/trajectory7.webp" alt="" />
-      <img class="flair" src="./imag/trajectory/trajectory2.webp" alt="" />
-      <img class="flair" src="./imag/trajectory/trajectory1.webp" alt="" />
-      <img class="flair" src="./imag/trajectory/trajectory2.webp" alt="" />
-      <img class="flair" src="./imag/trajectory/trajectory4.webp" alt="" />
-      <img class="flair" src="./imag/trajectory/trajectory5.webp" alt="" />
-    </div>
-
     <!-- 1网页导航 -->
     <header class="navbar">
         <a class="brand" href="#">
@@ -396,6 +381,7 @@
     <script src="./vendor/gsap.min.js"></script>
     <script src="./vendor/Draggable.min.js"></script>
     <script type="module" src="./src/portfolio-bounce-cards.jsx"></script>
+    <script type="module" src="./src/ribbons-entry.jsx"></script>
     <script src="./script.js"></script>
   </body>
 </html>

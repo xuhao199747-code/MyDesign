@@ -81,6 +81,17 @@ body.portfolio-featured-dragging *::selection {
   background: transparent;
 }
 
+body.is-click-surprise-active,
+body.is-click-surprise-active * {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+body.is-click-surprise-active *::selection {
+  background: transparent;
+}
+
 /* 全站内容区最大宽度 1200px；与区块类并列使用，如 class="container section-two" */
 .container {
   width: min(1200px, calc(100% - 240px));
@@ -176,8 +187,9 @@ body.portfolio-featured-dragging *::selection {
   opacity: 0.1;
 }
 
+/* 移除导航栏hover效果 */
 .navbar.navbar--scrolled:hover {
-  transform: translateY(-1px);
+  transform: none;
 }
 
 .navbar > * {
@@ -209,8 +221,6 @@ body.portfolio-featured-dragging *::selection {
   justify-content: center;
   text-decoration: none;
   color: #0f172a;
-  -webkit-text-stroke: 0.5px rgba(255, 255, 255, 0.9);
-  paint-order: stroke fill;
   padding: 0.4rem 0.5rem;
   border-radius: 8px;
   font-size: 14px;
@@ -218,9 +228,7 @@ body.portfolio-featured-dragging *::selection {
 }
 
 .menu a svg path {
-  stroke: rgba(255, 255, 255, 0.9);
-  stroke-width: 0.5;
-  paint-order: stroke fill;
+  stroke: none;
 }
 
 .menu a:hover {
@@ -473,6 +481,16 @@ body.portfolio-featured-dragging *::selection {
     10px 10px 10px rgba(0, 0, 0, 0.3);
   -webkit-transition: left 0.45s cubic-bezier(0.34, 1.2, 0.64, 1);
   transition: left 0.45s cubic-bezier(0.34, 1.2, 0.64, 1);
+}
+
+.ribbons-cursor-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 10001;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
 }
 
 .motion3d-section {
@@ -842,15 +860,33 @@ body.portfolio-featured-dragging *::selection {
   object-fit: cover;
 }
 
-.section-three .photo-images {
-  position: relative;
-  z-index: -1;
+.section-three .photo-hover-hitbox {
   width: 300px;
   height: 400px;
   margin: 64px 96px;
+  cursor: pointer;
+}
+
+.section-three .photo-images {
+  position: relative;
+  z-index: 1;
+  width: 300px;
+  height: 400px;
+  margin: 0;
   overflow: hidden;
   border-radius: 24px;
   display: block !important;
+  transform-style: preserve-3d;
+  transform-origin: center;
+  will-change: transform;
+}
+
+.section-three .photo-images .photo-tilt-surface {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transform-origin: center;
+  will-change: transform;
 }
 
 .section-three .photo-images .photo-image {
@@ -865,6 +901,20 @@ body.portfolio-featured-dragging *::selection {
 .section-three .photo-images .photo-image-front {
   z-index: 2;
   will-change: clip-path;
+}
+
+.section-three .photo-images .photo-grid-container {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.section-three .photo-images .grid-cell {
+  position: absolute;
+  transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 1;
 }
 
 .section-three .photo-content .photo-meta {
@@ -1179,10 +1229,6 @@ body.portfolio-featured-dragging *::selection {
 .play-title:has(.play-title__char:hover) .play-title__fire-group,
 .play-title:has(.play-title__sticker--work-face:hover) .play-title__fire-group,
 .play-title.is-hovering .play-title__fire-group {
-  color: var(--play-title-cream);
-  text-shadow:
-    0 0.04em 0 rgba(15, 23, 42, 0.08),
-    0.018em 0.018em 0 #0f172a;
   transform:
     translate3d(var(--title-char-drift), -0.03em, 0)
     rotate(calc(var(--title-char-rotate) * 0.6))
@@ -1217,10 +1263,6 @@ body.portfolio-featured-dragging *::selection {
 .play-title:has(.play-title__char:hover) .play-title__char,
 .play-title:has(.play-title__sticker--work-face:hover) .play-title__char,
 .play-title.is-hovering .play-title__char {
-  color: var(--play-title-green);
-  text-shadow:
-    0 0.04em 0 rgba(15, 23, 42, 0.08),
-    0.018em 0.018em 0 #0f172a;
   transform:
     translate3d(var(--title-char-drift), -0.085em, 0)
     rotate(var(--title-char-rotate))
@@ -1231,7 +1273,6 @@ body.portfolio-featured-dragging *::selection {
 .play-title:has(.play-title__char:hover) .play-title__char:nth-of-type(4n + 2),
 .play-title:has(.play-title__sticker--work-face:hover) .play-title__char:nth-of-type(4n + 2),
 .play-title.is-hovering .play-title__char:nth-of-type(4n + 2) {
-  color: var(--play-title-pink);
   transform:
     translate3d(calc(var(--title-char-drift) * -1), 0.025em, 0)
     rotate(calc(var(--title-char-rotate) * -1))
@@ -1242,7 +1283,6 @@ body.portfolio-featured-dragging *::selection {
 .play-title:has(.play-title__char:hover) .play-title__char:nth-of-type(5n + 3),
 .play-title:has(.play-title__sticker--work-face:hover) .play-title__char:nth-of-type(5n + 3),
 .play-title.is-hovering .play-title__char:nth-of-type(5n + 3) {
-  color: var(--play-title-cream);
   transform:
     translate3d(var(--title-char-drift), -0.03em, 0)
     rotate(calc(var(--title-char-rotate) * 0.6))
@@ -1253,7 +1293,6 @@ body.portfolio-featured-dragging *::selection {
 .play-title:has(.play-title__char:hover) .play-title__char:nth-of-type(7n),
 .play-title:has(.play-title__sticker--work-face:hover) .play-title__char:nth-of-type(7n),
 .play-title.is-hovering .play-title__char:nth-of-type(7n) {
-  color: var(--play-title-blue);
   transform:
     translate3d(calc(var(--title-char-drift) * 1.4), -0.07em, 0)
     rotate(calc(var(--title-char-rotate) * 1.25))
@@ -1300,6 +1339,9 @@ body.portfolio-featured-dragging *::selection {
 }
 
 .portfolio-featured__cell {
+  --featured-tilt-x: 0deg;
+  --featured-tilt-y: 0deg;
+  --featured-tilt-scale: 1;
   --featured-cell-offset: 0;
   flex: 0 0 var(--featured-card-w);
   position: relative;
@@ -1332,6 +1374,21 @@ body.portfolio-featured-dragging *::selection {
   background: #f8fafc;
   box-shadow: 0 14px 36px rgba(15, 23, 42, 0.1);
   overflow: hidden;
+}
+
+.portfolio-featured__tilt {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 16px;
+  transform:
+    perspective(1000px)
+    rotateX(var(--featured-tilt-x))
+    rotateY(var(--featured-tilt-y))
+    scale3d(var(--featured-tilt-scale), var(--featured-tilt-scale), 1);
+  transform-origin: center;
+  transition: transform 0.18s ease-out;
+  will-change: transform;
 }
 
 .portfolio-featured__cell img {
@@ -1673,6 +1730,10 @@ body.portfolio-featured-dragging *::selection {
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.62);
+  -webkit-text-stroke: none;
+  text-stroke: none;
+  paint-order: fill;
+  text-shadow: none;
 }
 
 .footer-demo__value {
@@ -1680,6 +1741,10 @@ body.portfolio-featured-dragging *::selection {
   font-size: clamp(14px, 1.6vw, 17px);
   font-weight: 500;
   line-height: 1.35;
+  -webkit-text-stroke: none;
+  text-stroke: none;
+  paint-order: fill;
+  text-shadow: none;
 }
 
 .footer-demo__value a {
@@ -1995,6 +2060,7 @@ body.portfolio-featured-dragging *::selection {
     min-height: 0;
     margin-top: 0;
     margin-bottom: var(--section-gap-y-sm);
+    gap: clamp(20px, 6vw, 32px);
     padding-left: max(16px, env(safe-area-inset-left, 0px));
     padding-right: max(16px, env(safe-area-inset-right, 0px));
   }
@@ -2021,18 +2087,33 @@ body.portfolio-featured-dragging *::selection {
   }
 
   .section-three .photo-content {
-    flex-direction: row;
-    flex-wrap: nowrap;
-    justify-content: space-between;
-    gap: 12px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    justify-content: center;
+    justify-items: center;
+    gap: 16px 12px;
     width: 100%;
-    padding: 0 8px;
+    max-width: 420px;
+    padding: 0;
     box-sizing: border-box;
     align-items: center;
   }
 
   .section-three .photo-content .photo-meta {
     align-items: center;
+    width: 100%;
+    min-width: 0;
+    padding: 0;
+  }
+
+  .section-three .photo-content .photo-meta:first-of-type {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .section-three .photo-content .photo-meta:last-of-type {
+    grid-column: 2;
+    grid-row: 2;
   }
 
   .section-three .photo-content .photo-meta dt,
@@ -2040,21 +2121,30 @@ body.portfolio-featured-dragging *::selection {
     text-align: center;
   }
 
+  .section-three .photo-hover-hitbox,
   .section-three .photo-images {
-    width: min(220px, 52vw);
-    height: auto;
+    grid-column: 1 / -1;
+    grid-row: 1;
+    width: min(340px, calc(100vw - 64px));
+    max-width: 100%;
     aspect-ratio: 3 / 4;
-    margin: 16px auto;
+    height: auto;
+    margin: 0;
     border-radius: 16px;
   }
 
-  .section-three .photo-content .photo-meta {
-    flex: 0 0 auto;
-    min-width: 64px;
+  .section-three .photo-hover-hitbox {
+    cursor: default;
+  }
+
+  .section-three .photo-hover-hitbox .photo-images {
+    width: 100%;
+    height: 100%;
   }
 
   .section-three .photo-content-bottom {
-    padding: 0 24px;
+    max-width: 420px;
+    padding: 0;
   }
 
   .section-three .photo-content-bottom p {
@@ -2244,23 +2334,135 @@ body.portfolio-featured-dragging *::selection {
   }
 }
 
-/* --------------------------------------------------------------------------
-   GSAP「flair」鼠标轨迹（源自 CodePen WbbEGmp，仅样式层适配本站）
-   原 Pen 对 body 使用 overflow:hidden 以居中演示；作品集需整页滚动，故不套用。
-   -------------------------------------------------------------------------- */
-.flair-trail {
+.click-surprise-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
   pointer-events: none;
+  overflow: hidden;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
-.flair {
-  position: fixed;
+.click-surprise-burst {
+  position: absolute;
   left: 0;
   top: 0;
+  width: 1px;
+  height: 1px;
+  animation: click-surprise-lifetime 1.45s ease forwards;
+}
+
+.click-surprise-sticker {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  margin: -12px 0 0 -12px;
+  font-size: 20px;
+  line-height: 1;
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.22));
+  transform:
+    translate3d(var(--burst-start-x), var(--burst-start-y), 0)
+    scale(0.62)
+    rotate(0deg);
   opacity: 0;
-  width: 50px;
-  height: auto;
-  /* 需高于常规区块，否则拖尾会被盖住看起来像「没反应」 */
-  z-index: 9999;
-  pointer-events: none;
+  animation: click-surprise-pop 1.28s cubic-bezier(0.22, 0.82, 0.28, 1) forwards;
+  animation-delay: var(--burst-delay);
   will-change: transform, opacity;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.click-surprise-bubble {
+  position: absolute;
+  left: 0;
+  top: 0;
+  min-width: 118px;
+  min-height: 30px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(6, 8, 15, 0.62);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 10px 24px rgba(0, 0, 0, 0.24);
+  color: rgba(255, 255, 255, 0.9);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0;
+  white-space: nowrap;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  opacity: 0;
+  transform:
+    translate3d(calc(-50% + var(--bubble-x)), -50%, 0)
+    rotate(calc(var(--bubble-rotate) * -0.45))
+    scale(0.92);
+  animation: click-surprise-bubble 1.32s cubic-bezier(0.22, 0.82, 0.28, 1) forwards;
+  animation-delay: var(--bubble-delay);
+  will-change: transform, opacity;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+@keyframes click-surprise-pop {
+  0% {
+    opacity: 0;
+    transform:
+      translate3d(var(--burst-start-x), var(--burst-start-y), 0)
+      scale(0.9)
+      rotate(0deg);
+  }
+  12% {
+    opacity: 1;
+    transform:
+      translate3d(calc(var(--burst-x) * 0.18), calc(var(--burst-y) * 0.18 - 8px), 0)
+      scale(0.98)
+      rotate(calc(var(--burst-rotate) * 0.18));
+  }
+  100% {
+    opacity: 0;
+    transform:
+      translate3d(calc(var(--burst-x) * 1.12), calc(var(--burst-y) * 1.12 - 42px), 0)
+      scale(0.8)
+      rotate(calc(var(--burst-rotate) * 1.35));
+  }
+}
+
+@keyframes click-surprise-bubble {
+  0% {
+    opacity: 0;
+    transform:
+      translate3d(calc(-50% + var(--bubble-x)), -50%, 0)
+      rotate(calc(var(--bubble-rotate) * -0.2))
+      scale(0.98);
+  }
+  12% {
+    opacity: 1;
+    transform:
+      translate3d(calc(-50% + var(--bubble-x) + var(--bubble-drift-x) * 0.14), calc(-50% + var(--bubble-y) * 0.18), 0)
+      rotate(calc(var(--bubble-rotate) * 0.2))
+      scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform:
+      translate3d(calc(-50% + var(--bubble-x) + var(--bubble-drift-x)), calc(-50% + var(--bubble-y)), 0)
+      rotate(calc(var(--bubble-rotate) * 1.35))
+      scale(0.96);
+  }
+}
+
+@keyframes click-surprise-lifetime {
+  to {
+    opacity: 1;
+  }
 }

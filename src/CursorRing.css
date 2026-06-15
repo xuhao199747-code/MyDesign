@@ -1,0 +1,66 @@
+.cursor-ring-lens,
+.cursor-ring,
+.cursor-ring-dot {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 10001;
+  pointer-events: none;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.cursor-ring-lens {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  backdrop-filter: invert(1);
+  -webkit-backdrop-filter: invert(1);
+  transition:
+    width 0.18s ease,
+    height 0.18s ease,
+    opacity 0.16s ease;
+}
+
+.cursor-ring {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  border: 0;
+  background: transparent;
+  transition:
+    width 0.18s ease,
+    height 0.18s ease,
+    opacity 0.16s ease;
+}
+
+.cursor-ring-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: #0f172a;
+  border: 1px solid rgba(255, 255, 255, 0.96);
+  box-shadow: 0 0 0 0.5px rgba(15, 23, 42, 0.12);
+  transition: opacity 0.16s ease;
+}
+
+.cursor-ring-lens.is-visible,
+.cursor-ring.is-visible,
+.cursor-ring-dot.is-visible {
+  opacity: 1;
+}
+
+.cursor-ring-lens.is-interactive,
+.cursor-ring.is-interactive {
+  width: 48px;
+  height: 48px;
+}
+
+@media (pointer: coarse), (prefers-reduced-motion: reduce) {
+  .cursor-ring-lens,
+  .cursor-ring,
+  .cursor-ring-dot {
+    display: none;
+  }
+}
