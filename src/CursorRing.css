@@ -17,10 +17,19 @@
   background: rgba(255, 255, 255, 0.16);
   backdrop-filter: invert(1);
   -webkit-backdrop-filter: invert(1);
+  transform: translateZ(0);
+  isolation: isolate;
   transition:
     width 0.18s ease,
     height 0.18s ease,
     opacity 0.16s ease;
+}
+
+@supports not ((backdrop-filter: invert(1)) or (-webkit-backdrop-filter: invert(1))) {
+  .cursor-ring-lens {
+    background: rgba(255, 255, 255, 0.16);
+    mix-blend-mode: difference;
+  }
 }
 
 .cursor-ring {
