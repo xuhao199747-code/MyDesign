@@ -16,18 +16,23 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: 'npm'
 
       - name: Install dependencies
-        run: npm install
+        run: npm install --legacy-peer-deps
+
+      - name: List files
+        run: ls -la
 
       - name: Build project
         run: npm run build
 
       - name: Copy static assets
         run: |
-          mkdir -p dist/imag dist/vendor
+          mkdir -p dist/imag dist/vendor dist/js
           cp -r imag/* dist/imag/
           cp -r vendor/* dist/vendor/
+          cp -r js/* dist/js/
           cp script.js dist/
           cp styles.css dist/
           cp skills-lock.json dist/
