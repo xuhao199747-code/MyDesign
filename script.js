@@ -1442,7 +1442,10 @@ if (document.readyState === 'loading') {
 // 模块 8：空白点击惊喜贴纸 — 点击非交互区域时生成短暂 emoji / 文案反馈
 // =============================================================================
 (function initClickSurpriseBurst() {
-  if (prefersReducedMotion) return;
+  const shouldReduceBurstMotion = window.matchMedia(
+    "(prefers-reduced-motion: reduce)"
+  ).matches;
+  if (shouldReduceBurstMotion) return;
 
   const stickerSets = [
     ["🌟", "✨", "🎨", "🪄", "💫"],
