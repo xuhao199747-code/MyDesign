@@ -9,6 +9,7 @@ export default defineConfig({
   },
   publicDir: 'public',
   build: {
+    cssMinify: false,
     rollupOptions: {
       input: {
         main: './index.html',
