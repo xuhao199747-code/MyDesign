@@ -2,6 +2,7 @@
  * 作品集页面交互脚本
  *
  * 模块概览：
+ * 0. 页面预加载 — 加载图片、字体等资源，显示加载进度
  * 1. 导航菜单 — 移动端抽屉开关、点击链接关闭、大屏重置
  * 2. 锚点滚动 — 平滑滚动到 # 区块，并扣除固定导航占位
  * 3. Logo 墙物理 — 技能图标下落、碰撞、落地静止；进入视口后启动
@@ -13,7 +14,109 @@
  */
 
 // =============================================================================
-// 模块 0：首屏装饰文字鼠标跟随效果
+// 模块 0：页面预加载
+// =============================================================================
+(function initPreloader() {
+  const preloader = document.getElementById("preloader");
+  const progressBar = document.querySelector(".preloader__bar");
+  const progressText = document.querySelector(".preloader__text");
+
+  if (!preloader) return;
+
+  const resourcesToLoad = [
+    "./imag/frame_front.webp",
+    "./imag/sprite.webp",
+    "./imag/sprite_2.webp",
+    "./imag/sprite_3.webp",
+    "./imag/sprite_4.webp",
+    "./imag/photo1.png",
+    "./imag/photo2-D3RfzUEW.png",
+    "./imag/portfolio-cards1-CG8z1SGJ.webp",
+    "./imag/Frame 2085668692-CkqBsBRm.png",
+    "./imag/Group 1940698323-Dg4MRAtP.png",
+    "./imag/Bottom information-Df-BKyl4.png",
+    "./imag/logo/logo1.webp",
+    "./imag/logo/logo2.webp",
+    "./imag/logo/logo3.webp",
+    "./imag/logo/logo4.webp",
+    "./imag/logo/logo5.webp",
+    "./imag/logo/logo6.webp",
+    "./imag/logo/logo7.webp",
+    "./imag/logo/logo8.webp",
+    "./imag/logo/logo9.webp",
+    "./imag/logo/logo10.webp",
+    "./imag/logo/logo11.webp",
+    "./imag/logo/logo12.webp",
+    "./imag/logo/logo13.webp",
+    "./imag/logo/logo14.webp",
+    "./imag/logo/logo15.webp",
+    "./imag/logo/logo16.webp",
+    "./imag/logo/logo17.webp",
+    "./imag/logo/logo18.png",
+    "./imag/logo/logo19.png",
+    "./font/ArchivoBlack-Regular.ttf",
+    "./font/LuckiestGuy-Regular.ttf",
+  ];
+
+  let loadedCount = 0;
+  const totalCount = resourcesToLoad.length;
+
+  const updateProgress = () => {
+    const percentage = Math.round((loadedCount / totalCount) * 100);
+    if (progressBar) {
+      progressBar.style.width = `${percentage}%`;
+    }
+    if (progressText) {
+      progressText.textContent = `LOADING ${percentage}%`;
+    }
+
+    if (loadedCount >= totalCount) {
+      setTimeout(hidePreloader, 500);
+    }
+  };
+
+  const hidePreloader = () => {
+    if (preloader) {
+      preloader.classList.add("preloader--hidden");
+      setTimeout(() => {
+        preloader.remove();
+      }, 600);
+    }
+  };
+
+  const loadResource = (url) => {
+    return new Promise((resolve) => {
+      if (url.endsWith(".ttf") || url.endsWith(".otf")) {
+        const font = new FontFace("PreloadFont", `url(${url})`);
+        font.load().then(resolve).catch(resolve);
+      } else {
+        const img = new Image();
+        img.onload = resolve;
+        img.onerror = resolve;
+        img.src = url;
+      }
+    });
+  };
+
+  const startLoading = async () => {
+    for (const url of resourcesToLoad) {
+      await loadResource(url);
+      loadedCount++;
+      updateProgress();
+    }
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", startLoading);
+  } else {
+    startLoading();
+  }
+
+  setTimeout(hidePreloader, 5000);
+})();
+
+// =============================================================================
+// 模块 1：首屏装饰文字鼠标跟随效果
 // =============================================================================
 (function initHeroTextFloat() {
   const heroTexts = document.querySelectorAll(".hero-nav__text");
