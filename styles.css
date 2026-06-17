@@ -667,8 +667,8 @@ body.is-click-surprise-active *::selection {
   align-items: center;
   justify-content: center;
   height: var(--screen-module-height);
-  padding-top: var(--screen-module-pad-y);
-  padding-bottom: var(--screen-module-pad-y);
+  padding-top: 0;
+  padding-bottom: 0;
   margin-top: 0;
   margin-bottom: 0;
   gap: var(--module-title-gap);
@@ -794,8 +794,8 @@ body.is-click-surprise-active *::selection {
   justify-content: center;
   align-items: center;
   height: var(--screen-module-height);
-  padding-top: var(--screen-module-pad-y);
-  padding-bottom: var(--screen-module-pad-y);
+  padding-top: 0;
+  padding-bottom: 0;
   margin-top: 0;
   margin-bottom: 0;
   gap: 0;
@@ -929,32 +929,35 @@ body.is-click-surprise-active *::selection {
 }
 
 /* 内容区域4 #portfolio；JS 钩子保留 .portfolio-cards-section */
-.section-portfolio {
+.section-portfolio,
+.section-portfolio-featured {
   box-sizing: border-box;
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
-  min-height: calc(var(--screen-module-height) * 2);
+  justify-content: center;
+  height: var(--screen-module-height);
   padding-top: 0;
   padding-bottom: 0;
   margin-top: 0;
   margin-bottom: 0;
-  height: auto;
-  max-height: none;
   gap: 0;
   overflow: visible;
 }
 
+/* 内容区域4 #portfolio；JS 钩子保留 .portfolio-cards-section */
+.section-portfolio {
+  /* 共享样式已在 .section-portfolio, .section-portfolio-featured 中定义 */
+}
+
 .section-portfolio .portfolio-top {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
   width: 100vw;
-  height: var(--portfolio-title-block);
   max-width: none;
-  padding-top: var(--screen-module-pad-y);
+  padding-top: 0;
   margin-bottom: var(--module-title-gap);
   font-size: var(--portfolio-title-size);
   color: #333333;
@@ -970,7 +973,7 @@ body.is-click-surprise-active *::selection {
     var(--screen-module-height) - var(--portfolio-title-block) -
       var(--module-title-gap)
   );
-  padding-bottom: var(--screen-module-pad-y);
+  padding-bottom: 0;
   box-sizing: border-box;
   overflow: hidden;
   background: #ffffff;
@@ -986,7 +989,7 @@ body.is-click-surprise-active *::selection {
     var(--screen-module-height) - var(--portfolio-title-block) -
       var(--module-title-gap)
   );
-  padding-top: clamp(32px, 5vh, 48px);
+  padding-top: var(--module-title-gap);
   overflow: visible;
 }
 
@@ -1091,13 +1094,12 @@ body.is-click-surprise-active *::selection {
 
 .portfolio-featured__head {
   width: 100vw;
-  height: var(--portfolio-title-block);
   align-self: center;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
   margin: 0;
-  padding-top: var(--screen-module-pad-y);
+  padding-top: 0;
   margin-bottom: var(--module-title-gap);
   text-align: center;
   box-sizing: border-box;
@@ -1307,7 +1309,7 @@ body.is-click-surprise-active *::selection {
     var(--screen-module-height) - var(--portfolio-title-block) -
       var(--module-title-gap)
   );
-  padding: 0 0 var(--screen-module-pad-y);
+  padding: 0;
   box-sizing: border-box;
   overflow: visible;
   touch-action: pan-y pinch-zoom;
@@ -1544,7 +1546,7 @@ body.is-click-surprise-active *::selection {
 .section-five.works-swipe-section {
   box-sizing: border-box;
   margin-top: 0;
-  margin-bottom: 160px;
+  margin-bottom: 0;
 }
 
 #experience {
@@ -1690,13 +1692,12 @@ body.is-click-surprise-active *::selection {
 /* 页脚 #contact：联系信息 + 底栏；中间背景见 .footer-demo__panel；最大宽度见各子块 width/max-width */
 .footer-demo {
   box-sizing: border-box;
-  height: var(--screen-module-height);
   display: flex;
   flex-direction: column;
   justify-content: center;
   gap: var(--module-title-gap);
-  padding-top: var(--screen-module-pad-y);
-  padding-bottom: var(--screen-module-pad-y);
+  padding-top: 0;
+  padding-bottom: 0;
   font-family: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
@@ -1891,6 +1892,8 @@ body.is-click-surprise-active *::selection {
     font-size: 14px;
     font-weight: 500;
     flex-shrink: 0;
+    color: #0f172a;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.9);
   }
 
   .menu-wrap {
@@ -1963,9 +1966,9 @@ body.is-click-surprise-active *::selection {
   }
 
   .section-two {
-    gap: 24px;
-    padding-top: clamp(24px, 6vw, 32px);
-    padding-bottom: clamp(32px, 8vw, 40px);
+    gap: var(--module-title-gap);
+    padding-top: 0;
+    padding-bottom: 0;
     margin-top: 0;
     margin-bottom: var(--section-gap-y-sm);
   }
@@ -2053,7 +2056,9 @@ body.is-click-surprise-active *::selection {
     min-height: 0;
     margin-top: 0;
     margin-bottom: var(--section-gap-y-sm);
-    gap: clamp(20px, 6vw, 32px);
+    gap: var(--module-title-gap);
+    padding-top: 0;
+    padding-bottom: 0;
     padding-left: max(16px, env(safe-area-inset-left, 0px));
     padding-right: max(16px, env(safe-area-inset-right, 0px));
   }
@@ -2150,9 +2155,10 @@ body.is-click-surprise-active *::selection {
   .section-portfolio {
     margin-top: 0;
     margin-bottom: var(--section-gap-y-sm);
-    gap: clamp(16px, 4vw, 32px);
+    gap: var(--module-title-gap);
     height: auto;
     max-height: none;
+    padding-top: 0;
     padding-bottom: env(safe-area-inset-bottom, 0);
   }
 
@@ -2204,8 +2210,8 @@ body.is-click-surprise-active *::selection {
   }
 
   .portfolio-featured__head {
-    margin-top: 68px;
-    margin-bottom: 0;
+    margin-top: 0;
+    margin-bottom: var(--module-title-gap);
     padding-top: 0;
   }
 
@@ -2222,7 +2228,7 @@ body.is-click-surprise-active *::selection {
   .portfolio-featured {
     --featured-card-w: min(56vw, 270px);
     --featured-gap: clamp(28px, 9vw, 52px);
-    padding-top: 34px;
+    padding-top: 0;
     padding-bottom: 0;
     min-height: 0;
   }
@@ -2250,8 +2256,8 @@ body.is-click-surprise-active *::selection {
   .section-five.works-swipe-section {
     margin-top: 0;
     margin-bottom: var(--section-gap-y-sm);
-    padding-top: clamp(24px, 6vw, 32px);
-    padding-bottom: clamp(28px, 8vw, 40px);
+    padding-top: 0;
+    padding-bottom: 0;
     padding-left: max(16px, env(safe-area-inset-left, 0px));
     padding-right: max(16px, env(safe-area-inset-right, 0px));
   }
@@ -2330,6 +2336,11 @@ body.is-click-surprise-active *::selection {
 
   .footer-demo__value {
     margin: 3px 0 0;
+  }
+
+  .footer-demo {
+    padding-top: 0;
+    padding-bottom: 0;
   }
 
   .footer-demo__bar {

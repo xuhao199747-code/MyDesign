@@ -12,10 +12,10 @@ const images = [
 ];
 
 const transformStyles = [
-  "rotate(5deg) translate(-240px)",
-  "rotate(-4deg) translate(-80px)",
-  "rotate(4deg) translate(80px)",
-  "rotate(-5deg) translate(240px)",
+  "rotate(5deg) translate(-340px)",
+  "rotate(-4deg) translate(-115px)",
+  "rotate(4deg) translate(115px)",
+  "rotate(-5deg) translate(340px)",
 ];
 
 if (mount) {
@@ -23,8 +23,8 @@ if (mount) {
     <BounceCards
       className="custom-bounceCards"
       images={images}
-      containerWidth={500}
-      containerHeight={250}
+      containerWidth={700}
+      containerHeight={380}
       animationDelay={0.15}
       animationStagger={0.08}
       easeType="elastic.out(1, 0.5)"

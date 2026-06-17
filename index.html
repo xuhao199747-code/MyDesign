@@ -13,6 +13,14 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="./styles.css" />
+    <!-- 关键首屏资源预加载：让浏览器尽早下载 sprite 精灵图 -->
+    <link rel="preload" as="image" href="./imag/frame_front.webp" />
+    <link rel="preload" as="image" href="./imag/sprite.webp" />
+    <link rel="preload" as="image" href="./imag/sprite_2.webp" />
+    <link rel="preload" as="image" href="./imag/sprite_3.webp" />
+    <link rel="preload" as="image" href="./imag/sprite_4.webp" />
+    <link rel="preload" as="font" href="./font/ArchivoBlack-Regular.ttf" crossorigin />
+    <link rel="preload" as="font" href="./font/LuckiestGuy-Regular.ttf" crossorigin />
   </head>
   <body>
     <div id="preloader" class="preloader" aria-label="页面加载中">
@@ -211,7 +219,7 @@
         </div>
       </section>
 
-      <!-- 内容区域4：作品 — 无限滚动卡片（CodePen GreenSock RwKwLWK） -->
+      <!-- 内容区域4：作品 — VIBE CODING 无限滚动卡片 -->
       <section
         id="portfolio"
         class="container section-portfolio portfolio-cards-section"
@@ -221,7 +229,14 @@
         <div class="portfolio-gallery portfolio-gallery--bounce">
           <div id="portfolioBounceCardsRoot"></div>
         </div>
+      </section>
 
+      <!-- 内容区域4.5：作品 — MY DESIGN 轮播 -->
+      <section
+        id="portfolio-featured"
+        class="container section-portfolio-featured"
+        aria-label="作品展示"
+      >
         <header class="portfolio-featured__head">
           <h2>MY DESIGN</h2>
         </header>

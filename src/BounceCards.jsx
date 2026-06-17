@@ -20,6 +20,7 @@ export default function BounceCards({
   enableHover = true,
 }) {
   const containerRef = useRef(null);
+  const hasAnimatedRef = useRef(false);
   const [currentTransformStyles, setCurrentTransformStyles] = useState(transformStyles);
 
   useEffect(() => {
@@ -56,10 +57,9 @@ export default function BounceCards({
       const cards = gsap.utils.toArray(".card");
       gsap.set(cards, { scale: 0.001 });
 
-      let hasAnimated = false;
       const runIntro = () => {
-        if (hasAnimated) return;
-        hasAnimated = true;
+        if (hasAnimatedRef.current) return;
+        hasAnimatedRef.current = true;
         gsap.fromTo(
           cards,
           { scale: 0.001 },
@@ -74,14 +74,23 @@ export default function BounceCards({
       };
 
       const checkInView = () => {
+        if (hasAnimatedRef.current) {
+          cleanup();
+          return;
+        }
         const rect = container.getBoundingClientRect();
         const viewportHeight =
           window.innerHeight || document.documentElement.clientHeight;
         if (rect.top < viewportHeight * 0.82 && rect.bottom > viewportHeight * 0.12) {
           runIntro();
-          window.removeEventListener("scroll", checkInView);
-          window.removeEventListener("resize", checkInView);
+          cleanup();
         }
+      };
+
+      const cleanup = () => {
+        window.removeEventListener("scroll", checkInView);
+        window.removeEventListener("resize", checkInView);
+        window.clearInterval(viewCheckTimer);
       };
 
       window.addEventListener("scroll", checkInView, { passive: true });
@@ -89,11 +98,7 @@ export default function BounceCards({
       window.requestAnimationFrame(checkInView);
       const viewCheckTimer = window.setInterval(checkInView, 180);
 
-      return () => {
-        window.removeEventListener("scroll", checkInView);
-        window.removeEventListener("resize", checkInView);
-        window.clearInterval(viewCheckTimer);
-      };
+      return cleanup;
     }, containerRef);
 
     return () => ctx.revert();
@@ -259,7 +264,7 @@ export default function BounceCards({
           className={`card card-${idx}`}
           style={{
             transform: `translate(-50%, -50%) ${currentTransformStyles[idx] ?? "none"}`,
-            top: isMobileDevice ? "45%" : "50%",
+            top: isMobileDevice ? "45%" : "65%",
           }}
           onMouseEnter={() => pushSiblings(idx)}
           onMouseMove={(event) => updateCardTilt(event, idx)}

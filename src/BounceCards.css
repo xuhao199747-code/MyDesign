@@ -12,7 +12,7 @@
   position: absolute;
   left: 50%;
   top: 50%;
-  width: min(230px, 44vw);
+  width: min(340px, 44vw);
   aspect-ratio: 1;
   border-radius: 18px;
   transform-origin: 50% 50%;

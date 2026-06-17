@@ -23,18 +23,24 @@
 
   if (!preloader) return;
 
-  const resourcesToLoad = [
+  // 关键资源：首屏必须加载完才显示（sprite 精灵图 + 正面帧）
+  const criticalResources = [
     "./imag/frame_front.webp",
     "./imag/sprite.webp",
     "./imag/sprite_2.webp",
     "./imag/sprite_3.webp",
     "./imag/sprite_4.webp",
+  ];
+
+  // 非关键资源：后台并行加载，不阻塞首屏显示
+  const nonCriticalResources = [
     "./imag/photo1.png",
-    "./imag/photo2-D3RfzUEW.png",
-    "./imag/portfolio-cards1-CG8z1SGJ.webp",
-    "./imag/Frame 2085668692-CkqBsBRm.png",
-    "./imag/Group 1940698323-Dg4MRAtP.png",
-    "./imag/Bottom information-Df-BKyl4.png",
+    "./imag/photo2.png",
+    "./imag/portfolio-cards1.webp",
+    "./imag/Frame 2085668692.png",
+    "./imag/Group 1940698323.png",
+    "./imag/Bottom information.png",
+    "./imag/Image2.webp",
     "./imag/logo/logo1.webp",
     "./imag/logo/logo2.webp",
     "./imag/logo/logo3.webp",
@@ -58,8 +64,9 @@
     "./font/LuckiestGuy-Regular.ttf",
   ];
 
+  const allResources = [...criticalResources, ...nonCriticalResources];
   let loadedCount = 0;
-  const totalCount = resourcesToLoad.length;
+  const totalCount = allResources.length;
 
   const updateProgress = () => {
     const percentage = Math.round((loadedCount / totalCount) * 100);
@@ -68,10 +75,6 @@
     }
     if (progressText) {
       progressText.textContent = `LOADING ${percentage}%`;
-    }
-
-    if (loadedCount >= totalCount) {
-      setTimeout(hidePreloader, 500);
     }
   };
 
@@ -84,26 +87,49 @@
     }
   };
 
+  // 预加载缓存：将已加载的 Image 对象暴露给其他模块复用
+  const preloadedImages = new Map();
+
   const loadResource = (url) => {
     return new Promise((resolve) => {
+      if (preloadedImages.has(url)) {
+        resolve();
+        return;
+      }
       if (url.endsWith(".ttf") || url.endsWith(".otf")) {
         const font = new FontFace("PreloadFont", `url(${url})`);
         font.load().then(resolve).catch(resolve);
       } else {
         const img = new Image();
-        img.onload = resolve;
+        img.onload = () => { preloadedImages.set(url, img); resolve(); };
         img.onerror = resolve;
         img.src = url;
       }
     });
   };
 
+  // 暴露预加载缓存，供 head tracker 等模块复用
+  window.__preloadedImages = preloadedImages;
+
   const startLoading = async () => {
-    for (const url of resourcesToLoad) {
-      await loadResource(url);
-      loadedCount++;
-      updateProgress();
-    }
+    // 并行加载所有资源，而非串行等待
+    const loadPromises = allResources.map((url) =>
+      loadResource(url).then(() => {
+        loadedCount++;
+        updateProgress();
+      })
+    );
+
+    // 等待关键资源加载完毕后立即显示首屏
+    await Promise.all(
+      criticalResources.map((url) => loadResource(url).catch(() => {}))
+    );
+
+    // 关键资源就绪，隐藏预加载遮罩
+    hidePreloader();
+
+    // 非关键资源继续在后台加载（Promise 已在 loadPromises 中运行）
+    await Promise.all(loadPromises);
   };
 
   if (document.readyState === "loading") {
@@ -112,7 +138,8 @@
     startLoading();
   }
 
-  setTimeout(hidePreloader, 5000);
+  // 安全兜底：最多 4 秒后强制隐藏
+  setTimeout(hidePreloader, 4000);
 })();
 
 // =============================================================================
@@ -279,12 +306,20 @@ if (navbar) {
   let motionRafId = 0;
   let queuedPoint = null;
   let hasPaintedFrame = false;
-  const spriteImages = [
+  const spriteSrcs = [
     "./imag/sprite.webp",
     "./imag/sprite_2.webp",
     "./imag/sprite_3.webp",
     "./imag/sprite_4.webp",
-  ].map((src) => {
+  ];
+
+  // 优先复用预加载器已加载的图片，避免重复请求和解码
+  const preloadedCache = window.__preloadedImages || new Map();
+  const spriteImages = spriteSrcs.map((src) => {
+    const cached = preloadedCache.get(src);
+    if (cached && cached.complete && cached.naturalWidth > 0) {
+      return cached;
+    }
     const image = new Image();
     image.decoding = "async";
     image.src = src;
@@ -461,11 +496,15 @@ if (navbar) {
   };
 
   spriteImages.forEach((image, index) => {
+    const isFromCache = preloadedCache.has(spriteSrcs[index]);
     const markReady = async () => {
-      try {
-        if (typeof image.decode === "function") await image.decode();
-      } catch {
-        // decode() can reject when the browser has already completed decode; load is enough.
+      // 已从预加载器缓存的图片无需再次 decode
+      if (!isFromCache) {
+        try {
+          if (typeof image.decode === "function") await image.decode();
+        } catch {
+          // decode() can reject when the browser has already completed decode; load is enough.
+        }
       }
       if ("createImageBitmap" in window) {
         try {
@@ -983,27 +1022,29 @@ if (logoWall) {
 
   let hasPlayedInCurrentViewport = false;
   let hasPlayedOnceOnMobile = false;
+  let isAnimating = false;
   const observer = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
         const isMobileViewport = window.innerWidth <= 768;
         if (entry.isIntersecting) {
+          // 如果正在动画中，不要重复触发
+          if (isAnimating) return;
+
           // 移动端：只播放一次，后续再次进入不重播。
           if (isMobileViewport) {
             if (hasPlayedOnceOnMobile) return;
             hasPlayedOnceOnMobile = true;
+            isAnimating = true;
             restartLogoPhysics();
             return;
           }
 
-          // 桌面端：每次离开后再次进入都重播。
+          // 桌面端：只播放一次，后续再次进入不重播。
           if (!hasPlayedInCurrentViewport) {
             hasPlayedInCurrentViewport = true;
+            isAnimating = true;
             restartLogoPhysics();
-          }
-        } else {
-          if (!isMobileViewport) {
-            hasPlayedInCurrentViewport = false;
           }
         }
       });
