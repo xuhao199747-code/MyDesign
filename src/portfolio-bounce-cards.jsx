@@ -6,18 +6,16 @@ const mount = document.getElementById("portfolioBounceCardsRoot");
 
 const images = [
   "./imag/photo1.png",
-  "./imag/Header Imagebg.webp",
   "./imag/portfolio-cards1.webp",
   "./imag/Image2.webp",
   "./imag/photo2.png",
 ];
 
 const transformStyles = [
-  "rotate(5deg) translate(-300px)",
-  "rotate(0deg) translate(-200px)",
-  "rotate(-5deg)",
-  "rotate(5deg) translate(200px)",
-  "rotate(-5deg) translate(300px)",
+  "rotate(5deg) translate(-240px)",
+  "rotate(-4deg) translate(-80px)",
+  "rotate(4deg) translate(80px)",
+  "rotate(-5deg) translate(240px)",
 ];
 
 if (mount) {

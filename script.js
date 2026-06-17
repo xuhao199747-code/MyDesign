@@ -9,7 +9,65 @@
  * 5. GSAP Flair — 鼠标移动拖尾小图动画（需先加载 gsap.min.js）
  * 6. 工作经历区悬停预览 — GreenSock quickTo + autoAlpha（.works-swipe-section，CodePen PwqrzeG）
  * 7. 作品区无限卡片 — Draggable + 横向滚轮（无 pin，CodePen RwKwLWK 变体）
+ * 8. 首屏装饰文字鼠标跟随效果
  */
+
+// =============================================================================
+// 模块 0：首屏装饰文字鼠标跟随效果
+// =============================================================================
+(function initHeroTextFloat() {
+  const heroTexts = document.querySelectorAll(".hero-nav__text");
+  if (!heroTexts.length) return;
+
+  let frameId = null;
+  const textData = new Map();
+
+  heroTexts.forEach((text) => {
+    textData.set(text, {
+      targetX: 0,
+      targetY: 0,
+      currentX: 0,
+      currentY: 0,
+    });
+  });
+
+  const handleMouseMove = (e) => {
+    heroTexts.forEach((text) => {
+      const rect = text.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+
+      const data = textData.get(text);
+      data.targetX = (e.clientX - centerX) * 0.03;
+      data.targetY = (e.clientY - centerY) * 0.03;
+    });
+
+    if (!frameId) {
+      frameId = requestAnimationFrame(animate);
+    }
+  };
+
+  const animate = () => {
+    let needsUpdate = false;
+
+    heroTexts.forEach((text) => {
+      const data = textData.get(text);
+      const dx = data.targetX - data.currentX;
+      const dy = data.targetY - data.currentY;
+
+      if (Math.abs(dx) > 0.05 || Math.abs(dy) > 0.05) {
+        data.currentX += dx * 0.1;
+        data.currentY += dy * 0.1;
+        text.style.transform = `translate(${data.currentX}px, ${data.currentY}px)`;
+        needsUpdate = true;
+      }
+    });
+
+    frameId = needsUpdate ? requestAnimationFrame(animate) : null;
+  };
+
+  document.addEventListener("mousemove", handleMouseMove, { passive: true });
+})();
 
 // =============================================================================
 // 模块 1：导航菜单（.menu-toggle / .menu-wrap）
@@ -79,6 +137,291 @@ if (navbar) {
   updateNavbarScrolledState();
   window.addEventListener("scroll", updateNavbarScrolledState, { passive: true });
 }
+
+// =============================================================================
+// 模块 1.1：首屏角色转头 — 基于视频 contact sheet 校准帧，不做线性角度映射
+// =============================================================================
+(function initHeadTracker() {
+  const tracker = document.querySelector("[data-head-tracker]");
+  if (!tracker) return;
+  const canvas = tracker.querySelector(".head-tracker__sprite");
+  if (!(canvas instanceof HTMLCanvasElement)) return;
+  const context = canvas.getContext("2d", { alpha: false });
+  if (!context) return;
+
+  const FRAME_COUNT = 240;
+  const FRAME_COLS = 12;
+  const FRAMES_PER_SHEET = 60;
+  const FRAME_WIDTH = 1280;
+  const FRAME_HEIGHT = 720;
+  const FRONT_FRAME = 0;
+  const CENTER_DEAD_ZONE = 54;
+  const LOOK_CENTER_X = 0.5;
+  const LOOK_CENTER_Y = 0.56;
+  const ANGLE_KEYS = [
+    { angle: 0, frame: 60, direction: "right", videoFrame: 150 },
+    { angle: 45, frame: 75, direction: "right-down", videoFrame: 187 },
+    { angle: 90, frame: 94, direction: "down", videoFrame: 237 },
+    { angle: 135, frame: 114, direction: "left-down", videoFrame: 287 },
+    { angle: 180, frame: 135, direction: "left", videoFrame: 338 },
+    { angle: 225, frame: 156, direction: "left-up", videoFrame: 391 },
+    { angle: 270, frame: 166, direction: "up", videoFrame: 416 },
+    { angle: 315, frame: 45, direction: "right-up", videoFrame: 112 },
+    { angle: 360, frame: 60, direction: "right", videoFrame: 150 },
+  ];
+  let displayedFrame = FRONT_FRAME;
+  let targetFrame = FRONT_FRAME;
+  let targetDirection = "center";
+  let pointerRafId = 0;
+  let motionRafId = 0;
+  let queuedPoint = null;
+  let hasPaintedFrame = false;
+  const spriteImages = [
+    "./imag/sprite.webp",
+    "./imag/sprite_2.webp",
+    "./imag/sprite_3.webp",
+    "./imag/sprite_4.webp",
+  ].map((src) => {
+    const image = new Image();
+    image.decoding = "async";
+    image.src = src;
+    return image;
+  });
+  const spriteReady = new Set();
+  const spriteBitmaps = new Map();
+  const prewarmCanvas = document.createElement("canvas");
+  prewarmCanvas.width = FRAME_WIDTH;
+  prewarmCanvas.height = FRAME_HEIGHT;
+  const prewarmContext = prewarmCanvas.getContext("2d", { alpha: false });
+  context.fillStyle = "#ffffff";
+  context.fillRect(0, 0, canvas.width, canvas.height);
+
+  const runWhenIdle = (callback) => {
+    if ("requestIdleCallback" in window) {
+      window.requestIdleCallback(callback, { timeout: 1200 });
+      return;
+    }
+    window.setTimeout(callback, 120);
+  };
+
+  const prewarmFrame = (frame) => {
+    if (!prewarmContext) return;
+    const sheetIndex = Math.floor(frame / FRAMES_PER_SHEET);
+    const sheetFrame = frame % FRAMES_PER_SHEET;
+    const spriteSource = spriteBitmaps.get(sheetIndex) || spriteImages[sheetIndex];
+    if (!spriteSource || !spriteReady.has(sheetIndex)) return;
+    prewarmContext.drawImage(
+      spriteSource,
+      (sheetFrame % FRAME_COLS) * FRAME_WIDTH,
+      Math.floor(sheetFrame / FRAME_COLS) * FRAME_HEIGHT,
+      FRAME_WIDTH,
+      FRAME_HEIGHT,
+      0,
+      0,
+      FRAME_WIDTH,
+      FRAME_HEIGHT
+    );
+  };
+
+  const normalizeFrame = (frame) => {
+    return ((Math.round(frame) % FRAME_COUNT) + FRAME_COUNT) % FRAME_COUNT;
+  };
+
+  const interpolateFrame = (fromFrame, toFrame, t) => {
+    let delta = toFrame - fromFrame;
+    if (delta > FRAME_COUNT / 2) delta -= FRAME_COUNT;
+    if (delta < -FRAME_COUNT / 2) delta += FRAME_COUNT;
+    return normalizeFrame(fromFrame + delta * t);
+  };
+
+  const signedFrameDelta = (fromFrame, toFrame) => {
+    let delta = toFrame - fromFrame;
+    if (delta > FRAME_COUNT / 2) delta -= FRAME_COUNT;
+    if (delta < -FRAME_COUNT / 2) delta += FRAME_COUNT;
+    return delta;
+  };
+
+  const pickCalibratedFrame = (angle) => {
+    for (let i = 0; i < ANGLE_KEYS.length - 1; i += 1) {
+      const from = ANGLE_KEYS[i];
+      const to = ANGLE_KEYS[i + 1];
+      if (angle < from.angle || angle > to.angle) continue;
+      const t = (angle - from.angle) / (to.angle - from.angle || 1);
+      const frame = interpolateFrame(from.frame, to.frame, t);
+      return {
+        frame,
+        direction:
+          t < 0.34 ? from.direction : t > 0.66 ? to.direction : `${from.direction}-to-${to.direction}`,
+      };
+    }
+    return ANGLE_KEYS[0];
+  };
+
+  const setFrame = (frame, direction) => {
+    displayedFrame = normalizeFrame(frame);
+    targetFrame = displayedFrame;
+    targetDirection = direction;
+    renderFrame(displayedFrame, direction);
+  };
+
+  const renderFrame = (frame, direction) => {
+    tracker.style.setProperty("--head-frame", String(frame));
+    tracker.style.setProperty("--head-col", String(frame % FRAME_COLS));
+    tracker.style.setProperty("--head-row", String(Math.floor(frame / FRAME_COLS)));
+    tracker.dataset.frame = String(frame);
+    tracker.dataset.direction = direction;
+    drawFrame(frame);
+  };
+
+  const startMotionLoop = () => {
+    if (motionRafId) return;
+    motionRafId = window.requestAnimationFrame(function tick() {
+      const delta = signedFrameDelta(displayedFrame, targetFrame);
+      if (delta === 0) {
+        motionRafId = 0;
+        renderFrame(targetFrame, targetDirection);
+        return;
+      }
+
+      const stepSize = Math.min(2, Math.max(1, Math.ceil(Math.abs(delta) / 42)));
+      const step = Math.sign(delta) * stepSize;
+      displayedFrame = normalizeFrame(displayedFrame + step);
+      if (Math.abs(delta) <= stepSize) displayedFrame = targetFrame;
+      renderFrame(displayedFrame, targetDirection);
+      motionRafId = window.requestAnimationFrame(tick);
+    });
+  };
+
+  const setTargetFrame = (frame, direction) => {
+    const nextTarget = normalizeFrame(frame);
+    if (nextTarget === targetFrame && targetDirection === direction) return;
+    targetFrame = nextTarget;
+    targetDirection = direction;
+    startMotionLoop();
+  };
+
+  const drawFrame = (frame) => {
+    const sheetIndex = Math.floor(frame / FRAMES_PER_SHEET);
+    const sheetFrame = frame % FRAMES_PER_SHEET;
+    const spriteSource = spriteBitmaps.get(sheetIndex) || spriteImages[sheetIndex];
+    if (!spriteSource || !spriteReady.has(sheetIndex)) return false;
+    const col = sheetFrame % FRAME_COLS;
+    const row = Math.floor(sheetFrame / FRAME_COLS);
+    context.drawImage(
+      spriteSource,
+      col * FRAME_WIDTH,
+      row * FRAME_HEIGHT,
+      FRAME_WIDTH,
+      FRAME_HEIGHT,
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    );
+    if (!hasPaintedFrame) {
+      hasPaintedFrame = true;
+      tracker.classList.add("is-ready");
+    }
+    return true;
+  };
+
+  const updateFromPoint = (clientX, clientY) => {
+    const rect = tracker.getBoundingClientRect();
+    const centerX = rect.left + rect.width * LOOK_CENTER_X;
+    const centerY = rect.top + rect.height * LOOK_CENTER_Y;
+    const dx = clientX - centerX;
+    const dy = clientY - centerY;
+    const distance = Math.hypot(dx, dy);
+
+    if (distance < CENTER_DEAD_ZONE) {
+      setTargetFrame(FRONT_FRAME, "center");
+      return;
+    }
+
+    const angle = (Math.atan2(dy, dx) * 180) / Math.PI;
+    const normalizedAngle = (angle + 360) % 360;
+    const key = pickCalibratedFrame(normalizedAngle);
+    setTargetFrame(key.frame, key.direction);
+  };
+
+  window.HEAD_TRACKER_ANGLE_KEYS = ANGLE_KEYS;
+  window.HEAD_TRACKER_TEST = {
+    setFrame,
+    updateFromPoint,
+    setTargetFrame,
+    getState: () => ({
+      frame: Number(tracker.dataset.frame),
+      direction: tracker.dataset.direction,
+      targetFrame,
+      targetDirection,
+    }),
+  };
+
+  spriteImages.forEach((image, index) => {
+    const markReady = async () => {
+      try {
+        if (typeof image.decode === "function") await image.decode();
+      } catch {
+        // decode() can reject when the browser has already completed decode; load is enough.
+      }
+      if ("createImageBitmap" in window) {
+        try {
+          spriteBitmaps.set(index, await createImageBitmap(image));
+        } catch {
+          spriteBitmaps.delete(index);
+        }
+      }
+      if (prewarmContext) {
+        const spriteSource = spriteBitmaps.get(index) || image;
+        prewarmContext.drawImage(
+          spriteSource,
+          0,
+          0,
+          FRAME_WIDTH,
+          FRAME_HEIGHT,
+          0,
+          0,
+          FRAME_WIDTH,
+          FRAME_HEIGHT
+        );
+      }
+      spriteReady.add(index);
+      runWhenIdle(() => {
+        const start = index * FRAMES_PER_SHEET;
+        [0, 15, 30, 45, 59].forEach((offset) => {
+          const frame = start + offset;
+          if (frame < FRAME_COUNT) prewarmFrame(frame);
+        });
+      });
+      drawFrame(displayedFrame);
+    };
+    image.addEventListener("load", markReady, { once: true });
+    if (image.complete) markReady();
+  });
+
+  setFrame(FRONT_FRAME, "center");
+  const queueUpdateFromPoint = (clientX, clientY) => {
+    queuedPoint = { clientX, clientY };
+    if (pointerRafId) return;
+    pointerRafId = window.requestAnimationFrame(() => {
+      pointerRafId = 0;
+      if (!queuedPoint) return;
+      updateFromPoint(queuedPoint.clientX, queuedPoint.clientY);
+      queuedPoint = null;
+    });
+  };
+
+  window.addEventListener(
+    "pointermove",
+    (event) => queueUpdateFromPoint(event.clientX, event.clientY),
+    { passive: true }
+  );
+  window.addEventListener(
+    "mousemove",
+    (event) => queueUpdateFromPoint(event.clientX, event.clientY),
+    { passive: true }
+  );
+})();
 
 // =============================================================================
 // 模块 1.5：标题悬停 — 字符弹性偏移与换色（避开首屏组合标题）
@@ -280,41 +623,6 @@ document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
     });
   });
 });
-
-// =============================================================================
-// 模块 2.5：首屏小视频 — 初次与每次回到视口都播放一次
-// =============================================================================
-const heroBadgeVideo = document.querySelector(".hero-img2-video");
-
-if (heroBadgeVideo) {
-  let hasPlayedInCurrentViewport = false;
-
-  const playHeroBadgeVideo = () => {
-    heroBadgeVideo.currentTime = 0;
-    const playPromise = heroBadgeVideo.play();
-    if (playPromise && typeof playPromise.catch === "function") {
-      playPromise.catch(() => {});
-    }
-  };
-
-  const heroBadgeObserver = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          if (!hasPlayedInCurrentViewport) {
-            hasPlayedInCurrentViewport = true;
-            playHeroBadgeVideo();
-          }
-        } else {
-          hasPlayedInCurrentViewport = false;
-        }
-      });
-    },
-    { threshold: 0.55 }
-  );
-
-  heroBadgeObserver.observe(heroBadgeVideo);
-}
 
 // =============================================================================
 // 模块 3：技能 Logo 墙 — 2D 简易物理（重力 + 边界 + 粒子碰撞）

@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Great+Vibes&display=swap"
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Great+Vibes&family=Orbitron:wght@400;500;600;700;800;900&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="./styles.css" />
@@ -96,45 +96,34 @@
         </nav>
     </header>
     <main>
-      <!-- 内容区域1：首屏；≤1200px 用整图 Header Imagebg，更宽视口用 hero-scale 排版 -->
-      <section id="home" class="container hero">
-        <div class="hero-banner-mobile">
-          <img
-            src="./imag/Header Imagebg.webp"
-            alt="DESIGN MORE HUMANIZED"
-            decoding="async"
-          />
-        </div>
-        <div class="hero-scale">
-        <div class="hero-in">
-          <div class="r1">
-            <img src="./imag/Header Image1.webp" alt="" />
-            <p>DES</p>
-            <div class="hero-img2-video-wrap" aria-hidden="true">
-              <video
-                class="hero-img2-video"
-                src="./imag/Header Image2.mp4"
-                autoplay
-                muted
-                playsinline
-                preload="auto"
-              ></video>
-            </div>
-            <p>GN</p>
-            <img src="./imag/Header Image3.webp" alt="" />
-          </div>
-          <div class="r2">
-            <p>M</p>
-            <div class="sw">
-              <input type="checkbox" id="mr" />
-              <label for="mr" aria-label="装饰开关"></label>
-            </div>
-            <p>RE</p>
-          </div>
-          <div class="r3">
-            <p>HUMANIZED</p>
+      <!-- 内容区域0：角色特写首屏；鼠标方向控制转头 -->
+      <section id="home" class="head-hero" aria-label="角色特写首屏">
+        <div
+          class="head-tracker"
+          data-head-tracker
+          data-frame="0"
+          data-direction="center"
+          aria-label="根据鼠标方向转头的角色"
+        >
+          <div class="head-tracker__stage">
+            <img
+              class="head-tracker__poster"
+              src="./imag/frame_front.webp"
+              alt=""
+              decoding="async"
+              aria-hidden="true"
+            />
+            <canvas
+              class="head-tracker__sprite"
+              width="1280"
+              height="720"
+              aria-hidden="true"
+            ></canvas>
           </div>
         </div>
+        <div class="hero-nav" aria-label="首屏装饰文字">
+          <span class="hero-nav__text hero-nav__text--left">WORKS</span>
+          <span class="hero-nav__text hero-nav__text--right">EXHIBITIONS</span>
         </div>
       </section>
 
@@ -249,17 +238,6 @@
               class="portfolio-featured__card"
               data-featured-card
               data-index="1"
-              data-title="Header"
-              data-href="./imag/Header Imagebg.webp"
-              aria-label="查看 Header"
-            >
-              <img src="./imag/Header Imagebg.webp" alt="Header 项目" />
-            </button>
-            <button
-              type="button"
-              class="portfolio-featured__card"
-              data-featured-card
-              data-index="2"
               data-title="Profile"
               data-href="./imag/photo1.png"
               aria-label="查看 Profile"
@@ -270,7 +248,7 @@
               type="button"
               class="portfolio-featured__card"
               data-featured-card
-              data-index="3"
+              data-index="2"
               data-title="About"
               data-href="./imag/Image2.webp"
               aria-label="查看 About"

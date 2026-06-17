@@ -44,6 +44,7 @@ img {
 body {
   --title-font: "Luckiest Guy Local", "Archivo Black Local", "DM Sans",
     "PingFang SC", "Microsoft YaHei", sans-serif;
+  --sprite-stage-bg: #ffffff;
   --screen-module-height: 100svh;
   --screen-module-pad-y: 80px;
   --module-title-gap: 64px;
@@ -269,241 +270,104 @@ body.is-click-surprise-active *::selection {
   border-radius: 8px;
   padding: 0;
 }
-/* 内容区域1 #home：与下方区块间距只设 margin-bottom；大模块间距 160px（小屏见 max-width:768px） */
-.hero {
-  box-sizing: border-box;
+.head-hero {
   position: relative;
   width: 100%;
-  height: var(--screen-module-height);
-  padding-top: var(--screen-module-pad-y);
-  padding-bottom: var(--screen-module-pad-y);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  margin-top: 0;
-  margin-bottom: 0;
+  height: 100svh;
+  min-height: 620px;
+  margin-top: -64px;
+  overflow: hidden;
+  background: var(--sprite-stage-bg);
+  isolation: isolate;
 }
 
-/* 首屏整图：默认隐藏；视口 ≤768px（手机）显示，PC 保持排版版 */
-.hero-banner-mobile {
-  display: none;
-  width: 100%;
-  max-width: 1200px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.hero-banner-mobile img {
-  width: 100%;
-  height: auto;
-  display: block;
-}
-
-/* 大屏：与原先 .hero-in 同宽 */
-.hero-scale {
-  width: 100%;
-  max-width: 1200px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.hero-in {
-  position: relative;
-  width: 100%;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.hero .r1,
-.hero .r2,
-.hero .r3 {
-  display: flex;
-  align-items: center;
-}
-
-.hero .r1 {
-  flex-wrap: nowrap;
-  margin-left: 160px;
-  gap: 90px;
-  position: relative;
-}
-
-.hero .r2 {
-  width: 100%;
-  justify-content: center;
-  align-items: center;
-  gap: 0;
-}
-
-/* 大字在底层，装饰图压在上面 */
-.hero .r1 p {
+.head-tracker {
+  --head-frame: 0;
+  --head-frame-count: 240;
+  --head-sprite-cols: 12;
+  --head-sprite-rows: 20;
+  --head-col: 0;
+  --head-row: 0;
   position: relative;
   z-index: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: auto;
+  contain: layout paint;
 }
 
-/* 装饰图叠在版面上方时勿拦截开关点击 */
-.hero .r1 img {
-  pointer-events: none;
-  z-index: 2;
-}
-
-.hero .r3 {
-  margin-top: -8px;
-  justify-content: center;
-}
-
-.hero .r1 p,
-.hero .r2 p {
-  margin: 0;
-  font-family: "Archivo Black Local", "Luckiest Guy Local", "DM Sans", "PingFang SC", "Microsoft YaHei", sans-serif;
-  font-weight: 400;
-  text-transform: uppercase;
-  line-height: 0.9;
-  letter-spacing: 0;
-  color: #0F172A;
-  font-size: clamp(84px, 16vw, 220px);
-}
-
-.hero .r3 p {
-  margin: 0;
-  font-family: "Archivo Black Local", "Luckiest Guy Local", "DM Sans", "PingFang SC", "Microsoft YaHei", sans-serif;
-  font-weight: 400;
-  text-transform: uppercase;
-  line-height: 1;
-  letter-spacing: 0;
-  font-size: 165px;
-  color: #ff4d00;
-  
-}
-
-.hero .r1 img:nth-of-type(1) {
-  position: absolute;
-  width: 400px;
-  top: -40px;
-  left: -250px;
-}
-
-.hero .r1 .hero-img2-video-wrap {
-  position: absolute;
-  top: 40px;
-  right: 360px;
-  width: 69px;
-  height: 148px;
-  overflow: hidden;
-  border-radius: 200px;
-  border: 1px solid #0F172A;
-  z-index: 3;
-  pointer-events: none;
-}
-
-.hero .r1 .hero-img2-video {
+.head-tracker__stage {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
+  overflow: hidden;
+  background: var(--sprite-stage-bg);
+  transform: translateZ(0);
+}
+
+.head-tracker__poster,
+.head-tracker__sprite {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: max(100vw, 177.778svh);
+  height: max(100svh, 56.25vw);
+  transform: translate(-50%, -50%);
+  display: block;
+}
+
+.head-tracker__poster {
   object-fit: cover;
   object-position: center;
+  z-index: 0;
 }
 
-.hero .r1 img:nth-of-type(2) {
-  width: 280px;
+.head-tracker__sprite {
+  z-index: 1;
+  image-rendering: auto;
+  opacity: 0;
+  transition: opacity 120ms ease;
+  will-change: contents;
+}
+
+.hero-nav {
   position: absolute;
-  top: -100px;
-  left: 670px;
-  height: auto;
-}
-
-/* Uiverse 开关：.sw 内 input + label，#mr 控制状态 */
-/* 仅抬高开关自身，避免整行 r2 盖掉上一行装饰 */
-.hero .sw {
-  position: relative;
-  z-index: 4;
+  inset: 0;
+  z-index: 20;
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  justify-content: center;
-  align-self: center;
-  pointer-events: auto;
-  width: clamp(360px, 42vw, 560px);
-  max-width: 540px;
-  flex: 0 1 auto;
-  /* 光学居中：M 与 RE 字宽不等、大写重心略偏上，用边距微调整行观感 */
-  margin:12px 4px 0 8px;
-}
-
-.hero .sw input {
-  display: none;
-}
-
-.hero .sw label {
-  height: 150px;
+  pointer-events: none;
   width: 100%;
-  box-sizing: border-box;
-  background-color: #ffffff;
-  border-radius: 200px;
-  border: 40px solid #0F172A;
-  box-shadow: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  position: relative;
-  -webkit-transition: -webkit-transform 0.4s;
-  transition: transform 0.4s;
-  flex-shrink: 0;
+  max-width: 1200px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0 20px;
 }
 
-.hero .sw label:hover {
-  transform: rotate(-1deg);
+.hero-nav__text {
+  font-family: "Orbitron", sans-serif;
+  font-size: clamp(2rem, 8vw, 4rem);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  line-height: 1;
+  color: #ffffff;
+  mix-blend-mode: difference;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
-.hero .sw #mr:checked ~ label:hover {
-  transform: rotate(1deg);
+.hero-nav__text--left {
+  text-align: left;
 }
 
-/* 必须包含 .hero .sw，否则优先级会低于后面的 .hero .sw label::before，选中态 left 不生效 */
-.hero .sw #mr:checked ~ label::before {
-  left: calc(100% - 66px - 17px);
-  background-color: #0f172a;
-  background-image: linear-gradient(315deg, #0f172a 0%, #334155 78%);
-  -webkit-transition: left 0.45s cubic-bezier(0.34, 1.2, 0.64, 1);
-  transition: left 0.45s cubic-bezier(0.34, 1.2, 0.64, 1);
-  top: 0;
-  bottom: 0;
-  margin-top: auto;
-  margin-bottom: auto;
-  transform: none;
+.hero-nav__text--right {
+  text-align: right;
+  margin-top: 380px;
 }
 
-.hero .sw label::before {
-  position: absolute;
-  content: "";
-  height: 50px;
-  width: 50px;
-  border-radius: 50%;
-  background-color: #000000;
-  background-image: linear-gradient(
-    130deg,
-    #757272 10%,
-    #ffffff 11%,
-    #726f6f 62%
-  );
-  left: 30px;
-  top: 0;
-  bottom: 0;
-  margin-top: auto;
-  margin-bottom: auto;
-  transform: none;
-  -webkit-box-shadow:
-    0 2px 1px rgba(0, 0, 0, 0.3),
-    10px 10px 10px rgba(0, 0, 0, 0.3);
-  box-shadow:
-    0 2px 1px rgba(0, 0, 0, 0.3),
-    10px 10px 10px rgba(0, 0, 0, 0.3);
-  -webkit-transition: left 0.45s cubic-bezier(0.34, 1.2, 0.64, 1);
-  transition: left 0.45s cubic-bezier(0.34, 1.2, 0.64, 1);
+.head-tracker.is-ready .head-tracker__sprite {
+  opacity: 1;
 }
 
 .ribbons-cursor-layer {
@@ -715,15 +579,6 @@ body.is-click-surprise-active *::selection {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero .sw label,
-  .hero .sw label::before {
-    transition: none;
-  }
-
-  .hero .sw label:hover,
-  .hero .sw #mr:checked ~ label:hover {
-    transform: none;
-  }
 }
 
 /* 锚点跳转时预留顶部导航高度，避免被遮挡 */
@@ -736,7 +591,7 @@ body.is-click-surprise-active *::selection {
 #contact {
   scroll-margin-top: 96px;
 }
-/* 内容区域2 #about：顶不外推（避免与 .hero 的 margin-bottom 合并）；间距见 margin-bottom */
+/* 内容区域2 #about：介绍与技能 */
 .section-two {
   box-sizing: border-box;
   display: flex;
@@ -1876,14 +1731,6 @@ body.is-click-surprise-active *::selection {
    * 手机端：模块垂直间距随视口收紧（PC 仍为 160px，仅在此断点生效）
    * 勿在 html/body 设 overflow-x: hidden —— 会破坏 position: sticky 的顶栏。
    */
-  .hero-banner-mobile {
-    display: block;
-  }
-
-  .hero-scale {
-    display: none;
-  }
-
   html {
     --section-gap-y-sm: clamp(48px, 11vw, 88px);
     scroll-padding-top: max(
@@ -2015,21 +1862,16 @@ body.is-click-surprise-active *::selection {
     box-sizing: border-box;
   }
 
-  /*
-   * 内容区域1：顶距交给 padding，避免与 margin 叠成双份空白（首屏整图见 .hero-banner-mobile）
-   */
-  .hero {
-    margin-top: 0;
-    margin-bottom: clamp(32px, 8vw, 56px);
-    min-height: 0;
-    padding-left: 0;
-    padding-right: 0;
-    /* main 已提供顶栏占位，这里只保留内容呼吸间距，避免首屏出现过大留白 */
-    padding-top: clamp(8px, 3vw, 20px);
-    padding-bottom: max(16px, env(safe-area-inset-bottom, 0));
-    justify-content: flex-start;
-    overflow-x: hidden;
-    box-sizing: border-box;
+  .head-hero {
+    min-height: 560px;
+    margin-top: calc(
+      (env(safe-area-inset-top, 0px) + 48px + clamp(32px, 6vw, 56px)) * -1
+    );
+  }
+
+  .head-tracker {
+    width: 100%;
+    height: 100%;
   }
 
   .motion3d-section {
