@@ -29,11 +29,10 @@ export default function BounceCards({
       
       if (isMobile) {
         const mobileTransformStyles = [
-          "rotate(5deg) translate(-130px)",
-          "rotate(0deg) translate(-65px)",
-          "rotate(-5deg)",
-          "rotate(5deg) translate(65px)",
-          "rotate(-5deg) translate(130px)",
+          "rotate(5deg) translate(-120px)",
+          "rotate(-4deg) translate(-40px)",
+          "rotate(4deg) translate(40px)",
+          "rotate(-5deg) translate(120px)",
         ];
         setCurrentTransformStyles(mobileTransformStyles);
       } else {
@@ -103,6 +102,29 @@ export default function BounceCards({
 
     return () => ctx.revert();
   }, [animationStagger, easeType, animationDelay]);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return undefined;
+
+    const preventBrowserGesture = (e) => {
+      e.preventDefault();
+    };
+
+    const preventTouchMove = (e) => {
+      e.preventDefault();
+    };
+
+    container.addEventListener("touchstart", preventBrowserGesture, { passive: false });
+    container.addEventListener("touchmove", preventTouchMove, { passive: false });
+    container.addEventListener("gesturestart", preventBrowserGesture, { passive: false });
+
+    return () => {
+      container.removeEventListener("touchstart", preventBrowserGesture);
+      container.removeEventListener("touchmove", preventTouchMove);
+      container.removeEventListener("gesturestart", preventBrowserGesture);
+    };
+  }, []);
 
   const getNoRotationTransform = (transformStr) => {
     const hasRotate = /rotate\([\s\S]*?\)/.test(transformStr);
@@ -243,19 +265,15 @@ export default function BounceCards({
     });
   }, [currentTransformStyles, images]);
 
-  const isMobileDevice = typeof window !== 'undefined' && window.innerWidth <= 768;
-
   return (
     <div
       className={`bounceCardsContainer ${className}`}
       ref={containerRef}
       style={{
         position: "relative",
-        width: isMobileDevice ? "100%" : containerWidth,
-        height: isMobileDevice ? "auto" : containerHeight,
-        aspectRatio: isMobileDevice ? "1.6" : undefined,
-        marginTop: isMobileDevice ? "1rem" : undefined,
-        marginBottom: isMobileDevice ? "0.5rem" : undefined,
+        width: "100%",
+        height: "auto",
+        aspectRatio: "1.4",
       }}
     >
       {images.map((src, idx) => (
@@ -264,7 +282,8 @@ export default function BounceCards({
           className={`card card-${idx}`}
           style={{
             transform: `translate(-50%, -50%) ${currentTransformStyles[idx] ?? "none"}`,
-            top: isMobileDevice ? "45%" : "65%",
+            top: "50%",
+            left: "50%",
           }}
           onMouseEnter={() => pushSiblings(idx)}
           onMouseMove={(event) => updateCardTilt(event, idx)}

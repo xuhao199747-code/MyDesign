@@ -373,6 +373,9 @@ if (navbar) {
   };
 
   const signedFrameDelta = (fromFrame, toFrame) => {
+    if (toFrame === FRONT_FRAME && fromFrame > FRONT_FRAME) {
+      return -fromFrame;
+    }
     let delta = toFrame - fromFrame;
     if (delta > FRAME_COUNT / 2) delta -= FRAME_COUNT;
     if (delta < -FRAME_COUNT / 2) delta += FRAME_COUNT;
@@ -1575,11 +1578,15 @@ if (document.readyState === 'loading') {
   let isAnimating = false;
   let dragStartX = 0;
   let dragStartY = 0;
+  let initialActiveSlot = activeSlot;
+  let touchStartX = 0;
+  let touchStartY = 0;
   let isPointerDown = false;
   let dragMoved = false;
   let wheelResetTimer = null;
   let motionFrame = null;
   let stepFallbackTimer = null;
+  let gestureActiveTimer = null;
 
   const wrapIndex = (index) => (index + items.length) % items.length;
   const getSlotPitch = () => {
@@ -1808,8 +1815,62 @@ if (document.readyState === 'loading') {
     }
   });
 
+  const setFeaturedGestureActive = () => {
+    document.documentElement.classList.add("portfolio-featured-gesture-active");
+    if (gestureActiveTimer) {
+      window.clearTimeout(gestureActiveTimer);
+    }
+    gestureActiveTimer = window.setTimeout(() => {
+      document.documentElement.classList.remove("portfolio-featured-gesture-active");
+      gestureActiveTimer = null;
+    }, 700);
+  };
+
+  const clearFeaturedGestureActive = () => {
+    if (gestureActiveTimer) {
+      window.clearTimeout(gestureActiveTimer);
+      gestureActiveTimer = null;
+    }
+    if (!isPointerDown) {
+      document.documentElement.classList.remove("portfolio-featured-gesture-active");
+    }
+  };
+
+  root.addEventListener("pointerenter", setFeaturedGestureActive);
+  root.addEventListener("pointerleave", clearFeaturedGestureActive);
+  root.addEventListener("focusin", setFeaturedGestureActive);
+  root.addEventListener("focusout", clearFeaturedGestureActive);
+
+  root.addEventListener(
+    "touchstart",
+    (event) => {
+      if (event.touches.length !== 1) return;
+      setFeaturedGestureActive();
+      touchStartX = event.touches[0].clientX;
+      touchStartY = event.touches[0].clientY;
+    },
+    { passive: true }
+  );
+
+  root.addEventListener(
+    "touchmove",
+    (event) => {
+      if (event.touches.length !== 1) return;
+      const deltaX = event.touches[0].clientX - touchStartX;
+      const deltaY = event.touches[0].clientY - touchStartY;
+      const isHorizontalGesture =
+        Math.abs(deltaX) > 6 && Math.abs(deltaX) > Math.abs(deltaY);
+      if (isHorizontalGesture && event.cancelable) {
+        setFeaturedGestureActive();
+        event.preventDefault();
+      }
+    },
+    { passive: false }
+  );
+
   root.addEventListener("pointerdown", (event) => {
     isPointerDown = true;
+    setFeaturedGestureActive();
     dragMoved = false;
     dragStartX = event.clientX;
     dragStartY = event.clientY;
@@ -1833,6 +1894,7 @@ if (document.readyState === 'loading') {
   root.addEventListener("pointerup", (event) => {
     if (!isPointerDown) return;
     isPointerDown = false;
+    clearFeaturedGestureActive();
     document.body.classList.remove("portfolio-featured-dragging");
 
     const deltaX = event.clientX - dragStartX;
@@ -1856,35 +1918,37 @@ if (document.readyState === 'loading') {
   root.addEventListener("pointercancel", () => {
     isPointerDown = false;
     dragMoved = false;
+    clearFeaturedGestureActive();
     document.body.classList.remove("portfolio-featured-dragging");
   });
 
-  root.addEventListener(
-    "wheel",
-    (event) => {
-      if (isAnimating) {
-        event.preventDefault();
-        return;
-      }
+  const handleFeaturedWheel = (event) => {
+    const horizontalDelta =
+      Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : 0;
+    if (Math.abs(horizontalDelta) < 4 && !isAnimating) return;
 
-      const horizontalDelta =
-        Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : 0;
-      if (Math.abs(horizontalDelta) < 4) return;
+    setFeaturedGestureActive();
+    event.preventDefault();
+    event.stopPropagation();
 
-      event.preventDefault();
-      activeSlot += horizontalDelta / getSlotPitch();
-      root.classList.remove("is-animating", "is-rolling-left", "is-rolling-right");
-      centerActiveCell(false);
+    if (isAnimating) return;
 
-      if (wheelResetTimer) {
-        window.clearTimeout(wheelResetTimer);
-      }
-      wheelResetTimer = window.setTimeout(() => {
-        resetLoopPosition();
-      }, 140);
-    },
-    { passive: false }
-  );
+    activeSlot += horizontalDelta / getSlotPitch();
+    root.classList.remove("is-animating", "is-rolling-left", "is-rolling-right");
+    centerActiveCell(false);
+
+    if (wheelResetTimer) {
+      window.clearTimeout(wheelResetTimer);
+    }
+    wheelResetTimer = window.setTimeout(() => {
+      resetLoopPosition();
+    }, 140);
+  };
+
+  root.addEventListener("wheel", handleFeaturedWheel, {
+    passive: false,
+    capture: true,
+  });
 
   window.addEventListener("resize", () => centerActiveCell(false));
   centerActiveCell(false);

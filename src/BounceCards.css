@@ -3,6 +3,8 @@
   max-width: 100%;
   margin: 0 auto;
   isolation: isolate;
+  position: relative;
+  touch-action: none;
 }
 
 .bounceCardsContainer .card {
@@ -12,9 +14,9 @@
   position: absolute;
   left: 50%;
   top: 50%;
-  width: min(340px, 44vw);
+  width: min(430px, 28vw);
   aspect-ratio: 1;
-  border-radius: 18px;
+  border-radius: var(--radius-card, clamp(12px, 3vw, 18px));
   transform-origin: 50% 50%;
   cursor: pointer;
   will-change: transform;
@@ -61,16 +63,19 @@
 @media (max-width: 768px) {
   .bounceCardsContainer {
     width: 100% !important;
-    height: auto !important;
-    aspect-ratio: 1.2;
+    height: 260px !important;
+    min-height: 260px;
     margin-top: 1rem;
     margin-bottom: 0.5rem;
+    position: relative;
   }
   
   .bounceCardsContainer .card {
-    width: min(150px, 36vw);
-    border-radius: 12px;
-    box-shadow: 0 16px 40px rgba(15, 23, 42, 0.14);
-    top: 45%;
+    width: min(180px, 48vw);
+    border-radius: var(--radius-card, clamp(10px, 2.5vw, 14px));
+    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.12);
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
   }
 }
