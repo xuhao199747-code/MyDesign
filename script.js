@@ -219,13 +219,20 @@
 
   const FUZZ_RANGE = 21;
   const BASE_INTENSITY = 0.12;
-  const HOVER_INTENSITY = 0.35;
+  const HOVER_INTENSITY = 0.11;
   const LETTER_SPACING = 2;
   const FPS = 35;
   const GLITCH_MODE = true;
   const CLICK_EFFECT = true;
   const CLICK_BOOST_DURATION = 320;
   const LERP_FACTOR = 0.1;
+  const BURST_INTENSITY_MIN = 0.22;
+  const BURST_INTENSITY_MAX = 0.52;
+  const BURST_DURATION_MIN = 420;
+  const BURST_DURATION_MAX = 420;
+  const IDLE_PULSE_DURATION = 680;
+  const BURST_INTERVAL_MIN = 500;
+  const BURST_INTERVAL_MAX = 4200;
 
   let frameId = null;
   let renderFrameId = null;
@@ -252,6 +259,31 @@
       currentIntensity: BASE_INTENSITY,
       targetIntensity: BASE_INTENSITY,
       clickBoostUntil: 0,
+      burstUntil: 0,
+      burstIntensity: 0,
+      burstBias:
+        Math.random() > 0.5
+          ? 0.6 + Math.random() * 0.8
+          : -(0.6 + Math.random() * 0.8),
+      burstSliceBoost: 0,
+      burstTempo: 0.018 + Math.random() * 0.04,
+      burstVector: Math.random() > 0.5 ? 1 : -1,
+      idlePackage: null,
+      activePackage: null,
+      nextBurstAt:
+        performance.now() +
+        (text.classList.contains("hero-nav__text--left") ? 0 : 280) +
+        BURST_INTERVAL_MIN +
+        Math.random() * (BURST_INTERVAL_MAX - BURST_INTERVAL_MIN),
+      idlePulseStart: 0,
+      idlePulseDuration: 0,
+      idlePulsePeak: 0,
+      nextIdlePulseAt:
+        performance.now() +
+        3600 +
+        Math.random() * 5600 +
+        (text.classList.contains("hero-nav__text--left") ? 0 : 420),
+      isHovered: false,
       width: 0,
       height: 0,
       dpr: 1,
@@ -261,16 +293,19 @@
   const resizeCanvas = (text, data) => {
     const dpr = window.devicePixelRatio || 1;
     const style = getComputedStyle(text);
+    const isMobileViewport = window.innerWidth <= 768;
+    const edgePadding = isMobileViewport ? 6 : 10;
+    const overscan = isMobileViewport ? Math.ceil(FUZZ_RANGE * 0.75) : FUZZ_RANGE;
     const fallbackFontSize = parseFloat(style.fontSize) || 32;
-    const fallbackWidth =
+    const measuredLabelWidth =
       labelMeasureCache(data.label, style) +
-      LETTER_SPACING * Math.max(0, data.label.length - 1) +
-      FUZZ_RANGE * 2 +
-      28;
+      LETTER_SPACING * Math.max(0, data.label.length - 1);
+    const horizontalPadding = edgePadding * 2 + overscan;
+    const fallbackWidth = measuredLabelWidth + horizontalPadding;
     const fallbackHeight = Math.ceil(fallbackFontSize * 1.24) + 20;
     const rect = text.getBoundingClientRect();
-    const width = Math.max(1, Math.ceil(Math.max(rect.width + 64, fallbackWidth)));
-    const height = Math.max(1, Math.ceil(Math.max(rect.height + 32, fallbackHeight)));
+    const width = Math.max(1, Math.ceil(fallbackWidth));
+    const height = Math.max(1, Math.ceil(Math.max(rect.height + (isMobileViewport ? 12 : 32), fallbackHeight)));
     if (
       data.width === width &&
       data.height === height &&
@@ -297,6 +332,52 @@
     return probeCtx.measureText(label).width;
   };
 
+  const createEffectPackage = ({
+    drawHeight,
+    glyphWidth,
+    strength,
+    direction,
+    lineCount,
+    lineSpread,
+    shiftBase,
+    alphaBase,
+    key,
+  }) => {
+    const anchorY = Math.round(drawHeight * (0.16 + Math.random() * 0.58));
+    const scanlineClusterHeight = Math.max(
+      2,
+      Math.round(2 + strength * 3 + Math.random() * 2)
+    );
+    const lines = Array.from({ length: lineCount }, () => ({
+      yOffset: (Math.random() * 2 - 1) * lineSpread,
+      height: scanlineClusterHeight,
+      shiftOffset: (Math.random() * 2 - 1) * (1 + strength * 2.4),
+      alphaOffset: Math.random() * 0.035,
+    }));
+    const bands = Array.from({ length: Math.ceil(drawHeight / 2) }, () => ({
+      shiftOffset: (Math.random() * 2 - 1) * (0.8 + strength * 3.2),
+      yOffset: (Math.random() * 2 - 1) * (0.24 + strength * 0.8),
+      stretch: 1 + (Math.random() * 0.08 - 0.04) * (0.4 + strength * 0.6),
+      dropout: Math.random(),
+      alphaOffset: Math.random() * 0.08,
+    }));
+
+    return {
+      key,
+      anchorY,
+      shift: direction * shiftBase,
+      alpha: alphaBase,
+      ghostShiftA: direction * shiftBase * 0.74,
+      ghostShiftB: -direction * shiftBase * 0.52,
+      ghostAlphaA: alphaBase * 0.32,
+      ghostAlphaB: alphaBase * 0.18,
+      lines,
+      bands,
+      glyphWidth,
+      drawHeight,
+    };
+  };
+
   const drawFuzzyText = (text, data) => {
     if (!data.ctx) return;
 
@@ -304,18 +385,50 @@
 
     const { ctx, width, height, label } = data;
     const style = getComputedStyle(text);
+    const isMobileViewport = window.innerWidth <= 768;
+    const edgePadding = isMobileViewport ? 6 : 10;
+    const verticalPadding = isMobileViewport ? 8 : 10;
+    const now = performance.now();
+    if (!data.isHovered && now >= data.nextBurstAt) {
+      data.burstUntil =
+        now +
+        BURST_DURATION_MIN;
+      data.burstIntensity =
+        BURST_INTENSITY_MIN +
+        Math.pow(Math.random(), 0.65) *
+          (BURST_INTENSITY_MAX - BURST_INTENSITY_MIN);
+      data.burstBias =
+        Math.random() > 0.5
+          ? 0.45 + Math.random() * 1.35
+          : -(0.45 + Math.random() * 1.35);
+      data.burstSliceBoost = Math.random() * 1.1;
+      data.burstTempo = 0.012 + Math.random() * 0.065;
+      data.burstVector = Math.random() > 0.5 ? 1 : -1;
+      data.activePackage = null;
+      data.nextBurstAt =
+        data.burstUntil +
+        BURST_INTERVAL_MIN +
+        Math.pow(Math.random(), 1.3) *
+          (BURST_INTERVAL_MAX - BURST_INTERVAL_MIN) +
+        Math.random() * 1400;
+    }
+
+    const burstBoost = now < data.burstUntil ? data.burstIntensity : 0;
     const intensityBoost =
-      CLICK_EFFECT && performance.now() < data.clickBoostUntil ? 0.18 : 0;
+      CLICK_EFFECT && now < data.clickBoostUntil ? 0.22 : 0;
+    const burstActive = now < data.burstUntil;
+    const isActiveGlitch = data.isHovered || burstActive || intensityBoost > 0;
     const targetIntensity = Math.min(
-      0.58,
-      data.targetIntensity + intensityBoost
+      0.78,
+      data.targetIntensity + burstBoost + intensityBoost
     );
-    data.currentIntensity +=
-      (targetIntensity - data.currentIntensity) * 0.24;
+    data.currentIntensity = isActiveGlitch
+      ? targetIntensity
+      : data.currentIntensity + (targetIntensity - data.currentIntensity) * 0.16;
 
     ctx.clearRect(0, 0, width, height);
     ctx.save();
-    ctx.translate(16, 10);
+    ctx.translate(0, verticalPadding);
     ctx.font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
     ctx.textBaseline = "top";
     ctx.textAlign = "left";
@@ -327,6 +440,10 @@
     );
     const drawWidth = Math.ceil(glyphWidth + FUZZ_RANGE * 2 + 18);
     const drawHeight = Math.ceil(parseFloat(style.fontSize) * 1.12);
+    const isRightAligned = text.classList.contains("hero-nav__text--right");
+    const drawX = isRightAligned
+      ? Math.max(0, width - glyphWidth - edgePadding)
+      : edgePadding;
 
     const offscreen = document.createElement("canvas");
     offscreen.width = Math.max(1, Math.ceil(drawWidth * data.dpr));
@@ -344,37 +461,322 @@
     offCtx.fillStyle = "#ffffff";
     offCtx.fillText(label, 0, 0);
 
-    const sliceHeight = GLITCH_MODE ? 3 : 5;
+    const staticNoise = (seed) => {
+      const value = Math.sin(seed * 12.9898 + 78.233) * 43758.5453;
+      return value - Math.floor(value);
+    };
+
+    if (!isActiveGlitch) {
+      if (
+        now >= data.nextIdlePulseAt &&
+        now > data.idlePulseStart + data.idlePulseDuration
+      ) {
+        data.idlePulseStart = now;
+        data.idlePulseDuration = IDLE_PULSE_DURATION;
+        data.idlePulsePeak = 0.36 + Math.random() * 0.18;
+        data.nextIdlePulseAt =
+          now +
+          data.idlePulseDuration +
+          3400 +
+          Math.random() * 7200;
+        data.idlePackage = null;
+      }
+
+      const idleDamage =
+        now < data.idlePulseStart + data.idlePulseDuration
+          ? data.idlePulsePeak
+          : 0;
+
+      const combinedPulseActive = idleDamage > 0.16;
+      const assembledStrength = combinedPulseActive ? 0.16 : 0.022;
+      const assembledSliceHeight = 2;
+      if (
+        combinedPulseActive &&
+        (!data.idlePackage || data.idlePackage.key !== data.idlePulseStart)
+      ) {
+        data.idlePackage = createEffectPackage({
+          drawHeight,
+          glyphWidth,
+          strength: idleDamage,
+          direction: staticNoise(label.length * 41 + idleDamage * 100) > 0.5 ? 1 : -1,
+          lineCount: 2 + Math.round(idleDamage * 2),
+          lineSpread: 1 + idleDamage * 2.2,
+          shiftBase: 4 + idleDamage * 6,
+          alphaBase: 0.08 + idleDamage * 0.04,
+          key: data.idlePulseStart,
+        });
+      }
+      if (!combinedPulseActive) {
+        data.idlePackage = null;
+      }
+
+      for (let y = 0; y < drawHeight; y += assembledSliceHeight) {
+        const bandIndex = Math.floor(y / assembledSliceHeight);
+        const bandPackage = data.idlePackage?.bands[bandIndex] || null;
+        const bandHeight = Math.min(assembledSliceHeight, drawHeight - y);
+        const bandProgress = drawHeight <= assembledSliceHeight ? 0 : y / (drawHeight - assembledSliceHeight);
+        const seed = staticNoise(y + label.length * 17 + (isRightAligned ? 11 : 5));
+        const offsetX =
+          (seed - 0.5) *
+          (combinedPulseActive ? 1.6 + idleDamage * 2.8 : 0.18 + bandProgress * 0.14) +
+          (bandPackage?.shiftOffset || 0);
+        const offsetY =
+          combinedPulseActive
+            ? (staticNoise(y + 91) - 0.5) * (0.6 + idleDamage * 1.4) + (bandPackage?.yOffset || 0)
+            : 0;
+        const widthScale =
+          0.9985 -
+          assembledStrength * 0.02 +
+          staticNoise(y + 31) * (combinedPulseActive ? 0.012 : 0.004) +
+          ((bandPackage?.stretch || 1) - 1);
+        ctx.globalAlpha = combinedPulseActive
+          ? 0.86 + staticNoise(y + 93) * 0.06 + (bandPackage?.alphaOffset || 0)
+          : 0.96 + staticNoise(y + 93) * 0.03;
+        ctx.drawImage(
+          offscreen,
+          0,
+          Math.round(y * data.dpr),
+          Math.round(glyphWidth * data.dpr),
+          Math.round(bandHeight * data.dpr),
+          drawX + offsetX,
+          y + offsetY,
+          glyphWidth * widthScale,
+          bandHeight
+        );
+      }
+
+      if (combinedPulseActive) {
+        const fractureCount = 8 + Math.round(idleDamage * 10);
+        ctx.save();
+        ctx.globalCompositeOperation = "destination-out";
+        for (let i = 0; i < fractureCount; i++) {
+          const fractureWidth = Math.max(
+            2,
+            Math.round(glyphWidth * (0.008 + Math.random() * 0.022))
+          );
+          const fractureHeight = Math.max(
+            8,
+            Math.round(drawHeight * (0.28 + Math.random() * 0.34))
+          );
+          const fractureX = drawX + Math.round((glyphWidth - fractureWidth) * Math.random());
+          const fractureY = Math.round((drawHeight - fractureHeight) * Math.random());
+          ctx.fillRect(fractureX, fractureY, fractureWidth, fractureHeight);
+        }
+        ctx.restore();
+
+        const idlePackage = data.idlePackage;
+        for (let i = 0; i < idlePackage.lines.length; i++) {
+          const linePackage = idlePackage.lines[i];
+          const lineY = Math.max(
+            0,
+            Math.min(
+              drawHeight - 2,
+              Math.round(idlePackage.anchorY + linePackage.yOffset)
+            )
+          );
+          const lineHeight = linePackage.height;
+          const lineShift = idlePackage.shift + linePackage.shiftOffset;
+          ctx.globalAlpha = idlePackage.alpha + linePackage.alphaOffset;
+          ctx.drawImage(
+            offscreen,
+            0,
+            Math.round(lineY * data.dpr),
+            Math.round(glyphWidth * data.dpr),
+            Math.round(lineHeight * data.dpr),
+            drawX + lineShift,
+            lineY,
+            glyphWidth,
+            lineHeight
+          );
+        }
+
+        const ghostShift = idlePackage.ghostShiftA;
+        ctx.globalAlpha = idlePackage.ghostAlphaA;
+        ctx.drawImage(
+          offscreen,
+          0,
+          0,
+          Math.round(glyphWidth * data.dpr),
+          offscreen.height,
+          drawX + ghostShift,
+          0,
+          glyphWidth,
+          drawHeight
+        );
+        ctx.globalAlpha = idlePackage.ghostAlphaB;
+        ctx.drawImage(
+          offscreen,
+          0,
+          0,
+          Math.round(glyphWidth * data.dpr),
+          offscreen.height,
+          drawX + idlePackage.ghostShiftB,
+          0,
+          glyphWidth,
+          drawHeight
+        );
+      }
+
+      ctx.restore();
+      return;
+    }
+
+    const sliceHeight = GLITCH_MODE
+      ? burstActive || data.isHovered
+        ? 2
+        : 3
+      : 5;
     const maxOffset = FUZZ_RANGE * data.currentIntensity;
+    const disassembleStrength = data.isHovered
+      ? 1.28
+      : burstActive
+        ? 0.9
+        : 0.58;
+    const dropoutChance = data.isHovered
+      ? 0.34
+      : burstActive
+        ? 0.4
+        : 0.08;
+    const verticalScatter = data.isHovered ? 15 : burstActive ? 10 : 4;
+    const activeKey = data.isHovered ? `hover-${data.burstUntil}` : `burst-${data.burstUntil}`;
+    if (!data.activePackage || data.activePackage.key !== activeKey) {
+        data.activePackage = createEffectPackage({
+          drawHeight,
+          glyphWidth,
+          strength: disassembleStrength,
+          direction: data.burstVector,
+        lineCount: data.isHovered ? 3 : burstActive ? 4 : 2,
+        lineSpread: 1.1 + maxOffset * 0.045,
+        shiftBase: 4 + maxOffset * 0.28,
+        alphaBase: data.isHovered ? 0.05 : 0.07,
+        key: activeKey,
+      });
+    }
+    const activePackage = data.activePackage;
 
     for (let y = 0; y < drawHeight; y += sliceHeight) {
+      const bandIndex = Math.floor(y / sliceHeight);
+      const bandPackage = activePackage?.bands[bandIndex] || null;
       const bandHeight = Math.min(sliceHeight, drawHeight - y);
-      const offsetX = (Math.random() * 2 - 1) * maxOffset;
-      const alpha = 0.68 + Math.random() * 0.32;
-      ctx.globalAlpha = alpha;
+      const bandProgress = drawHeight <= sliceHeight ? 0 : y / (drawHeight - sliceHeight);
+      const randomBias =
+        (Math.random() * 2 - 1) *
+        (0.45 + disassembleStrength * 0.35 + Math.random() * 0.55);
+      const waveTempo =
+        data.burstTempo *
+        (0.85 + Math.random() * 0.7) *
+        (data.isHovered ? 1.18 : burstActive ? 1 : 0.82);
+      const horizontalBias =
+        Math.sin(
+          now * waveTempo +
+            y * (0.12 + data.burstSliceBoost * 0.42 + Math.random() * 0.08)
+        ) *
+          (0.2 + data.burstSliceBoost * 1.05 + Math.random() * 0.28) +
+        data.burstBias *
+          data.burstVector *
+          (0.12 + bandProgress * (0.12 + Math.random() * 0.18)) +
+        randomBias;
+      const scatterX =
+        ((Math.random() * 2 - 1) *
+          (0.9 + disassembleStrength * 1.4 + Math.random() * 0.9) +
+          horizontalBias) *
+        maxOffset *
+        disassembleStrength +
+        (bandPackage?.shiftOffset || 0);
+      const scatterY =
+        (Math.random() * 2 - 1) *
+        verticalScatter *
+        (0.18 + bandProgress * (0.8 + Math.random() * 0.8) + Math.random() * 0.45) *
+        disassembleStrength +
+        (bandPackage?.yOffset || 0);
+      const stretch = (1 + (Math.random() * 0.14 - 0.07) * disassembleStrength) + ((bandPackage?.stretch || 1) - 1);
+      const destWidth = Math.max(1, glyphWidth * stretch);
+      const destX = drawX + scatterX - (destWidth - glyphWidth) * 0.5;
+      const shouldDropBand =
+        Math.random() <
+        dropoutChance *
+          (0.35 + bandProgress * (0.7 + Math.random() * 0.9));
+
+      if (!shouldDropBand) {
+        ctx.globalAlpha = (data.isHovered ? 0.72 : 0.62) + Math.random() * 0.1 + (bandPackage?.alphaOffset || 0);
+        ctx.drawImage(
+          offscreen,
+          0,
+          Math.round(y * data.dpr),
+          Math.round(glyphWidth * data.dpr),
+          Math.round(bandHeight * data.dpr),
+          destX,
+          y + scatterY,
+          destWidth,
+          bandHeight
+        );
+      }
+
+    }
+
+    for (let i = 0; i < activePackage.lines.length; i++) {
+      const linePackage = activePackage.lines[i];
+      const lineY = Math.max(
+        0,
+        Math.min(
+          drawHeight - 2,
+          Math.round(activePackage.anchorY + linePackage.yOffset)
+        )
+      );
+      const lineHeight = linePackage.height;
+      const lineShift = activePackage.shift + linePackage.shiftOffset;
+      ctx.globalAlpha = activePackage.alpha + linePackage.alphaOffset;
       ctx.drawImage(
         offscreen,
         0,
-        Math.round(y * data.dpr),
+        Math.round(lineY * data.dpr),
         Math.round(glyphWidth * data.dpr),
-        Math.round(bandHeight * data.dpr),
-        offsetX,
-        y,
+        Math.round(lineHeight * data.dpr),
+        drawX + lineShift,
+        lineY,
         glyphWidth,
-        bandHeight
+        lineHeight
       );
     }
 
-    ctx.globalAlpha = 0.9;
-    ctx.shadowColor = "rgba(255,255,255,0.18)";
-    ctx.shadowBlur = 2;
+    const ghostShift = activePackage.ghostShiftA;
+    ctx.globalAlpha = data.isHovered ? activePackage.ghostAlphaA * 0.55 : activePackage.ghostAlphaA;
     ctx.drawImage(
       offscreen,
       0,
       0,
       Math.round(glyphWidth * data.dpr),
       offscreen.height,
+      drawX + ghostShift,
       0,
+      glyphWidth,
+      drawHeight
+    );
+    ctx.globalAlpha = data.isHovered ? activePackage.ghostAlphaB * 0.55 : activePackage.ghostAlphaB;
+    ctx.drawImage(
+      offscreen,
+      0,
+      0,
+      Math.round(glyphWidth * data.dpr),
+      offscreen.height,
+      drawX + activePackage.ghostShiftB,
+      0,
+      glyphWidth,
+      drawHeight
+    );
+
+    ctx.globalAlpha = data.isHovered ? 0.78 : burstActive ? 0.8 : 0.9;
+    ctx.shadowColor = burstActive || data.isHovered
+      ? "rgba(255,255,255,0.18)"
+      : "rgba(255,255,255,0.18)";
+    ctx.shadowBlur = burstActive || data.isHovered ? 3 : 2;
+    ctx.drawImage(
+      offscreen,
+      0,
+      0,
+      Math.round(glyphWidth * data.dpr),
+      offscreen.height,
+      drawX,
       0,
       glyphWidth,
       drawHeight
@@ -438,7 +840,12 @@
     drawFuzzyText(text, data);
 
     const setHoverState = (active) => {
+      data.isHovered = active;
       data.targetIntensity = active ? HOVER_INTENSITY : BASE_INTENSITY;
+      if (active) {
+        data.burstUntil = performance.now() + 300;
+        data.burstIntensity = 0.14;
+      }
     };
 
     text.addEventListener("pointerenter", () => setHoverState(true));
