@@ -4,6 +4,7 @@ import "./BounceCards.css";
 
 export default function BounceCards({
   className = "",
+  cards = [],
   images = [],
   containerWidth = 500,
   containerHeight = 250,
@@ -23,6 +24,14 @@ export default function BounceCards({
   const hasAnimatedRef = useRef(false);
   const resetTimerRef = useRef(null);
   const [currentTransformStyles, setCurrentTransformStyles] = useState(transformStyles);
+  const entries = cards.length
+    ? cards
+    : images.map((src, index) => ({
+        slug: `image-${index}`,
+        title: `Card ${index + 1}`,
+        image: src,
+        href: src,
+      }));
 
   useEffect(() => {
     const updateTransformStyles = () => {
@@ -135,7 +144,7 @@ export default function BounceCards({
     const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
     const hoverOffset = isMobile ? -110 : -160;
 
-    images.forEach((_, i) => {
+    entries.forEach((_, i) => {
       const target = q(`.card-${i}`);
       gsap.killTweensOf(target);
 
@@ -171,7 +180,7 @@ export default function BounceCards({
 
     const q = gsap.utils.selector(containerRef);
 
-    images.forEach((_, i) => {
+    entries.forEach((_, i) => {
       const target = q(`.card-${i}`);
       gsap.killTweensOf(target);
       const baseTransform = currentTransformStyles[i] || "none";
@@ -243,7 +252,7 @@ export default function BounceCards({
     if (!containerRef.current) return;
     
     const q = gsap.utils.selector(containerRef);
-    images.forEach((_, i) => {
+    entries.forEach((_, i) => {
       const target = q(`.card-${i}`);
       if (target) {
         gsap.to(target, {
@@ -253,7 +262,7 @@ export default function BounceCards({
         });
       }
     });
-  }, [currentTransformStyles, images]);
+  }, [currentTransformStyles, entries]);
 
   useEffect(() => {
     return () => {
@@ -274,10 +283,13 @@ export default function BounceCards({
         aspectRatio: "1.4",
       }}
     >
-      {images.map((src, idx) => (
-        <div
-          key={src}
+      {entries.map((item, idx) => (
+        <a
+          key={item.slug || item.image}
           className={`card card-${idx}`}
+          href={item.href || `./project.html?slug=${item.slug}`}
+          target="_blank"
+          rel="noopener noreferrer"
           style={{
             transform: `translate(-50%, -50%) ${currentTransformStyles[idx] ?? "none"}`,
             top: "50%",
@@ -294,11 +306,16 @@ export default function BounceCards({
               activateCard(idx);
             }
           }}
+          onClick={(event) => {
+            if (window.__portfolioBounceDragging) {
+              event.preventDefault();
+            }
+          }}
         >
           <div className="cardTiltSurface">
-            <img className="image" src={src} alt={`card-${idx}`} />
+            <img className="image" src={item.image} alt={item.title || `card-${idx}`} />
           </div>
-        </div>
+        </a>
       ))}
     </div>
   );

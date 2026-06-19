@@ -20,6 +20,7 @@
   transform-origin: 50% 50%;
   cursor: pointer;
   will-change: transform;
+  text-decoration: none;
 }
 
 .bounceCardsContainer .cardTiltSurface {

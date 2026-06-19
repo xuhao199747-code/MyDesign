@@ -1,15 +1,16 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
 import BounceCards from "./BounceCards.jsx";
+import { projectCatalog } from "./projectCatalog.js";
 
 const mount = document.getElementById("portfolioBounceCardsRoot");
 
-const images = [
-  "./imag/photo1.png",
-  "./imag/portfolio-cards1.webp",
-  "./imag/Image2.webp",
-  "./imag/photo2.png",
-];
+const cards = [
+  projectCatalog.find((item) => item.slug === "profile"),
+  projectCatalog.find((item) => item.slug === "sneakers"),
+  projectCatalog.find((item) => item.slug === "about"),
+  projectCatalog.find((item) => item.slug === "portrait"),
+].filter(Boolean);
 
 const transformStyles = [
   "rotate(5deg) translate(-340px)",
@@ -22,7 +23,7 @@ if (mount) {
   createRoot(mount).render(
     <BounceCards
       className="custom-bounceCards"
-      images={images}
+      cards={cards}
       containerWidth={700}
       containerHeight={380}
       animationDelay={0.15}

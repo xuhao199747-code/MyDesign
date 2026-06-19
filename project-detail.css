@@ -1,0 +1,130 @@
+.project-page {
+  min-height: 100vh;
+  background: var(--color-surface);
+}
+
+.project-shell {
+  width: min(1200px, calc(100% - 48px));
+  margin: 32px auto 96px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+  gap: 48px;
+  align-items: start;
+}
+
+.project-media {
+  position: relative;
+  overflow: hidden;
+  border-radius: 28px;
+  background: #f7f7f7;
+  box-shadow: 0 28px 72px rgba(15, 23, 42, 0.08);
+}
+
+.project-media img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+}
+
+.project-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding-top: 12px;
+}
+
+.project-kicker {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.project-heading {
+  margin: 0;
+  font-family: var(--title-font);
+  font-size: clamp(52px, 7vw, 88px);
+  line-height: 0.9;
+  color: var(--color-title);
+}
+
+.project-summary {
+  margin: 0;
+  color: var(--color-soft-text);
+  font-size: clamp(18px, 2vw, 24px);
+  line-height: 1.55;
+}
+
+.project-body {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 16px;
+  line-height: 1.72;
+}
+
+.project-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.project-tags li {
+  border: 1px solid var(--color-line);
+  border-radius: 999px;
+  padding: 10px 16px;
+  font-size: 13px;
+  color: var(--color-text);
+  background: var(--color-surface);
+}
+
+.project-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  padding: 12px 18px;
+  border-radius: 999px;
+  background: var(--color-text);
+  color: var(--color-on-dark);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .project-shell {
+    width: calc(100% - 32px);
+    margin: calc(env(safe-area-inset-top, 0px) + 88px) auto 48px;
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .project-media {
+    border-radius: 22px;
+  }
+
+  .project-copy {
+    gap: 18px;
+    padding-top: 0;
+  }
+
+  .project-heading {
+    font-size: clamp(42px, 12vw, 64px);
+  }
+
+  .project-summary {
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  .project-body {
+    font-size: 15px;
+    line-height: 1.68;
+  }
+}

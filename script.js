@@ -1474,6 +1474,7 @@ if (document.readyState === 'loading') {
       trigger: dragHit,
       minimumMovement: 2,
       onPress() {
+        window.__portfolioBounceDragging = false;
         if (portfolioBtnTween) {
           portfolioBtnTween.kill();
           portfolioBtnTween = null;
@@ -1485,11 +1486,15 @@ if (document.readyState === 'loading') {
         this.startOffset = playhead.offset;
       },
       onDrag() {
+        window.__portfolioBounceDragging = true;
         playhead.offset = this.startOffset + (this.startX - this.x) * 0.001;
         syncLoopToPlayhead();
       },
       onDragEnd() {
         settleToNearestOffset(playhead.offset, 0.34);
+        window.setTimeout(() => {
+          window.__portfolioBounceDragging = false;
+        }, 0);
       },
     });
   }
@@ -1554,6 +1559,7 @@ if (document.readyState === 'loading') {
   if (!root) return;
 
   const stage = root.querySelector(".portfolio-featured__stage");
+  const titleLink = root.querySelector(".portfolio-featured__title");
   const prevButton = root.querySelector(".portfolio-featured__nav--prev");
   const nextButton = root.querySelector(".portfolio-featured__nav--next");
   if (!stage) return;
@@ -1583,6 +1589,7 @@ if (document.readyState === 'loading') {
   let touchStartY = 0;
   let isPointerDown = false;
   let dragMoved = false;
+  let dragAxis = "";
   let wheelResetTimer = null;
   let motionFrame = null;
   let stepFallbackTimer = null;
@@ -1609,7 +1616,7 @@ if (document.readyState === 'loading') {
     cell.dataset.title = item.title;
     cell.href = item.href;
     cell.target = "_blank";
-    cell.rel = "noreferrer noopener";
+    cell.rel = "noopener noreferrer";
     cell.setAttribute("aria-label", `查看 ${item.title}`);
     cell.innerHTML =
       '<span class="portfolio-featured__tilt"><span class="portfolio-featured__media"><img alt="" /></span></span><span class="portfolio-featured__badge"></span>';
@@ -1629,6 +1636,11 @@ if (document.readyState === 'loading') {
   function updateCellStates() {
     const roundedSlot = Math.round(activeSlot);
     root.dataset.activeIndex = String(wrapIndex(roundedSlot));
+    const activeItem = items[wrapIndex(roundedSlot)];
+    if (titleLink && activeItem) {
+      titleLink.href = activeItem.href;
+      titleLink.textContent = activeItem.title;
+    }
     cells.forEach((cell, slot) => {
       const offset = slot - activeSlot;
       const roundedOffset = slot - roundedSlot;
@@ -1643,12 +1655,21 @@ if (document.readyState === 'loading') {
 
   function updateCellMotion() {
     const slotPitch = getSlotPitch();
+    const isMobileViewport = window.innerWidth <= 768;
     cells.forEach((cell, slot) => {
       const offset = slot - activeSlot;
       const distance = offset * slotPitch;
-      const rotation = Math.max(-25, Math.min(25, distance * 0.042));
-      const normalizedDistance = Math.min(1.35, Math.abs(distance) / 560);
-      const curveY = 6 + normalizedDistance * normalizedDistance * 66;
+      const rotationStrength = isMobileViewport ? 0.056 : 0.042;
+      const rotationLimit = isMobileViewport ? 32 : 25;
+      const curveBase = isMobileViewport ? 10 : 6;
+      const curveStrength = isMobileViewport ? 96 : 66;
+      const curveRange = isMobileViewport ? 420 : 560;
+      const rotation = Math.max(
+        -rotationLimit,
+        Math.min(rotationLimit, distance * rotationStrength)
+      );
+      const normalizedDistance = Math.min(1.35, Math.abs(distance) / curveRange);
+      const curveY = curveBase + normalizedDistance * normalizedDistance * curveStrength;
       const badgeOpacity = Math.max(0, Math.min(1, Math.cos(distance * Math.PI / 600)));
       const badgeY = (1 - badgeOpacity) * 14;
       const badgeScale = 0.94 + badgeOpacity * 0.06;
@@ -1689,8 +1710,13 @@ if (document.readyState === 'loading') {
     const activeCenter =
       activeCell.offsetLeft + activeCell.offsetWidth / 2 + slotProgress * getSlotPitch();
     const stageCenter = stage.clientWidth / 2;
+    const isMobileViewport = window.innerWidth <= 768;
+    const transitionDuration = isMobileViewport ? "0.74s" : "1.05s";
+    const transitionEase = isMobileViewport
+      ? "cubic-bezier(0.22, 0.98, 0.28, 1)"
+      : "cubic-bezier(0.18, 1, 0.22, 1)";
     track.style.transition = animate
-      ? "transform 1.05s cubic-bezier(0.18, 1, 0.22, 1)"
+      ? `transform ${transitionDuration} ${transitionEase}`
       : "none";
     track.style.transform = `translate3d(${stageCenter - activeCenter}px, 0, 0)`;
     if (!animate) {
@@ -1870,23 +1896,49 @@ if (document.readyState === 'loading') {
 
   root.addEventListener("pointerdown", (event) => {
     isPointerDown = true;
-    setFeaturedGestureActive();
+    dragAxis = "";
     dragMoved = false;
     dragStartX = event.clientX;
     dragStartY = event.clientY;
     initialActiveSlot = activeSlot;
-    document.body.classList.add("portfolio-featured-dragging");
+    if (event.pointerType === "mouse") {
+      dragAxis = "x";
+      setFeaturedGestureActive();
+      document.body.classList.add("portfolio-featured-dragging");
+    }
   });
 
   root.addEventListener("pointermove", (event) => {
     if (!isPointerDown) return;
     const deltaX = event.clientX - dragStartX;
     const deltaY = event.clientY - dragStartY;
-    if (Math.abs(deltaX) > 12 || Math.abs(deltaY) > 12) {
-      dragMoved = true;
+
+    if (!dragAxis) {
+      const absX = Math.abs(deltaX);
+      const absY = Math.abs(deltaY);
+      if (absX < 10 && absY < 10) return;
+      if (absX > absY * 1.12) {
+        dragAxis = "x";
+        setFeaturedGestureActive();
+        document.body.classList.add("portfolio-featured-dragging");
+      } else if (absY > absX) {
+        dragAxis = "y";
+        clearFeaturedGestureActive();
+        document.body.classList.remove("portfolio-featured-dragging");
+        return;
+      }
     }
-    
-    const dragProgress = deltaX / getSlotPitch();
+
+    if (dragAxis !== "x") {
+      return;
+    }
+
+    if (Math.abs(deltaX) > 10 || Math.abs(deltaY) > 10) {
+      dragMoved = Math.abs(deltaX) > Math.abs(deltaY);
+    }
+
+    const dragSensitivity = window.innerWidth <= 768 ? 0.76 : 1;
+    const dragProgress = deltaX / (getSlotPitch() * dragSensitivity);
     activeSlot = initialActiveSlot - dragProgress;
     centerActiveCell(false);
   });
@@ -1894,12 +1946,19 @@ if (document.readyState === 'loading') {
   root.addEventListener("pointerup", (event) => {
     if (!isPointerDown) return;
     isPointerDown = false;
+    const releasedAxis = dragAxis;
+    dragAxis = "";
     clearFeaturedGestureActive();
     document.body.classList.remove("portfolio-featured-dragging");
 
     const deltaX = event.clientX - dragStartX;
     const deltaY = event.clientY - dragStartY;
-    
+
+    if (releasedAxis !== "x") {
+      dragMoved = false;
+      return;
+    }
+
     root.classList.remove("is-animating", "is-rolling-left", "is-rolling-right");
     centerActiveCell(true);
 
@@ -1917,6 +1976,7 @@ if (document.readyState === 'loading') {
 
   root.addEventListener("pointercancel", () => {
     isPointerDown = false;
+    dragAxis = "";
     dragMoved = false;
     clearFeaturedGestureActive();
     document.body.classList.remove("portfolio-featured-dragging");
