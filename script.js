@@ -1518,7 +1518,7 @@ const initPhotoReveal = () => {
 
   if (photoLinkHref) {
     const openPhotoProject = () => {
-      window.open(photoLinkHref, "_blank", "noopener,noreferrer");
+      window.location.assign(photoLinkHref);
     };
 
     hoverHitbox.addEventListener("click", (event) => {
