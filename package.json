@@ -1,7 +1,7 @@
 {
   "scripts": {
     "dev": "vite --host 127.0.0.1",
-    "build": "vite build && node build-post.js && mkdir -p dist/imag dist/vendor dist/js && cp -r imag/* dist/imag/ && cp -r vendor/* dist/vendor/ && cp -r js/* dist/js/ && cp script.js dist/ && cp styles.css dist/ && cp skills-lock.json dist/"
+    "build": "vite build && node build-post.js"
   },
   "dependencies": {
     "@animateicons/react": "^0.3.3",
