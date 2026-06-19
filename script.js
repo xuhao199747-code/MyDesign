@@ -20,6 +20,7 @@
   const preloader = document.getElementById("preloader");
   const progressBar = document.querySelector(".preloader__bar");
   const progressText = document.querySelector(".preloader__text");
+  const typeText = document.querySelector(".preloader__type-text");
 
   if (!preloader) return;
 
@@ -67,6 +68,10 @@
   const allResources = [...criticalResources, ...nonCriticalResources];
   let loadedCount = 0;
   const totalCount = allResources.length;
+  let hasHidden = false;
+  let criticalReady = false;
+  let heroReady = false;
+  let minimumDisplayElapsed = false;
 
   const updateProgress = () => {
     const percentage = Math.round((loadedCount / totalCount) * 100);
@@ -79,12 +84,57 @@
   };
 
   const hidePreloader = () => {
-    if (preloader) {
-      preloader.classList.add("preloader--hidden");
-      setTimeout(() => {
-        preloader.remove();
-      }, 600);
-    }
+    if (!preloader || hasHidden) return;
+    hasHidden = true;
+    preloader.classList.add("preloader--hidden");
+    setTimeout(() => {
+      preloader.remove();
+    }, 600);
+  };
+
+  if (typeText) {
+    const phrases = [
+      "Please wait a moment.",
+      "Loading the full experience.",
+    ];
+    let phraseIndex = 0;
+    let charIndex = 0;
+    let deleting = false;
+
+    const tickType = () => {
+      if (!document.body.contains(typeText)) return;
+      const current = phrases[phraseIndex];
+      if (!deleting) {
+        charIndex = Math.min(current.length, charIndex + 1);
+        typeText.textContent = current.slice(0, charIndex);
+        if (charIndex === current.length) {
+          deleting = true;
+          setTimeout(tickType, 900);
+          return;
+        }
+        setTimeout(tickType, 42);
+        return;
+      }
+
+      charIndex = Math.max(0, charIndex - 1);
+      typeText.textContent = current.slice(0, charIndex);
+      if (charIndex === 0) {
+        deleting = false;
+        phraseIndex = (phraseIndex + 1) % phrases.length;
+        setTimeout(tickType, 220);
+        return;
+      }
+      setTimeout(tickType, 24);
+    };
+
+    typeText.textContent = "";
+    tickType();
+  }
+
+  const tryHidePreloader = () => {
+    if (!criticalReady || !heroReady || !minimumDisplayElapsed) return;
+    criticalReady = true;
+    tryHidePreloader();
   };
 
   // 预加载缓存：将已加载的 Image 对象暴露给其他模块复用
@@ -112,6 +162,19 @@
   window.__preloadedImages = preloadedImages;
 
   const startLoading = async () => {
+    setTimeout(() => {
+      minimumDisplayElapsed = true;
+      tryHidePreloader();
+    }, 900);
+
+    window.addEventListener(
+      "hero:first-frame-ready",
+      () => {
+        heroReady = true;
+        tryHidePreloader();
+      },
+      { once: true }
+    );
     // 并行加载所有资源，而非串行等待
     const loadPromises = allResources.map((url) =>
       loadResource(url).then(() => {
@@ -133,13 +196,18 @@
   };
 
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", startLoading);
+    document.addEventListener("DOMContentLoaded", startLoading, { once: true });
   } else {
     startLoading();
   }
 
   // 安全兜底：最多 4 秒后强制隐藏
-  setTimeout(hidePreloader, 4000);
+  setTimeout(() => {
+    criticalReady = true;
+    heroReady = true;
+    minimumDisplayElapsed = true;
+    hidePreloader();
+  }, 7000);
 })();
 
 // =============================================================================
@@ -149,17 +217,183 @@
   const heroTexts = document.querySelectorAll(".hero-nav__text");
   if (!heroTexts.length) return;
 
+  const FUZZ_RANGE = 21;
+  const BASE_INTENSITY = 0.12;
+  const HOVER_INTENSITY = 0.35;
+  const LETTER_SPACING = 2;
+  const FPS = 35;
+  const GLITCH_MODE = true;
+  const CLICK_EFFECT = true;
+  const CLICK_BOOST_DURATION = 320;
+  const LERP_FACTOR = 0.1;
+
   let frameId = null;
+  let renderFrameId = null;
+  let lastRenderTime = 0;
   const textData = new Map();
 
   heroTexts.forEach((text) => {
+    const label = text.textContent?.trim() || "";
+    const canvas = document.createElement("canvas");
+    canvas.className = "hero-nav__canvas";
+    text.dataset.text = label;
+    text.setAttribute("aria-label", label);
+    text.appendChild(canvas);
+
+    const ctx = canvas.getContext("2d");
     textData.set(text, {
+      label,
+      canvas,
+      ctx,
       targetX: 0,
       targetY: 0,
       currentX: 0,
       currentY: 0,
+      currentIntensity: BASE_INTENSITY,
+      targetIntensity: BASE_INTENSITY,
+      clickBoostUntil: 0,
+      width: 0,
+      height: 0,
+      dpr: 1,
     });
   });
+
+  const resizeCanvas = (text, data) => {
+    const dpr = window.devicePixelRatio || 1;
+    const style = getComputedStyle(text);
+    const fallbackFontSize = parseFloat(style.fontSize) || 32;
+    const fallbackWidth =
+      labelMeasureCache(data.label, style) +
+      LETTER_SPACING * Math.max(0, data.label.length - 1) +
+      FUZZ_RANGE * 2 +
+      28;
+    const fallbackHeight = Math.ceil(fallbackFontSize * 1.24) + 20;
+    const rect = text.getBoundingClientRect();
+    const width = Math.max(1, Math.ceil(Math.max(rect.width + 64, fallbackWidth)));
+    const height = Math.max(1, Math.ceil(Math.max(rect.height + 32, fallbackHeight)));
+    if (
+      data.width === width &&
+      data.height === height &&
+      data.dpr === dpr
+    ) {
+      return;
+    }
+
+    data.width = width;
+    data.height = height;
+    data.dpr = dpr;
+    data.canvas.width = Math.round(width * dpr);
+    data.canvas.height = Math.round(height * dpr);
+    data.canvas.style.width = `${width}px`;
+    data.canvas.style.height = `${height}px`;
+    data.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  };
+
+  const labelMeasureCache = (label, style) => {
+    const probe = document.createElement("canvas");
+    const probeCtx = probe.getContext("2d");
+    if (!probeCtx) return label.length * 18;
+    probeCtx.font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+    return probeCtx.measureText(label).width;
+  };
+
+  const drawFuzzyText = (text, data) => {
+    if (!data.ctx) return;
+
+    resizeCanvas(text, data);
+
+    const { ctx, width, height, label } = data;
+    const style = getComputedStyle(text);
+    const intensityBoost =
+      CLICK_EFFECT && performance.now() < data.clickBoostUntil ? 0.18 : 0;
+    const targetIntensity = Math.min(
+      0.58,
+      data.targetIntensity + intensityBoost
+    );
+    data.currentIntensity +=
+      (targetIntensity - data.currentIntensity) * 0.24;
+
+    ctx.clearRect(0, 0, width, height);
+    ctx.save();
+    ctx.translate(16, 10);
+    ctx.font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+    ctx.textBaseline = "top";
+    ctx.textAlign = "left";
+    ctx.letterSpacing = `${LETTER_SPACING}px`;
+
+    const textWidth = labelMeasureCache(label, style);
+    const glyphWidth = Math.ceil(
+      textWidth + LETTER_SPACING * Math.max(0, label.length - 1)
+    );
+    const drawWidth = Math.ceil(glyphWidth + FUZZ_RANGE * 2 + 18);
+    const drawHeight = Math.ceil(parseFloat(style.fontSize) * 1.12);
+
+    const offscreen = document.createElement("canvas");
+    offscreen.width = Math.max(1, Math.ceil(drawWidth * data.dpr));
+    offscreen.height = Math.max(1, Math.ceil(drawHeight * data.dpr));
+    const offCtx = offscreen.getContext("2d");
+    if (!offCtx) {
+      ctx.restore();
+      return;
+    }
+    offCtx.setTransform(data.dpr, 0, 0, data.dpr, 0, 0);
+    offCtx.font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+    offCtx.textBaseline = "top";
+    offCtx.textAlign = "left";
+    offCtx.letterSpacing = `${LETTER_SPACING}px`;
+    offCtx.fillStyle = "#ffffff";
+    offCtx.fillText(label, 0, 0);
+
+    const sliceHeight = GLITCH_MODE ? 3 : 5;
+    const maxOffset = FUZZ_RANGE * data.currentIntensity;
+
+    for (let y = 0; y < drawHeight; y += sliceHeight) {
+      const bandHeight = Math.min(sliceHeight, drawHeight - y);
+      const offsetX = (Math.random() * 2 - 1) * maxOffset;
+      const alpha = 0.68 + Math.random() * 0.32;
+      ctx.globalAlpha = alpha;
+      ctx.drawImage(
+        offscreen,
+        0,
+        Math.round(y * data.dpr),
+        Math.round(glyphWidth * data.dpr),
+        Math.round(bandHeight * data.dpr),
+        offsetX,
+        y,
+        glyphWidth,
+        bandHeight
+      );
+    }
+
+    ctx.globalAlpha = 0.9;
+    ctx.shadowColor = "rgba(255,255,255,0.18)";
+    ctx.shadowBlur = 2;
+    ctx.drawImage(
+      offscreen,
+      0,
+      0,
+      Math.round(glyphWidth * data.dpr),
+      offscreen.height,
+      0,
+      0,
+      glyphWidth,
+      drawHeight
+    );
+    ctx.restore();
+  };
+
+  const renderTexts = (time) => {
+    const frameInterval = 1000 / FPS;
+    if (!lastRenderTime || time - lastRenderTime >= frameInterval) {
+      heroTexts.forEach((text) => {
+        const data = textData.get(text);
+        if (!data) return;
+        drawFuzzyText(text, data);
+      });
+      lastRenderTime = time;
+    }
+    renderFrameId = requestAnimationFrame(renderTexts);
+  };
 
   const handleMouseMove = (e) => {
     heroTexts.forEach((text) => {
@@ -186,9 +420,10 @@
       const dy = data.targetY - data.currentY;
 
       if (Math.abs(dx) > 0.05 || Math.abs(dy) > 0.05) {
-        data.currentX += dx * 0.1;
-        data.currentY += dy * 0.1;
-        text.style.transform = `translate(${data.currentX}px, ${data.currentY}px)`;
+        data.currentX += dx * LERP_FACTOR;
+        data.currentY += dy * LERP_FACTOR;
+        text.style.setProperty("--hero-float-x", `${data.currentX}px`);
+        text.style.setProperty("--hero-float-y", `${data.currentY}px`);
         needsUpdate = true;
       }
     });
@@ -196,6 +431,38 @@
     frameId = needsUpdate ? requestAnimationFrame(animate) : null;
   };
 
+  heroTexts.forEach((text) => {
+    const data = textData.get(text);
+    if (!data) return;
+    resizeCanvas(text, data);
+    drawFuzzyText(text, data);
+
+    const setHoverState = (active) => {
+      data.targetIntensity = active ? HOVER_INTENSITY : BASE_INTENSITY;
+    };
+
+    text.addEventListener("pointerenter", () => setHoverState(true));
+    text.addEventListener("pointerleave", () => setHoverState(false));
+    text.addEventListener("focus", () => setHoverState(true));
+    text.addEventListener("blur", () => setHoverState(false));
+
+    if (CLICK_EFFECT) {
+      text.addEventListener("pointerdown", () => {
+        data.clickBoostUntil = performance.now() + CLICK_BOOST_DURATION;
+      });
+    }
+  });
+
+  window.addEventListener("resize", () => {
+    heroTexts.forEach((text) => {
+      const data = textData.get(text);
+      if (!data) return;
+      resizeCanvas(text, data);
+      drawFuzzyText(text, data);
+    });
+  });
+
+  renderFrameId = requestAnimationFrame(renderTexts);
   document.addEventListener("mousemove", handleMouseMove, { passive: true });
 })();
 
@@ -208,21 +475,36 @@ const navbar = document.querySelector(".navbar");
 
 if (menuToggle && menuWrap) {
   const isMobileViewport = () => window.innerWidth <= 768;
+  let toggleClickLock = false;
+  const isMenuOpen = () => menuWrap.classList.contains("open");
+
+  const setMenuOpen = (open) => {
+    menuWrap.classList.toggle("open", open);
+    syncMenuOpenState();
+  };
 
   const syncMenuOpenState = () => {
-    const isOpen = isMobileViewport() && menuWrap.classList.contains("open");
+    const isOpen = isMobileViewport() && isMenuOpen();
     document.body.classList.toggle("menu-open", isOpen);
+    menuToggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
   };
 
   const closeMenu = () => {
-    menuWrap.classList.remove("open");
-    syncMenuOpenState();
+    setMenuOpen(false);
   };
 
-  menuToggle.addEventListener("click", () => {
-    menuWrap.classList.toggle("open");
-    syncMenuOpenState();
-  });
+  const handleTogglePress = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (toggleClickLock) return;
+    toggleClickLock = true;
+    setMenuOpen(!isMenuOpen());
+    window.setTimeout(() => {
+      toggleClickLock = false;
+    }, 0);
+  };
+
+  menuToggle.addEventListener("pointerdown", handleTogglePress);
 
   menuWrap.querySelectorAll("a").forEach((link) => {
     link.addEventListener("click", () => {
@@ -462,6 +744,7 @@ if (navbar) {
     if (!hasPaintedFrame) {
       hasPaintedFrame = true;
       tracker.classList.add("is-ready");
+      window.dispatchEvent(new CustomEvent("hero:first-frame-ready"));
     }
     return true;
   };
@@ -1084,6 +1367,8 @@ const initPhotoReveal = () => {
   const photoSection = document.querySelector("#photo");
   const photoImagesWrap = document.querySelector("#photo .photo-images");
   const frontPhotoImage = document.querySelector("#photo .photo-image-front");
+  const photoLinkHref = photoImagesWrap?.dataset.href || "";
+  const photoLinkLabel = photoImagesWrap?.dataset.linkLabel || "查看项目";
   const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   if (photoSection && photoImagesWrap && frontPhotoImage && !prefersReducedMotion) {
@@ -1091,6 +1376,11 @@ const initPhotoReveal = () => {
 
   const hoverHitbox = document.createElement('div');
   hoverHitbox.className = 'photo-hover-hitbox';
+  if (photoLinkHref) {
+    hoverHitbox.setAttribute("role", "link");
+    hoverHitbox.setAttribute("tabindex", "0");
+    hoverHitbox.setAttribute("aria-label", photoLinkLabel);
+  }
   photoImagesWrap.parentNode.insertBefore(hoverHitbox, photoImagesWrap);
   hoverHitbox.appendChild(photoImagesWrap);
 
@@ -1225,6 +1515,23 @@ const initPhotoReveal = () => {
   
   hoverHitbox.addEventListener('mousemove', handleMouseMove);
   hoverHitbox.addEventListener('mouseleave', resetPhotoTilt);
+
+  if (photoLinkHref) {
+    const openPhotoProject = () => {
+      window.open(photoLinkHref, "_blank", "noopener,noreferrer");
+    };
+
+    hoverHitbox.addEventListener("click", (event) => {
+      event.preventDefault();
+      openPhotoProject();
+    });
+
+    hoverHitbox.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault();
+      openPhotoProject();
+    });
+  }
   }
 }
 

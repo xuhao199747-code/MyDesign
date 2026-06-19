@@ -37,21 +37,36 @@ const navbar = document.querySelector(".navbar");
 
 if (menuToggle && menuWrap) {
   const isMobileViewport = () => window.innerWidth <= 768;
+  let toggleClickLock = false;
+  const isMenuOpen = () => menuWrap.classList.contains("open");
+
+  const setMenuOpen = (open) => {
+    menuWrap.classList.toggle("open", open);
+    syncMenuOpenState();
+  };
 
   const syncMenuOpenState = () => {
-    const isOpen = isMobileViewport() && menuWrap.classList.contains("open");
+    const isOpen = isMobileViewport() && isMenuOpen();
     document.body.classList.toggle("menu-open", isOpen);
+    menuToggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
   };
 
   const closeMenu = () => {
-    menuWrap.classList.remove("open");
-    syncMenuOpenState();
+    setMenuOpen(false);
   };
 
-  menuToggle.addEventListener("click", () => {
-    menuWrap.classList.toggle("open");
-    syncMenuOpenState();
-  });
+  const handleTogglePress = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (toggleClickLock) return;
+    toggleClickLock = true;
+    setMenuOpen(!isMenuOpen());
+    window.setTimeout(() => {
+      toggleClickLock = false;
+    }, 0);
+  };
+
+  menuToggle.addEventListener("pointerdown", handleTogglePress);
 
   menuWrap.querySelectorAll("a").forEach((link) => {
     link.addEventListener("click", closeMenu);

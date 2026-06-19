@@ -23,7 +23,10 @@ export default function BounceCards({
   const containerRef = useRef(null);
   const hasAnimatedRef = useRef(false);
   const resetTimerRef = useRef(null);
+  const navigationTimerRef = useRef(null);
+  const lastPointerTypeRef = useRef("mouse");
   const [currentTransformStyles, setCurrentTransformStyles] = useState(transformStyles);
+  const [raisedCardIndex, setRaisedCardIndex] = useState(null);
   const entries = cards.length
     ? cards
     : images.map((src, index) => ({
@@ -194,6 +197,7 @@ export default function BounceCards({
   };
 
   const activateCard = (idx) => {
+    setRaisedCardIndex(idx);
     pushSiblings(idx);
     if (resetTimerRef.current) {
       window.clearTimeout(resetTimerRef.current);
@@ -201,8 +205,21 @@ export default function BounceCards({
     resetTimerRef.current = window.setTimeout(() => {
       resetCardTilt(idx);
       resetSiblings();
+      setRaisedCardIndex(null);
       resetTimerRef.current = null;
     }, 1100);
+  };
+
+  const isMobileInteraction = () =>
+    typeof window !== "undefined" && window.innerWidth <= 768;
+
+  const openCardLink = (href, target) => {
+    if (!href) return;
+    if (target === "_blank") {
+      window.open(href, "_blank", "noopener,noreferrer");
+      return;
+    }
+    window.location.assign(href);
   };
 
   const updateCardTilt = (event, idx) => {
@@ -269,6 +286,9 @@ export default function BounceCards({
       if (resetTimerRef.current) {
         window.clearTimeout(resetTimerRef.current);
       }
+      if (navigationTimerRef.current) {
+        window.clearTimeout(navigationTimerRef.current);
+      }
     };
   }, []);
 
@@ -294,22 +314,49 @@ export default function BounceCards({
             transform: `translate(-50%, -50%) ${currentTransformStyles[idx] ?? "none"}`,
             top: "50%",
             left: "50%",
+            zIndex: raisedCardIndex === idx ? 8 : undefined,
           }}
-          onMouseEnter={() => pushSiblings(idx)}
+          onMouseEnter={() => {
+            setRaisedCardIndex(idx);
+            pushSiblings(idx);
+          }}
           onMouseMove={(event) => updateCardTilt(event, idx)}
           onMouseLeave={() => {
             resetCardTilt(idx);
             resetSiblings();
+            setRaisedCardIndex(null);
           }}
-          onPointerUp={(event) => {
-            if (event.pointerType !== "mouse") {
-              activateCard(idx);
-            }
+          onPointerDown={(event) => {
+            lastPointerTypeRef.current = event.pointerType || "mouse";
+            setRaisedCardIndex(idx);
           }}
+          onFocus={() => setRaisedCardIndex(idx)}
+          onBlur={() => setRaisedCardIndex(null)}
           onClick={(event) => {
             if (window.__portfolioBounceDragging) {
               event.preventDefault();
+              return;
             }
+
+            const shouldAnimateFirst =
+              isMobileInteraction() || lastPointerTypeRef.current !== "mouse";
+
+            if (!shouldAnimateFirst) {
+              return;
+            }
+
+            event.preventDefault();
+            activateCard(idx);
+
+            if (navigationTimerRef.current) {
+              window.clearTimeout(navigationTimerRef.current);
+            }
+
+            const { href, target } = event.currentTarget;
+            navigationTimerRef.current = window.setTimeout(() => {
+              openCardLink(href, target);
+              navigationTimerRef.current = null;
+            }, 360);
           }}
         >
           <div className="cardTiltSurface">

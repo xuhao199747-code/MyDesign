@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
@@ -48,15 +48,15 @@
     </svg>
 
     <header class="navbar">
-      <a class="brand" href="./index.html#home" aria-label="XHDESIGN 首页">
+      <a class="brand" href="./index.html#home" aria-label="XHDESIGN 棣栭〉">
         <img src="./favicon.png" alt="XHDESIGN" />
       </a>
-      <button class="menu-toggle" id="menuToggle" aria-label="切换导航菜单">
-        菜单
+      <button class="menu-toggle" id="menuToggle" aria-label="鍒囨崲瀵艰埅鑿滃崟">
+        <span class="menu-toggle__icon" id="menuToggleIcon" aria-hidden="true"></span>
       </button>
       <nav class="menu-wrap" id="menuWrap" aria-label="主导航">
         <ul class="menu">
-          <li><a href="./index.html#about">简历</a></li>
+          <li><a href="./index.html#about">关于</a></li>
           <li><a href="./index.html#portfolio">作品</a></li>
           <li><a href="./index.html#contact">联系</a></li>
         </ul>
@@ -78,6 +78,10 @@
       </section>
     </main>
 
+    <script type="module" src="./src/MenuIcon.jsx"></script>
     <script type="module" src="./project-detail.js"></script>
   </body>
 </html>
+
+
+
