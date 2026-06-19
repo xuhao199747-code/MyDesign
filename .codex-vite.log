@@ -1,0 +1,25 @@
+
+> dev
+> vite --host 127.0.0.1 --host 127.0.0.1 --port 4173
+
+
+  [32m[1mVITE[22m v5.4.21[39m  [2mready in [0m[1m301[22m[2m[0m ms[22m
+
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://127.0.0.1:[1m4173[22m/[39m
+[2m09:04:06[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/styles.css?direct[22m
+[2m09:04:54[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/styles.css?direct[22m
+[2m09:08:18[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/styles.css?direct[22m
+[2m09:08:49[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/styles.css?direct[22m
+[2m09:10:14[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/styles.css?direct[22m
+[2m09:10:58[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/styles.css?direct[22m
+[2m09:12:28[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/styles.css?direct[22m
+[2m09:14:22[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/styles.css?direct[22m
+[2m09:15:03[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/styles.css?direct[22m
+[2m09:17:10[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/styles.css?direct[22m
+[2m09:17:17[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/BounceCards.css[22m
+[2m09:18:57[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/styles.css?direct[22m
+[2m09:19:22[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/styles.css?direct[22m
+[2m09:20:56[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/styles.css?direct[22m
+[2m09:22:27[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/styles.css?direct[22m
+[2m09:28:24[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/BounceCards.jsx[22m
+[2m09:28:36[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/BounceCards.css[22m

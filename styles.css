@@ -988,6 +988,8 @@ body.is-click-surprise-active *::selection {
   color: var(--color-title);
   flex-shrink: 0;
   box-sizing: border-box;
+  position: relative;
+  z-index: 10;
 }
 
 .section-portfolio .portfolio-gallery {
@@ -1812,7 +1814,12 @@ body.is-click-surprise-active *::selection {
    * 勿在 html/body 设 overflow-x: hidden —— 会破坏 position: sticky 的顶栏。
    */
   html {
-    --section-gap-y-sm: clamp(48px, 11vw, 88px);
+    --section-gap-y-sm: 64px;
+    --screen-module-height: auto;
+    --screen-module-pad-y: 40px;
+    --module-title-gap: clamp(18px, 5vw, 24px);
+    --module-content-gap-sm: 32px;
+    --module-stack-gap-sm: 24px;
     scroll-padding-top: max(
       72px,
       calc(env(safe-area-inset-top, 0px) + 56px)
@@ -1835,7 +1842,7 @@ body.is-click-surprise-active *::selection {
     padding-top: calc(
       env(safe-area-inset-top, 0px) + 48px + clamp(32px, 6vw, 56px)
     );
-    padding-bottom: 24px;
+    padding-bottom: 0;
     box-sizing: border-box;
   }
 
@@ -1996,10 +2003,11 @@ body.is-click-surprise-active *::selection {
   }
 
   .section-two {
-    gap: var(--module-title-gap);
+    min-height: 0;
+    gap: 0;
     padding-top: 0;
     padding-bottom: 0;
-    margin-top: 0;
+    margin-top: var(--section-gap-y-sm);
     margin-bottom: var(--section-gap-y-sm);
   }
 
@@ -2044,7 +2052,7 @@ body.is-click-surprise-active *::selection {
   }
 
   .section-two .logo-wall {
-    margin-top: 0;
+    margin-top: var(--module-content-gap-sm);
     position: relative;
     width: 100%;
     height: 120px;
@@ -2086,11 +2094,11 @@ body.is-click-surprise-active *::selection {
     min-height: 0;
     margin-top: 0;
     margin-bottom: var(--section-gap-y-sm);
-    gap: var(--module-title-gap);
+    gap: var(--module-content-gap-sm);
     padding-top: 0;
     padding-bottom: 0;
-    padding-left: max(16px, env(safe-area-inset-left, 0px));
-    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-left: 0;
+    padding-right: 0;
   }
 
   .section-three .photo-top,
@@ -2101,15 +2109,21 @@ body.is-click-surprise-active *::selection {
     flex-shrink: 0;
   }
 
+  .section-portfolio .portfolio-top,
+  .portfolio-featured__head h2 {
+    box-sizing: border-box;
+    padding-top: 0.34em;
+  }
+
   .section-three .photo-top {
     font-size: clamp(42px, 12vw, 58px);
   }
 
   .section-portfolio .portfolio-top {
     font-size: clamp(42px, 12vw, 58px);
-    height: 160px;
+    height: auto;
     margin-bottom: 0;
-    padding-top: 0;
+    padding-top: 0.34em;
     display: flex;
     justify-content: center;
     align-items: flex-end;
@@ -2132,7 +2146,7 @@ body.is-click-surprise-active *::selection {
     width: auto;
     min-width: 0;
     padding: 0;
-    margin: 0 32px;
+    margin: 0 16px;
   }
 
   .section-three .photo-content .photo-meta:first-of-type {
@@ -2178,6 +2192,7 @@ body.is-click-surprise-active *::selection {
   }
 
   .section-three .photo-content-bottom {
+    margin-top: 0;
     max-width: 100%;
     padding: 0;
   }
@@ -2188,9 +2203,10 @@ body.is-click-surprise-active *::selection {
   }
 
   .section-portfolio {
+    min-height: 0;
     margin-top: 0;
     margin-bottom: var(--section-gap-y-sm);
-    gap: var(--module-title-gap);
+    gap: 24px;
     height: auto;
     max-height: none;
     padding-top: 0;
@@ -2198,13 +2214,16 @@ body.is-click-surprise-active *::selection {
   }
 
   .section-portfolio .portfolio-gallery {
-    min-height: calc(278px + 120px);
+    height: auto;
+    min-height: 320px;
     padding-bottom: max(12px, env(safe-area-inset-bottom, 0px));
     box-sizing: border-box;
   }
 
   .section-portfolio .portfolio-gallery--bounce {
-    min-height: 320px;
+    height: 260px;
+    min-height: 260px;
+    align-items: flex-start;
     padding-top: 0;
   }
 
@@ -2244,15 +2263,24 @@ body.is-click-surprise-active *::selection {
     white-space: nowrap;
   }
 
+  .section-portfolio-featured {
+    min-height: 0;
+    gap: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-bottom: var(--section-gap-y-sm);
+  }
+
   .portfolio-featured__head {
     margin-top: 0;
-    margin-bottom: var(--module-title-gap);
+    margin-bottom: 0;
     padding-top: 0;
   }
 
   .portfolio-featured__head h2 {
     font-size: clamp(42px, 12vw, 58px);
     line-height: 0.9;
+    padding-top: 0.34em;
   }
 
   .portfolio-featured__head p {
@@ -2263,13 +2291,19 @@ body.is-click-surprise-active *::selection {
   .portfolio-featured {
     --featured-card-w: min(180px, 48vw);
     --featured-gap: clamp(24px, 8vw, 48px);
+    height: auto;
     padding-top: 0;
     padding-bottom: 0;
     min-height: 0;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    touch-action: pan-x pinch-zoom;
   }
 
   .portfolio-featured__stage {
-    height: clamp(300px, 88vw, 420px);
+    overflow: hidden;
+    margin-top: var(--module-content-gap-sm);
+    height: clamp(260px, 72vw, 340px);
   }
 
   .portfolio-featured__cell {
@@ -2293,8 +2327,8 @@ body.is-click-surprise-active *::selection {
     margin-bottom: var(--section-gap-y-sm);
     padding-top: 0;
     padding-bottom: 0;
-    padding-left: max(16px, env(safe-area-inset-left, 0px));
-    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-left: 0;
+    padding-right: 0;
   }
 
   /* 手机端统一通栏，避免标题区与 intro 左右挤压 */
@@ -2342,10 +2376,10 @@ body.is-click-surprise-active *::selection {
     width: auto;
     max-width: none;
     margin-top: 0;
-    margin-bottom: 24px;
+    margin-bottom: var(--module-content-gap-sm);
     margin-left: max(16px, env(safe-area-inset-left, 0px));
     margin-right: max(16px, env(safe-area-inset-right, 0px));
-    padding: 24px 0 32px;
+    padding: 24px 0 28px;
     height: auto;
     min-height: 320px;
     border-radius: 28px 28px 0 0;
@@ -2374,6 +2408,7 @@ body.is-click-surprise-active *::selection {
   }
 
   .footer-demo {
+    gap: 0;
     padding-top: 0;
     padding-bottom: 0;
   }

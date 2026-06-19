@@ -4,7 +4,7 @@
   margin: 0 auto;
   isolation: isolate;
   position: relative;
-  touch-action: none;
+  touch-action: pan-y;
 }
 
 .bounceCardsContainer .card {
@@ -63,15 +63,16 @@
 @media (max-width: 768px) {
   .bounceCardsContainer {
     width: 100% !important;
-    height: 260px !important;
-    min-height: 260px;
-    margin-top: 1rem;
-    margin-bottom: 0.5rem;
+    height: 236px !important;
+    min-height: 236px;
+    margin-top: 0;
+    margin-bottom: 0;
     position: relative;
+    touch-action: pan-y;
   }
   
   .bounceCardsContainer .card {
-    width: min(180px, 48vw);
+    width: min(164px, 43vw);
     border-radius: var(--radius-card, clamp(10px, 2.5vw, 14px));
     box-shadow: 0 12px 32px rgba(15, 23, 42, 0.12);
     left: 50%;

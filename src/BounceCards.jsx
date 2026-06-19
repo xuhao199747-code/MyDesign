@@ -21,6 +21,7 @@ export default function BounceCards({
 }) {
   const containerRef = useRef(null);
   const hasAnimatedRef = useRef(false);
+  const resetTimerRef = useRef(null);
   const [currentTransformStyles, setCurrentTransformStyles] = useState(transformStyles);
 
   useEffect(() => {
@@ -29,10 +30,10 @@ export default function BounceCards({
       
       if (isMobile) {
         const mobileTransformStyles = [
-          "rotate(5deg) translate(-120px)",
-          "rotate(-4deg) translate(-40px)",
-          "rotate(4deg) translate(40px)",
-          "rotate(-5deg) translate(120px)",
+          "rotate(5deg) translate(-104px)",
+          "rotate(-4deg) translate(-34px)",
+          "rotate(4deg) translate(34px)",
+          "rotate(-5deg) translate(104px)",
         ];
         setCurrentTransformStyles(mobileTransformStyles);
       } else {
@@ -102,29 +103,6 @@ export default function BounceCards({
 
     return () => ctx.revert();
   }, [animationStagger, easeType, animationDelay]);
-
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return undefined;
-
-    const preventBrowserGesture = (e) => {
-      e.preventDefault();
-    };
-
-    const preventTouchMove = (e) => {
-      e.preventDefault();
-    };
-
-    container.addEventListener("touchstart", preventBrowserGesture, { passive: false });
-    container.addEventListener("touchmove", preventTouchMove, { passive: false });
-    container.addEventListener("gesturestart", preventBrowserGesture, { passive: false });
-
-    return () => {
-      container.removeEventListener("touchstart", preventBrowserGesture);
-      container.removeEventListener("touchmove", preventTouchMove);
-      container.removeEventListener("gesturestart", preventBrowserGesture);
-    };
-  }, []);
 
   const getNoRotationTransform = (transformStr) => {
     const hasRotate = /rotate\([\s\S]*?\)/.test(transformStr);
@@ -206,6 +184,18 @@ export default function BounceCards({
     });
   };
 
+  const activateCard = (idx) => {
+    pushSiblings(idx);
+    if (resetTimerRef.current) {
+      window.clearTimeout(resetTimerRef.current);
+    }
+    resetTimerRef.current = window.setTimeout(() => {
+      resetCardTilt(idx);
+      resetSiblings();
+      resetTimerRef.current = null;
+    }, 1100);
+  };
+
   const updateCardTilt = (event, idx) => {
     if (!enableHover) return;
 
@@ -265,6 +255,14 @@ export default function BounceCards({
     });
   }, [currentTransformStyles, images]);
 
+  useEffect(() => {
+    return () => {
+      if (resetTimerRef.current) {
+        window.clearTimeout(resetTimerRef.current);
+      }
+    };
+  }, []);
+
   return (
     <div
       className={`bounceCardsContainer ${className}`}
@@ -290,6 +288,11 @@ export default function BounceCards({
           onMouseLeave={() => {
             resetCardTilt(idx);
             resetSiblings();
+          }}
+          onPointerUp={(event) => {
+            if (event.pointerType !== "mouse") {
+              activateCard(idx);
+            }
           }}
         >
           <div className="cardTiltSurface">
