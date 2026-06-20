@@ -229,8 +229,6 @@
   const BURST_INTENSITY_MIN = 0.22;
   const BURST_INTENSITY_MAX = 0.52;
   const BURST_DURATION_MIN = 420;
-  const BURST_DURATION_MAX = 420;
-  const IDLE_PULSE_DURATION = 680;
   const BURST_INTERVAL_MIN = 500;
   const BURST_INTERVAL_MAX = 4200;
 
@@ -261,6 +259,7 @@
       clickBoostUntil: 0,
       burstUntil: 0,
       burstIntensity: 0,
+      burstStrengthScale: 0.5,
       burstBias:
         Math.random() > 0.5
           ? 0.6 + Math.random() * 0.8
@@ -275,14 +274,6 @@
         (text.classList.contains("hero-nav__text--left") ? 0 : 280) +
         BURST_INTERVAL_MIN +
         Math.random() * (BURST_INTERVAL_MAX - BURST_INTERVAL_MIN),
-      idlePulseStart: 0,
-      idlePulseDuration: 0,
-      idlePulsePeak: 0,
-      nextIdlePulseAt:
-        performance.now() +
-        3600 +
-        Math.random() * 5600 +
-        (text.classList.contains("hero-nav__text--left") ? 0 : 420),
       isHovered: false,
       width: 0,
       height: 0,
@@ -343,25 +334,29 @@
     alphaBase,
     key,
   }) => {
-    const anchorY = Math.round(drawHeight * (0.16 + Math.random() * 0.58));
+    const seeded = (seed) => {
+      const value = Math.sin(seed * 12.9898 + 78.233) * 43758.5453;
+      return value - Math.floor(value);
+    };
+    const baseSeed = glyphWidth * 0.17 + drawHeight * 0.31 + strength * 13.7 + key.length * 0.19;
+    const anchorY = Math.round(drawHeight * (0.16 + seeded(baseSeed + 1) * 0.58));
     const scanlineClusterHeight = Math.max(
       2,
-      Math.round(2 + strength * 3 + Math.random() * 2)
+      Math.round(2 + strength * 3 + seeded(baseSeed + 2) * 2)
     );
-    const lines = Array.from({ length: lineCount }, () => ({
-      yOffset: (Math.random() * 2 - 1) * lineSpread,
+    const lines = Array.from({ length: lineCount }, (_, index) => ({
+      yOffset: (seeded(baseSeed + index * 2.1 + 3) * 2 - 1) * lineSpread,
       height: scanlineClusterHeight,
-      shiftOffset: (Math.random() * 2 - 1) * (1 + strength * 2.4),
-      alphaOffset: Math.random() * 0.035,
+      shiftOffset: (seeded(baseSeed + index * 2.1 + 4) * 2 - 1) * (1 + strength * 2.4),
+      alphaOffset: seeded(baseSeed + index * 2.1 + 5) * 0.035,
     }));
-    const bands = Array.from({ length: Math.ceil(drawHeight / 2) }, () => ({
-      shiftOffset: (Math.random() * 2 - 1) * (0.8 + strength * 3.2),
-      yOffset: (Math.random() * 2 - 1) * (0.24 + strength * 0.8),
-      stretch: 1 + (Math.random() * 0.08 - 0.04) * (0.4 + strength * 0.6),
-      dropout: Math.random(),
-      alphaOffset: Math.random() * 0.08,
+    const bands = Array.from({ length: Math.ceil(drawHeight / 2) }, (_, index) => ({
+      shiftOffset: (seeded(baseSeed + index * 1.73 + 6) * 2 - 1) * (0.8 + strength * 3.2),
+      yOffset: (seeded(baseSeed + index * 1.73 + 7) * 2 - 1) * (0.24 + strength * 0.8),
+      stretch: 1 + (seeded(baseSeed + index * 1.73 + 8) * 0.08 - 0.04) * (0.4 + strength * 0.6),
+      dropout: seeded(baseSeed + index * 1.73 + 9),
+      alphaOffset: seeded(baseSeed + index * 1.73 + 10) * 0.08,
     }));
-
     return {
       key,
       anchorY,
@@ -390,13 +385,16 @@
     const verticalPadding = isMobileViewport ? 8 : 10;
     const now = performance.now();
     if (!data.isHovered && now >= data.nextBurstAt) {
-      data.burstUntil =
-        now +
-        BURST_DURATION_MIN;
+      data.burstUntil = now + BURST_DURATION_MIN;
       data.burstIntensity =
         BURST_INTENSITY_MIN +
         Math.pow(Math.random(), 0.65) *
           (BURST_INTENSITY_MAX - BURST_INTENSITY_MIN);
+      const burstTierRoll = Math.random();
+      data.burstStrengthScale =
+        burstTierRoll < 0.24
+          ? 0.12 + Math.random() * 0.1
+          : 0.55 + Math.random() * 0.85;
       data.burstBias =
         Math.random() > 0.5
           ? 0.45 + Math.random() * 1.35
@@ -467,71 +465,18 @@
     };
 
     if (!isActiveGlitch) {
-      if (
-        now >= data.nextIdlePulseAt &&
-        now > data.idlePulseStart + data.idlePulseDuration
-      ) {
-        data.idlePulseStart = now;
-        data.idlePulseDuration = IDLE_PULSE_DURATION;
-        data.idlePulsePeak = 0.36 + Math.random() * 0.18;
-        data.nextIdlePulseAt =
-          now +
-          data.idlePulseDuration +
-          3400 +
-          Math.random() * 7200;
-        data.idlePackage = null;
-      }
+      const settleSliceHeight = 3;
 
-      const idleDamage =
-        now < data.idlePulseStart + data.idlePulseDuration
-          ? data.idlePulsePeak
-          : 0;
-
-      const combinedPulseActive = idleDamage > 0.16;
-      const assembledStrength = combinedPulseActive ? 0.16 : 0.022;
-      const assembledSliceHeight = 2;
-      if (
-        combinedPulseActive &&
-        (!data.idlePackage || data.idlePackage.key !== data.idlePulseStart)
-      ) {
-        data.idlePackage = createEffectPackage({
-          drawHeight,
-          glyphWidth,
-          strength: idleDamage,
-          direction: staticNoise(label.length * 41 + idleDamage * 100) > 0.5 ? 1 : -1,
-          lineCount: 2 + Math.round(idleDamage * 2),
-          lineSpread: 1 + idleDamage * 2.2,
-          shiftBase: 4 + idleDamage * 6,
-          alphaBase: 0.08 + idleDamage * 0.04,
-          key: data.idlePulseStart,
-        });
-      }
-      if (!combinedPulseActive) {
-        data.idlePackage = null;
-      }
-
-      for (let y = 0; y < drawHeight; y += assembledSliceHeight) {
-        const bandIndex = Math.floor(y / assembledSliceHeight);
-        const bandPackage = data.idlePackage?.bands[bandIndex] || null;
-        const bandHeight = Math.min(assembledSliceHeight, drawHeight - y);
-        const bandProgress = drawHeight <= assembledSliceHeight ? 0 : y / (drawHeight - assembledSliceHeight);
+      for (let y = 0; y < drawHeight; y += settleSliceHeight) {
+        const bandIndex = Math.floor(y / settleSliceHeight);
+        const bandHeight = Math.min(settleSliceHeight, drawHeight - y);
+        const bandProgress =
+          drawHeight <= settleSliceHeight ? 0 : y / (drawHeight - settleSliceHeight);
         const seed = staticNoise(y + label.length * 17 + (isRightAligned ? 11 : 5));
-        const offsetX =
-          (seed - 0.5) *
-          (combinedPulseActive ? 1.6 + idleDamage * 2.8 : 0.18 + bandProgress * 0.14) +
-          (bandPackage?.shiftOffset || 0);
-        const offsetY =
-          combinedPulseActive
-            ? (staticNoise(y + 91) - 0.5) * (0.6 + idleDamage * 1.4) + (bandPackage?.yOffset || 0)
-            : 0;
-        const widthScale =
-          0.9985 -
-          assembledStrength * 0.02 +
-          staticNoise(y + 31) * (combinedPulseActive ? 0.012 : 0.004) +
-          ((bandPackage?.stretch || 1) - 1);
-        ctx.globalAlpha = combinedPulseActive
-          ? 0.86 + staticNoise(y + 93) * 0.06 + (bandPackage?.alphaOffset || 0)
-          : 0.96 + staticNoise(y + 93) * 0.03;
+        const offsetX = (seed - 0.5) * (0.16 + bandProgress * 0.12);
+        const offsetY = (staticNoise(y + 91) - 0.5) * 0.08;
+        const widthScale = 0.999 + staticNoise(y + 31) * 0.002;
+        ctx.globalAlpha = 0.97 + staticNoise(y + 93) * 0.02;
         ctx.drawImage(
           offscreen,
           0,
@@ -545,108 +490,39 @@
         );
       }
 
-      if (combinedPulseActive) {
-        const fractureCount = 8 + Math.round(idleDamage * 10);
-        ctx.save();
-        ctx.globalCompositeOperation = "destination-out";
-        for (let i = 0; i < fractureCount; i++) {
-          const fractureWidth = Math.max(
-            2,
-            Math.round(glyphWidth * (0.008 + Math.random() * 0.022))
-          );
-          const fractureHeight = Math.max(
-            8,
-            Math.round(drawHeight * (0.28 + Math.random() * 0.34))
-          );
-          const fractureX = drawX + Math.round((glyphWidth - fractureWidth) * Math.random());
-          const fractureY = Math.round((drawHeight - fractureHeight) * Math.random());
-          ctx.fillRect(fractureX, fractureY, fractureWidth, fractureHeight);
-        }
-        ctx.restore();
-
-        const idlePackage = data.idlePackage;
-        for (let i = 0; i < idlePackage.lines.length; i++) {
-          const linePackage = idlePackage.lines[i];
-          const lineY = Math.max(
-            0,
-            Math.min(
-              drawHeight - 2,
-              Math.round(idlePackage.anchorY + linePackage.yOffset)
-            )
-          );
-          const lineHeight = linePackage.height;
-          const lineShift = idlePackage.shift + linePackage.shiftOffset;
-          ctx.globalAlpha = idlePackage.alpha + linePackage.alphaOffset;
-          ctx.drawImage(
-            offscreen,
-            0,
-            Math.round(lineY * data.dpr),
-            Math.round(glyphWidth * data.dpr),
-            Math.round(lineHeight * data.dpr),
-            drawX + lineShift,
-            lineY,
-            glyphWidth,
-            lineHeight
-          );
-        }
-
-        const ghostShift = idlePackage.ghostShiftA;
-        ctx.globalAlpha = idlePackage.ghostAlphaA;
-        ctx.drawImage(
-          offscreen,
-          0,
-          0,
-          Math.round(glyphWidth * data.dpr),
-          offscreen.height,
-          drawX + ghostShift,
-          0,
-          glyphWidth,
-          drawHeight
-        );
-        ctx.globalAlpha = idlePackage.ghostAlphaB;
-        ctx.drawImage(
-          offscreen,
-          0,
-          0,
-          Math.round(glyphWidth * data.dpr),
-          offscreen.height,
-          drawX + idlePackage.ghostShiftB,
-          0,
-          glyphWidth,
-          drawHeight
-        );
-      }
-
       ctx.restore();
       return;
     }
 
+    const cycle = ((now % 1600) / 1600) * Math.PI * 2;
     const sliceHeight = GLITCH_MODE
       ? burstActive || data.isHovered
         ? 2
         : 3
       : 5;
     const maxOffset = FUZZ_RANGE * data.currentIntensity;
+    const burstStrength = burstActive ? data.burstStrengthScale : 0.6;
     const disassembleStrength = data.isHovered
-      ? 1.28
+      ? 0.92
       : burstActive
-        ? 0.9
-        : 0.58;
-    const dropoutChance = data.isHovered
-      ? 0.34
+        ? 0.42 + burstStrength * 0.34
+        : 0.42;
+    const verticalScatter = data.isHovered
+      ? 9
       : burstActive
-        ? 0.4
-        : 0.08;
-    const verticalScatter = data.isHovered ? 15 : burstActive ? 10 : 4;
-    const activeKey = data.isHovered ? `hover-${data.burstUntil}` : `burst-${data.burstUntil}`;
+        ? 3 + burstStrength * 4
+        : 3;
+    const activeKey = data.isHovered
+      ? `hover-${data.burstUntil}`
+      : `burst-${data.burstUntil}`;
     if (!data.activePackage || data.activePackage.key !== activeKey) {
-        data.activePackage = createEffectPackage({
-          drawHeight,
-          glyphWidth,
-          strength: disassembleStrength,
-          direction: data.burstVector,
-        lineCount: data.isHovered ? 3 : burstActive ? 4 : 2,
-        lineSpread: 1.1 + maxOffset * 0.045,
+      data.activePackage = createEffectPackage({
+        drawHeight,
+        glyphWidth,
+        strength: disassembleStrength,
+        direction: data.burstVector,
+        lineCount: 0,
+        lineSpread: 0,
         shiftBase: 4 + maxOffset * 0.28,
         alphaBase: data.isHovered ? 0.05 : 0.07,
         key: activeKey,
@@ -661,7 +537,7 @@
       const bandProgress = drawHeight <= sliceHeight ? 0 : y / (drawHeight - sliceHeight);
       const randomBias =
         (Math.random() * 2 - 1) *
-        (0.45 + disassembleStrength * 0.35 + Math.random() * 0.55);
+        (0.24 + disassembleStrength * 0.18 + Math.random() * 0.24);
       const waveTempo =
         data.burstTempo *
         (0.85 + Math.random() * 0.7) *
@@ -671,116 +547,124 @@
           now * waveTempo +
             y * (0.12 + data.burstSliceBoost * 0.42 + Math.random() * 0.08)
         ) *
-          (0.2 + data.burstSliceBoost * 1.05 + Math.random() * 0.28) +
+          (0.12 + data.burstSliceBoost * 0.46 + Math.random() * 0.12) +
         data.burstBias *
           data.burstVector *
-          (0.12 + bandProgress * (0.12 + Math.random() * 0.18)) +
+          (0.08 + bandProgress * (0.08 + Math.random() * 0.1)) +
         randomBias;
       const scatterX =
         ((Math.random() * 2 - 1) *
-          (0.9 + disassembleStrength * 1.4 + Math.random() * 0.9) +
+          (0.38 + disassembleStrength * 0.52 + Math.random() * 0.28) +
           horizontalBias) *
-        maxOffset *
-        disassembleStrength +
-        (bandPackage?.shiftOffset || 0);
+          maxOffset *
+          disassembleStrength +
+        (bandPackage?.shiftOffset || 0) * 0.18;
       const scatterY =
         (Math.random() * 2 - 1) *
-        verticalScatter *
-        (0.18 + bandProgress * (0.8 + Math.random() * 0.8) + Math.random() * 0.45) *
-        disassembleStrength +
-        (bandPackage?.yOffset || 0);
-      const stretch = (1 + (Math.random() * 0.14 - 0.07) * disassembleStrength) + ((bandPackage?.stretch || 1) - 1);
+          verticalScatter *
+          (0.18 +
+            bandProgress * (0.36 + Math.random() * 0.32) +
+            Math.random() * 0.18) *
+          disassembleStrength +
+        (bandPackage?.yOffset || 0) * 0.5;
+      const stretch =
+        1 +
+        (Math.random() * 0.08 - 0.04) * disassembleStrength +
+        ((bandPackage?.stretch || 1) - 1) * 0.45;
       const destWidth = Math.max(1, glyphWidth * stretch);
       const destX = drawX + scatterX - (destWidth - glyphWidth) * 0.5;
-      const shouldDropBand =
-        Math.random() <
-        dropoutChance *
-          (0.35 + bandProgress * (0.7 + Math.random() * 0.9));
-
-      if (!shouldDropBand) {
-        ctx.globalAlpha = (data.isHovered ? 0.72 : 0.62) + Math.random() * 0.1 + (bandPackage?.alphaOffset || 0);
-        ctx.drawImage(
-          offscreen,
-          0,
-          Math.round(y * data.dpr),
-          Math.round(glyphWidth * data.dpr),
-          Math.round(bandHeight * data.dpr),
-          destX,
-          y + scatterY,
-          destWidth,
-          bandHeight
-        );
-      }
-
-    }
-
-    for (let i = 0; i < activePackage.lines.length; i++) {
-      const linePackage = activePackage.lines[i];
-      const lineY = Math.max(
-        0,
-        Math.min(
-          drawHeight - 2,
-          Math.round(activePackage.anchorY + linePackage.yOffset)
-        )
-      );
-      const lineHeight = linePackage.height;
-      const lineShift = activePackage.shift + linePackage.shiftOffset;
-      ctx.globalAlpha = activePackage.alpha + linePackage.alphaOffset;
+      ctx.globalAlpha =
+        (data.isHovered ? 0.72 : 0.62) +
+        Math.random() * 0.1 +
+        (bandPackage?.alphaOffset || 0);
       ctx.drawImage(
         offscreen,
         0,
-        Math.round(lineY * data.dpr),
+        Math.round(y * data.dpr),
         Math.round(glyphWidth * data.dpr),
-        Math.round(lineHeight * data.dpr),
-        drawX + lineShift,
-        lineY,
+        Math.round(bandHeight * data.dpr),
+        destX,
+        y + scatterY,
+        destWidth,
+        bandHeight
+      );
+
+      const echoShift =
+        ((Math.random() * 2 - 1) * 0.7 +
+          Math.sin(cycle + bandIndex * 0.72) * 0.35) *
+        maxOffset *
+        0.08 *
+        disassembleStrength;
+      ctx.globalAlpha = data.isHovered ? 0.18 : 0.12;
+      ctx.drawImage(
+        offscreen,
+        0,
+        Math.round(y * data.dpr),
+        Math.round(glyphWidth * data.dpr),
+        Math.round(bandHeight * data.dpr),
+        drawX + echoShift + (bandPackage?.shiftOffset || 0) * 0.18,
+        y + scatterY * 0.42,
         glyphWidth,
-        lineHeight
+        bandHeight
       );
     }
 
-    const ghostShift = activePackage.ghostShiftA;
-    ctx.globalAlpha = data.isHovered ? activePackage.ghostAlphaA * 0.55 : activePackage.ghostAlphaA;
+    ctx.save();
+    ctx.globalCompositeOperation = "destination-out";
+    const fractureStrength = data.isHovered
+      ? 1
+      : burstActive
+        ? Math.max(0.18, burstStrength)
+        : 0;
+    const fractureCount = Math.max(
+      0,
+      Math.round(2 + fractureStrength * 5)
+    );
+    for (let i = 0; i < fractureCount; i++) {
+      const widthSeed = staticNoise(now * 0.003 + i * 17.3);
+      const heightSeed = staticNoise(now * 0.002 + i * 11.7);
+      const xSeed = staticNoise(now * 0.0016 + i * 9.1);
+      const ySeed = staticNoise(now * 0.0019 + i * 13.4);
+      const fractureWidth = Math.max(
+        1,
+        Math.round(glyphWidth * (0.005 + widthSeed * 0.012))
+      );
+      const fractureHeight = Math.max(
+        4,
+        Math.round(drawHeight * (0.12 + heightSeed * 0.22))
+      );
+      const fractureX =
+        drawX + Math.round((glyphWidth - fractureWidth) * xSeed);
+      const fractureY = Math.round((drawHeight - fractureHeight) * ySeed);
+      ctx.fillRect(fractureX, fractureY, fractureWidth, fractureHeight);
+    }
+    ctx.restore();
+
+    ctx.globalAlpha = data.isHovered ? 0.08 : 0.05;
     ctx.drawImage(
       offscreen,
       0,
       0,
       Math.round(glyphWidth * data.dpr),
       offscreen.height,
-      drawX + ghostShift,
+      drawX + activePackage.ghostShiftA * (1 + Math.sin(cycle) * 0.18),
       0,
       glyphWidth,
       drawHeight
     );
-    ctx.globalAlpha = data.isHovered ? activePackage.ghostAlphaB * 0.55 : activePackage.ghostAlphaB;
+    ctx.globalAlpha = data.isHovered ? 0.05 : 0.03;
     ctx.drawImage(
       offscreen,
       0,
       0,
       Math.round(glyphWidth * data.dpr),
       offscreen.height,
-      drawX + activePackage.ghostShiftB,
+      drawX + activePackage.ghostShiftB * (1 + Math.cos(cycle * 1.18) * 0.16),
       0,
       glyphWidth,
       drawHeight
     );
 
-    ctx.globalAlpha = data.isHovered ? 0.78 : burstActive ? 0.8 : 0.9;
-    ctx.shadowColor = burstActive || data.isHovered
-      ? "rgba(255,255,255,0.18)"
-      : "rgba(255,255,255,0.18)";
-    ctx.shadowBlur = burstActive || data.isHovered ? 3 : 2;
-    ctx.drawImage(
-      offscreen,
-      0,
-      0,
-      Math.round(glyphWidth * data.dpr),
-      offscreen.height,
-      drawX,
-      0,
-      glyphWidth,
-      drawHeight
-    );
     ctx.restore();
   };
 
