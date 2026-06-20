@@ -43,4 +43,5 @@ copyDir('vendor', 'dist/vendor');
 copyDir('js', 'dist/js');
 copyFile('script.js', 'dist/script.js');
 copyFile('styles.css', 'dist/styles.css');
+copyFile('project-detail.css', 'dist/project-detail.css');
 copyFile('skills-lock.json', 'dist/skills-lock.json');

@@ -213,12 +213,8 @@ export default function BounceCards({
   const isMobileInteraction = () =>
     typeof window !== "undefined" && window.innerWidth <= 768;
 
-  const openCardLink = (href, target) => {
+  const openCardLink = (href) => {
     if (!href) return;
-    if (target === "_blank") {
-      window.open(href, "_blank", "noopener,noreferrer");
-      return;
-    }
     window.location.assign(href);
   };
 
@@ -308,8 +304,6 @@ export default function BounceCards({
           key={item.slug || item.image}
           className={`card card-${idx}`}
           href={item.href || `./project.html?slug=${item.slug}`}
-          target="_blank"
-          rel="noopener noreferrer"
           style={{
             transform: `translate(-50%, -50%) ${currentTransformStyles[idx] ?? "none"}`,
             top: "50%",
@@ -352,9 +346,9 @@ export default function BounceCards({
               window.clearTimeout(navigationTimerRef.current);
             }
 
-            const { href, target } = event.currentTarget;
+            const { href } = event.currentTarget;
             navigationTimerRef.current = window.setTimeout(() => {
-              openCardLink(href, target);
+              openCardLink(href);
               navigationTimerRef.current = null;
             }, 360);
           }}

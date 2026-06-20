@@ -2213,8 +2213,6 @@ if (document.readyState === 'loading') {
     cell.dataset.href = item.href;
     cell.dataset.title = item.title;
     cell.href = item.href;
-    cell.target = "_blank";
-    cell.rel = "noopener noreferrer";
     cell.setAttribute("aria-label", `查看 ${item.title}`);
     cell.innerHTML =
       '<span class="portfolio-featured__tilt"><span class="portfolio-featured__media"><img alt="" /></span></span><span class="portfolio-featured__badge"></span>';
@@ -2631,6 +2629,12 @@ if (document.readyState === 'loading') {
     "好事正在发生",
     "今天也灵感满格",
     "灵感捕获成功",
+    "脑洞正在偷偷加载",
+    "这一下点中了快乐",
+    "今日份惊喜已签收",
+    "好运正在向你靠近",
+    "创意雷达滴滴作响",
+    "你的想法有点会发光",
   ];
 
   const layer = document.createElement("div");
