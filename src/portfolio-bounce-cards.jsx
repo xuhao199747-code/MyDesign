@@ -1,36 +1,25 @@
 import React from "react";
-import { createRoot } from "react-dom/client";
 import BounceCards from "./BounceCards.jsx";
-import { projectCatalog } from "./projectCatalog.js";
+import { mountReactRoot } from "./lib/mount-react-root.js";
+import { getSiteConfigSection } from "./lib/site-config.js";
+import { getProjectsBySlugs } from "./projectCatalog.js";
 
-const mount = document.getElementById("portfolioBounceCardsRoot");
+const portfolioBounceCardsConfig = getSiteConfigSection("portfolioBounceCards");
+const cards = getProjectsBySlugs(portfolioBounceCardsConfig.cardSlugs || []);
 
-const cards = [
-  projectCatalog.find((item) => item.slug === "profile"),
-  projectCatalog.find((item) => item.slug === "sneakers"),
-  projectCatalog.find((item) => item.slug === "about"),
-  projectCatalog.find((item) => item.slug === "portrait"),
-].filter(Boolean);
-
-const transformStyles = [
-  "rotate(5deg) translate(-340px)",
-  "rotate(-4deg) translate(-115px)",
-  "rotate(4deg) translate(115px)",
-  "rotate(-5deg) translate(340px)",
-];
-
-if (mount) {
-  createRoot(mount).render(
+export function mountPortfolioBounceCards() {
+  const mount = document.getElementById("portfolioBounceCardsRoot");
+  return mountReactRoot(
+    mount,
     <BounceCards
       className="custom-bounceCards"
       cards={cards}
-      containerWidth={700}
-      containerHeight={380}
-      animationDelay={0.15}
-      animationStagger={0.08}
-      easeType="elastic.out(1, 0.5)"
-      transformStyles={transformStyles}
-      enableHover
+      animationDelay={portfolioBounceCardsConfig.animationDelay}
+      animationStagger={portfolioBounceCardsConfig.animationStagger}
+      easeType={portfolioBounceCardsConfig.easeType}
+      transformStyles={portfolioBounceCardsConfig.desktopTransformStyles}
+      mobileTransformStyles={portfolioBounceCardsConfig.mobileTransformStyles}
+      enableHover={portfolioBounceCardsConfig.enableHover !== false}
     />
   );
 }

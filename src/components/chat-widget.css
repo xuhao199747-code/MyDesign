@@ -1,0 +1,132 @@
+.site-assistant {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 9999;
+  font-family: "DM Sans", sans-serif;
+  pointer-events: none;
+}
+
+.site-assistant__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  pointer-events: auto;
+}
+
+.site-assistant__trigger {
+  position: relative;
+  z-index: 2;
+  border: 0;
+  border-radius: 999px;
+  background: #111111;
+  color: #ffffff;
+  padding: 14px 20px;
+  font-size: 14px;
+  cursor: pointer;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
+  pointer-events: auto;
+}
+
+.site-assistant__panel {
+  position: relative;
+  z-index: 2;
+  width: min(360px, calc(100vw - 32px));
+  height: min(560px, calc(100vh - 48px));
+  display: flex;
+  flex-direction: column;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.16);
+  overflow: hidden;
+  pointer-events: auto;
+}
+
+.site-assistant__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 18px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.site-assistant__title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #111111;
+}
+
+.site-assistant__subtitle {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #666666;
+}
+
+.site-assistant__icon {
+  border: 0;
+  background: transparent;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  color: #111111;
+}
+
+.site-assistant__body {
+  flex: 1;
+  overflow: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.site-assistant__bubble {
+  max-width: 88%;
+  border-radius: 18px;
+  padding: 12px 14px;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.site-assistant__bubble--assistant {
+  background: #f2f2f2;
+  color: #111111;
+}
+
+.site-assistant__bubble--user {
+  align-self: flex-end;
+  background: #111111;
+  color: #ffffff;
+}
+
+.site-assistant__form {
+  display: flex;
+  gap: 10px;
+  padding: 14px 16px 16px;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.site-assistant__input {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 14px;
+  padding: 12px 14px;
+  font-size: 13px;
+  outline: none;
+}
+
+.site-assistant__send {
+  border: 0;
+  border-radius: 14px;
+  background: #111111;
+  color: #ffffff;
+  padding: 0 16px;
+  font-size: 13px;
+  cursor: pointer;
+}

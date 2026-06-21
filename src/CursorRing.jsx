@@ -23,8 +23,18 @@ export default function CursorRing() {
 
     let frameId = 0;
     let isPointerActive = false;
+    let isLocked = false;
+
+    const isInsideAssistant = (target) =>
+      target instanceof Element &&
+      Boolean(target.closest("#chatWidgetRoot, .site-assistant__panel, .site-assistant__trigger"));
 
     const updatePointer = (event) => {
+      if (isInsideAssistant(event.target)) {
+        hide();
+        return;
+      }
+      if (isLocked) return;
       isPointerActive = true;
       pointerRef.current.x = event.clientX;
       pointerRef.current.y = event.clientY;
@@ -35,6 +45,12 @@ export default function CursorRing() {
     };
 
     const updateInteractiveState = (event) => {
+      if (isInsideAssistant(event.target)) {
+        lens.classList.remove("is-interactive");
+        ring.classList.remove("is-interactive");
+        return;
+      }
+      if (isLocked) return;
       const target = event.target;
       const isInteractive =
         target instanceof Element &&
@@ -65,6 +81,13 @@ export default function CursorRing() {
       dot.classList.remove("is-visible");
     };
 
+    const handleCursorLock = (event) => {
+      isLocked = Boolean(event.detail?.locked);
+      if (isLocked) {
+        hide();
+      }
+    };
+
     const show = () => {
       if (!isPointerActive) return;
       lens.classList.add("is-visible");
@@ -76,6 +99,7 @@ export default function CursorRing() {
     window.addEventListener("pointermove", updateInteractiveState, {
       passive: true,
     });
+    window.addEventListener("site-assistant:cursor-lock", handleCursorLock);
     window.addEventListener("pointerleave", hide);
     window.addEventListener("blur", hide);
     window.addEventListener("focus", show);
@@ -84,6 +108,7 @@ export default function CursorRing() {
     return () => {
       window.removeEventListener("pointermove", updatePointer);
       window.removeEventListener("pointermove", updateInteractiveState);
+      window.removeEventListener("site-assistant:cursor-lock", handleCursorLock);
       window.removeEventListener("pointerleave", hide);
       window.removeEventListener("blur", hide);
       window.removeEventListener("focus", show);

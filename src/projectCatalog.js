@@ -41,6 +41,16 @@ export const projectCatalog = [
   },
 ];
 
+const projectCatalogBySlug = new Map(
+  projectCatalog.map((item) => [item.slug, item])
+);
+
 export function getProjectBySlug(slug) {
-  return projectCatalog.find((item) => item.slug === slug) || projectCatalog[0];
+  return projectCatalogBySlug.get(slug) || projectCatalog[0];
+}
+
+export function getProjectsBySlugs(slugs = []) {
+  return slugs
+    .map((slug) => projectCatalogBySlug.get(slug))
+    .filter(Boolean);
 }

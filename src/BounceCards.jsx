@@ -6,8 +6,6 @@ export default function BounceCards({
   className = "",
   cards = [],
   images = [],
-  containerWidth = 500,
-  containerHeight = 250,
   animationDelay = 1,
   animationStagger = 0.08,
   easeType = "elastic.out(1, 0.5)",
@@ -18,13 +16,24 @@ export default function BounceCards({
     "rotate(5deg) translate(70px)",
     "rotate(-5deg) translate(150px)",
   ],
+  mobileTransformStyles = [
+    "rotate(5deg) translate(-104px)",
+    "rotate(-4deg) translate(-34px)",
+    "rotate(4deg) translate(34px)",
+    "rotate(-5deg) translate(104px)",
+  ],
   enableHover = true,
 }) {
   const containerRef = useRef(null);
+  const cardRefs = useRef([]);
   const hasAnimatedRef = useRef(false);
   const resetTimerRef = useRef(null);
   const navigationTimerRef = useRef(null);
   const lastPointerTypeRef = useRef("mouse");
+  const tiltFrameRef = useRef(0);
+  const tiltPointRef = useRef(null);
+  const activeTiltRectRef = useRef(null);
+  const [isMobileLayout, setIsMobileLayout] = useState(false);
   const [currentTransformStyles, setCurrentTransformStyles] = useState(transformStyles);
   const [raisedCardIndex, setRaisedCardIndex] = useState(null);
   const entries = cards.length
@@ -37,29 +46,28 @@ export default function BounceCards({
       }));
 
   useEffect(() => {
-    const updateTransformStyles = () => {
-      const isMobile = window.innerWidth <= 768;
-      
-      if (isMobile) {
-        const mobileTransformStyles = [
-          "rotate(5deg) translate(-104px)",
-          "rotate(-4deg) translate(-34px)",
-          "rotate(4deg) translate(34px)",
-          "rotate(-5deg) translate(104px)",
-        ];
-        setCurrentTransformStyles(mobileTransformStyles);
-      } else {
-        setCurrentTransformStyles(transformStyles);
-      }
+    if (!window.matchMedia) {
+      setIsMobileLayout(window.innerWidth <= 768);
+      return undefined;
+    }
+
+    const mediaQuery = window.matchMedia("(max-width: 768px)");
+
+    const syncLayoutMode = (event) => {
+      setIsMobileLayout(event.matches);
     };
 
-    updateTransformStyles();
-    window.addEventListener("resize", updateTransformStyles);
-    
+    setIsMobileLayout(mediaQuery.matches);
+    mediaQuery.addEventListener("change", syncLayoutMode);
+
     return () => {
-      window.removeEventListener("resize", updateTransformStyles);
+      mediaQuery.removeEventListener("change", syncLayoutMode);
     };
-  }, [transformStyles]);
+  }, []);
+
+  useEffect(() => {
+    setCurrentTransformStyles(isMobileLayout ? mobileTransformStyles : transformStyles);
+  }, [isMobileLayout, mobileTransformStyles, transformStyles]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -85,11 +93,26 @@ export default function BounceCards({
         );
       };
 
+      if ("IntersectionObserver" in window) {
+        const observer = new IntersectionObserver(
+          (entries) => {
+            const [entry] = entries;
+            if (!entry?.isIntersecting || hasAnimatedRef.current) return;
+            runIntro();
+            observer.disconnect();
+          },
+          {
+            root: null,
+            rootMargin: "0px 0px -12% 0px",
+            threshold: 0.12,
+          }
+        );
+
+        observer.observe(container);
+        return () => observer.disconnect();
+      }
+
       const checkInView = () => {
-        if (hasAnimatedRef.current) {
-          cleanup();
-          return;
-        }
         const rect = container.getBoundingClientRect();
         const viewportHeight =
           window.innerHeight || document.documentElement.clientHeight;
@@ -102,13 +125,11 @@ export default function BounceCards({
       const cleanup = () => {
         window.removeEventListener("scroll", checkInView);
         window.removeEventListener("resize", checkInView);
-        window.clearInterval(viewCheckTimer);
       };
 
       window.addEventListener("scroll", checkInView, { passive: true });
       window.addEventListener("resize", checkInView);
       window.requestAnimationFrame(checkInView);
-      const viewCheckTimer = window.setInterval(checkInView, 180);
 
       return cleanup;
     }, containerRef);
@@ -140,15 +161,15 @@ export default function BounceCards({
       : `${baseTransform} translate(${offsetX}px)`;
   };
 
-  const pushSiblings = (hoveredIdx) => {
-    if (!enableHover || !containerRef.current) return;
+  const getCardNode = (idx) => cardRefs.current[idx] || null;
 
-    const q = gsap.utils.selector(containerRef);
-    const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
-    const hoverOffset = isMobile ? -110 : -160;
+  const pushSiblings = (hoveredIdx) => {
+    if (!enableHover) return;
+    const hoverOffset = isMobileLayout ? -110 : -160;
 
     entries.forEach((_, i) => {
-      const target = q(`.card-${i}`);
+      const target = getCardNode(i);
+      if (!target) return;
       gsap.killTweensOf(target);
 
       const baseTransform = currentTransformStyles[i] || "none";
@@ -179,12 +200,11 @@ export default function BounceCards({
   };
 
   const resetSiblings = () => {
-    if (!enableHover || !containerRef.current) return;
-
-    const q = gsap.utils.selector(containerRef);
+    if (!enableHover) return;
 
     entries.forEach((_, i) => {
-      const target = q(`.card-${i}`);
+      const target = getCardNode(i);
+      if (!target) return;
       gsap.killTweensOf(target);
       const baseTransform = currentTransformStyles[i] || "none";
       gsap.to(target, {
@@ -211,24 +231,25 @@ export default function BounceCards({
   };
 
   const isMobileInteraction = () =>
-    typeof window !== "undefined" && window.innerWidth <= 768;
+    isMobileLayout;
 
   const openCardLink = (href) => {
     if (!href) return;
     window.location.assign(href);
   };
 
-  const updateCardTilt = (event, idx) => {
+  const applyCardTilt = (idx, clientX, clientY) => {
     if (!enableHover) return;
-
-    const card = event.currentTarget;
-    const rect = card.getBoundingClientRect();
+    const target = getCardNode(idx);
+    if (!target) return;
+    const rect = activeTiltRectRef.current || target.getBoundingClientRect();
+    activeTiltRectRef.current = rect;
     const edgeInset = 10;
     const isInsideStableHoverZone =
-      event.clientX >= rect.left + edgeInset &&
-      event.clientX <= rect.right - edgeInset &&
-      event.clientY >= rect.top + edgeInset &&
-      event.clientY <= rect.bottom - edgeInset;
+      clientX >= rect.left + edgeInset &&
+      clientX <= rect.right - edgeInset &&
+      clientY >= rect.top + edgeInset &&
+      clientY <= rect.bottom - edgeInset;
 
     if (!isInsideStableHoverZone) {
       resetCardTilt(idx);
@@ -239,22 +260,30 @@ export default function BounceCards({
     const centerY = rect.top + rect.height / 2;
     const rotateX = Math.max(
       -10,
-      Math.min(10, ((event.clientY - centerY) / (rect.height / 2)) * -10)
+      Math.min(10, ((clientY - centerY) / (rect.height / 2)) * -10)
     );
     const rotateY = Math.max(
       -10,
-      Math.min(10, ((event.clientX - centerX) / (rect.width / 2)) * 10)
+      Math.min(10, ((clientX - centerX) / (rect.width / 2)) * 10)
     );
-
-    const target = containerRef.current?.querySelector(`.card-${idx}`);
-    if (!target) return;
     target.style.setProperty("--card-tilt-x", `${rotateX.toFixed(3)}deg`);
     target.style.setProperty("--card-tilt-y", `${rotateY.toFixed(3)}deg`);
     target.style.setProperty("--card-tilt-scale", "1.025");
   };
 
+  const queueCardTilt = (idx, clientX, clientY) => {
+    tiltPointRef.current = { idx, clientX, clientY };
+    if (tiltFrameRef.current) return;
+    tiltFrameRef.current = window.requestAnimationFrame(() => {
+      tiltFrameRef.current = 0;
+      const point = tiltPointRef.current;
+      if (!point) return;
+      applyCardTilt(point.idx, point.clientX, point.clientY);
+    });
+  };
+
   const resetCardTilt = (idx) => {
-    const target = containerRef.current?.querySelector(`.card-${idx}`);
+    const target = getCardNode(idx);
     if (!target) return;
     target.style.setProperty("--card-tilt-x", "0deg");
     target.style.setProperty("--card-tilt-y", "0deg");
@@ -263,10 +292,8 @@ export default function BounceCards({
 
   useEffect(() => {
     if (!containerRef.current) return;
-    
-    const q = gsap.utils.selector(containerRef);
     entries.forEach((_, i) => {
-      const target = q(`.card-${i}`);
+      const target = getCardNode(i);
       if (target) {
         gsap.to(target, {
           transform: `translate(-50%, -50%) ${currentTransformStyles[i] ?? "none"}`,
@@ -284,6 +311,9 @@ export default function BounceCards({
       }
       if (navigationTimerRef.current) {
         window.clearTimeout(navigationTimerRef.current);
+      }
+      if (tiltFrameRef.current) {
+        window.cancelAnimationFrame(tiltFrameRef.current);
       }
     };
   }, []);
@@ -303,6 +333,9 @@ export default function BounceCards({
         <a
           key={item.slug || item.image}
           className={`card card-${idx}`}
+          ref={(node) => {
+            cardRefs.current[idx] = node;
+          }}
           href={item.href || `./project.html?slug=${item.slug}`}
           style={{
             transform: `translate(-50%, -50%) ${currentTransformStyles[idx] ?? "none"}`,
@@ -311,11 +344,13 @@ export default function BounceCards({
             zIndex: raisedCardIndex === idx ? 8 : undefined,
           }}
           onMouseEnter={() => {
+            activeTiltRectRef.current = getCardNode(idx)?.getBoundingClientRect() || null;
             setRaisedCardIndex(idx);
             pushSiblings(idx);
           }}
-          onMouseMove={(event) => updateCardTilt(event, idx)}
+          onMouseMove={(event) => queueCardTilt(idx, event.clientX, event.clientY)}
           onMouseLeave={() => {
+            activeTiltRectRef.current = null;
             resetCardTilt(idx);
             resetSiblings();
             setRaisedCardIndex(null);
@@ -354,7 +389,13 @@ export default function BounceCards({
           }}
         >
           <div className="cardTiltSurface">
-            <img className="image" src={item.image} alt={item.title || `card-${idx}`} />
+            <img
+              className="image"
+              src={item.image}
+              alt={item.title || `card-${idx}`}
+              loading="lazy"
+              decoding="async"
+            />
           </div>
         </a>
       ))}

@@ -158,12 +158,24 @@ body {
   --color-dark-surface: #171717;
   --focus-ring: rgba(59, 130, 246, 0.5);
   --sprite-stage-bg: #ffffff;
+  --page-max-width: 1200px;
+  --page-frame-gutter: 24px;
+  --page-content-gutter: 120px;
+  --page-frame-width: min(
+    var(--page-max-width),
+    calc(100% - (var(--page-frame-gutter) * 2))
+  );
+  --page-content-width: min(
+    var(--page-max-width),
+    calc(100% - (var(--page-content-gutter) * 2))
+  );
   --screen-module-height: 100svh;
   --screen-module-pad-y: 88px;
   --module-title-gap: 32px;
   --portfolio-title-size: clamp(52px, 7vw, 84px);
   --radius-card: 12px;
   --radius-pill: 9999px;
+  --radius-panel: 40px;
   --module-content-space: calc(
     var(--screen-module-height) - (var(--screen-module-pad-y) * 2)
   );
@@ -226,7 +238,7 @@ body.is-click-surprise-active *::selection {
 
 /* 全站内容区最大宽度 1200px；与区块类并列使用，如 class="container section-two" */
 .container {
-  width: min(1200px, calc(100% - 240px));
+  width: var(--page-content-width);
   margin: 0 auto;
 }
 
@@ -240,7 +252,7 @@ body.is-click-surprise-active *::selection {
   display: flex;
   align-items: center;
   margin: 0 auto;
-  width: min(1200px, calc(100% - 48px));
+  width: var(--page-frame-width);
   height: 48px;
   padding: 0 20px 0 5px;
   border-radius: 200px;
@@ -547,7 +559,7 @@ body.is-click-surprise-active *::selection {
   align-items: center;
   pointer-events: none;
   width: 100%;
-  max-width: 1200px;
+  max-width: var(--page-max-width);
   left: 50%;
   transform: translateX(-50%);
   padding: 0 20px;
@@ -699,8 +711,8 @@ body.is-click-surprise-active *::selection {
 
 .motion3d-case {
   position: absolute;
-  left: max(24px, calc((100vw - 1200px) / 2));
-  right: max(24px, calc((100vw - 1200px) / 2));
+  left: max(var(--page-frame-gutter), calc((100vw - var(--page-max-width)) / 2));
+  right: max(var(--page-frame-gutter), calc((100vw - var(--page-max-width)) / 2));
   bottom: clamp(18px, 4vh, 36px);
   z-index: 2;
   display: grid;
@@ -782,7 +794,7 @@ body.is-click-surprise-active *::selection {
 
 .motion3d-hint {
   position: absolute;
-  right: max(24px, calc((100vw - 1200px) / 2));
+  right: max(var(--page-frame-gutter), calc((100vw - var(--page-max-width)) / 2));
   bottom: clamp(22px, 5vh, 42px);
   z-index: 2;
   display: inline-flex;
@@ -832,8 +844,8 @@ body.is-click-surprise-active *::selection {
 #contact {
   scroll-margin-top: 96px;
 }
-/* 内容区域2 #about：介绍与技能 */
-.section-two {
+
+:is(.section-two, .section-three, .section-portfolio, .section-portfolio-featured) {
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -845,7 +857,10 @@ body.is-click-surprise-active *::selection {
   margin-top: 0;
   margin-bottom: 0;
   gap: var(--module-title-gap);
-  width: min(1200px, calc(100% - 48px));
+}
+/* 内容区域2 #about：介绍与技能 */
+.section-two {
+  width: var(--page-frame-width);
 }
 
 .section-two .section-two-head {
@@ -953,6 +968,7 @@ body.is-click-surprise-active *::selection {
 
 /* 内容区域3 #photo */
 .section-three {
+  --photo-spacing: 24px;
   --photo-card-height: clamp(
     220px,
     calc(
@@ -961,22 +977,18 @@ body.is-click-surprise-active *::selection {
     400px
   );
   --photo-card-width: calc(var(--photo-card-height) * 0.75);
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  min-height: var(--screen-module-height);
-  padding-top: var(--screen-module-pad-y);
-  padding-bottom: var(--screen-module-pad-y);
-  margin-top: 0;
-  margin-bottom: 0;
-  gap: var(--module-title-gap);
+  gap: var(--photo-spacing);
 }
 
-.section-three .photo-top {
+.section-three .photo-top,
+.section-portfolio .portfolio-top,
+.portfolio-featured__head {
   width: 100vw;
   max-width: none;
+}
+
+.section-three .photo-top,
+.section-portfolio .portfolio-top {
   font-size: var(--portfolio-title-size);
   color: var(--color-title);
   margin-bottom: 0;
@@ -989,6 +1001,11 @@ body.is-click-surprise-active *::selection {
   align-items: center;
 }
 
+.section-three .photo-content {
+  width: auto;
+  gap: var(--photo-spacing);
+}
+
 .section-three .photo-image {
   width: 100%;
   height: 100%;
@@ -998,7 +1015,7 @@ body.is-click-surprise-active *::selection {
 .section-three .photo-hover-hitbox {
   width: var(--photo-card-width);
   height: var(--photo-card-height);
-  margin: 0 96px;
+  margin: 0 auto;
   cursor: pointer;
 }
 
@@ -1098,25 +1115,21 @@ body.is-click-surprise-active *::selection {
   align-items: center;
   gap: 8px;
   width: 100%;
-  margin-top: 24px;
+  margin-top: 0;
 }
 
 /* 内容区域4 #portfolio；JS 钩子保留 .portfolio-cards-section */
 .section-portfolio,
 .section-portfolio-featured {
-  box-sizing: border-box;
   position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: var(--screen-module-height);
-  padding-top: var(--screen-module-pad-y);
-  padding-bottom: var(--screen-module-pad-y);
-  margin-top: 0;
-  margin-bottom: 0;
-  gap: var(--module-title-gap);
   overflow: visible;
+}
+
+#portfolio-featured.section-portfolio-featured {
+  width: 100vw;
+  max-width: none;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
 }
 
 /* 内容区域4 #portfolio；JS 钩子保留 .portfolio-cards-section */
@@ -1128,12 +1141,7 @@ body.is-click-surprise-active *::selection {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100vw;
-  max-width: none;
   padding-top: 0;
-  margin-bottom: 0;
-  font-size: var(--portfolio-title-size);
-  color: var(--color-title);
   flex-shrink: 0;
   box-sizing: border-box;
   position: relative;
@@ -1262,7 +1270,6 @@ body.is-click-surprise-active *::selection {
 }
 
 .portfolio-featured__head {
-  width: 100vw;
   align-self: center;
   display: flex;
   align-items: center;
@@ -1535,6 +1542,11 @@ body.is-click-surprise-active *::selection {
   background: #f8fafc;
   box-shadow: 0 14px 36px rgba(15, 23, 42, 0.1);
   overflow: hidden;
+  transition:
+    transform 0.7s cubic-bezier(0.23, 1, 0.32, 1),
+    opacity 0.6s ease,
+    filter 0.6s ease,
+    box-shadow 0.6s ease;
 }
 
 .portfolio-featured__tilt {
@@ -1589,14 +1601,6 @@ body.is-click-surprise-active *::selection {
     filter 0.55s ease,
     background-color 0.4s ease;
   will-change: transform, opacity;
-}
-
-.portfolio-featured__media {
-  transition:
-    transform 0.7s cubic-bezier(0.23, 1, 0.32, 1),
-    opacity 0.6s ease,
-    filter 0.6s ease,
-    box-shadow 0.6s ease;
 }
 
 .portfolio-featured__cell.is-active {
@@ -1865,20 +1869,20 @@ body.is-click-surprise-active *::selection {
 .footer-demo__panel {
   margin: 0 auto;
   padding-top: min(64px, calc(var(--screen-module-pad-y) * 0.8));
-  width: 1200px;
-  max-width: calc(100% - 48px);
+  width: var(--page-max-width);
+  max-width: calc(100% - (var(--page-frame-gutter) * 2));
   height: min(450px, calc(var(--screen-module-height) - 220px));
   background-image: url("./imag/Bottom information.png");
   background-repeat: no-repeat;
   background-position: center bottom;
   background-size: contain;
-  border-radius: 40px;
+  border-radius: var(--radius-panel);
   color: var(--color-on-dark);
   background-color: #4b68f0;
 }
 
 .footer-demo__contain {
-  width: min(1200px, calc(100% - 48px));
+  width: var(--page-frame-width);
   margin: 0 auto;
   padding: 0 24px;
 }
@@ -1956,6 +1960,17 @@ body.is-click-surprise-active *::selection {
   color: var(--color-accent);
 }
 
+@supports (content-visibility: auto) {
+  .section-two,
+  .section-three,
+  .section-portfolio,
+  .section-portfolio-featured,
+  .footer-demo {
+    content-visibility: auto;
+    contain-intrinsic-size: 100svh;
+  }
+}
+
 @media (max-width: 768px) {
   /*
    * 手机端：模块垂直间距随视口收紧（PC 仍为 160px，仅在此断点生效）
@@ -1964,6 +1979,11 @@ body.is-click-surprise-active *::selection {
   html {
     --section-gap-y-sm: 16px;
     --mobile-module-lead-gap: 32px;
+    --mobile-section-title-size: clamp(42px, 12vw, 58px);
+    --mobile-copy-size: 13px;
+    --mobile-copy-line: 20px;
+    --mobile-card-gap: 24px;
+    --mobile-inline-gap: 16px;
     --screen-module-height: auto;
     --screen-module-pad-y: 40px;
     --module-title-gap: clamp(18px, 5vw, 24px);
@@ -1980,7 +2000,8 @@ body.is-click-surprise-active *::selection {
     padding-right: env(safe-area-inset-right, 0);
   }
 
-  main {
+  main,
+  .site-main {
     display: flex;
     flex-direction: column;
     align-items: stretch;
@@ -2431,7 +2452,7 @@ body.is-click-surprise-active *::selection {
     min-height: 0;
     margin-top: 0;
     margin-bottom: 0;
-    gap: 24px;
+    gap: var(--mobile-card-gap);
     padding-top: var(--mobile-module-lead-gap);
     padding-bottom: 0;
     padding-left: 0;
@@ -2447,14 +2468,14 @@ body.is-click-surprise-active *::selection {
   }
 
   .section-three .photo-top {
-    font-size: clamp(42px, 12vw, 58px);
+    font-size: var(--mobile-section-title-size);
     margin-top: 0;
     box-sizing: border-box;
     padding-top: 0.34em;
   }
 
   .section-portfolio .portfolio-top {
-    font-size: clamp(42px, 12vw, 58px);
+    font-size: var(--mobile-section-title-size);
     height: auto;
     margin-top: 0;
     margin-bottom: 0;
@@ -2482,17 +2503,7 @@ body.is-click-surprise-active *::selection {
     width: auto;
     min-width: 0;
     padding: 0;
-    margin: 0 16px;
-  }
-
-  .section-three .photo-content .photo-meta:first-of-type {
-    grid-column: auto;
-    grid-row: auto;
-  }
-
-  .section-three .photo-content .photo-meta:last-of-type {
-    grid-column: auto;
-    grid-row: auto;
+    margin: 0 var(--mobile-inline-gap);
   }
 
   .section-three .photo-content .photo-meta dt,
@@ -2502,8 +2513,6 @@ body.is-click-surprise-active *::selection {
 
   .section-three .photo-hover-hitbox,
   .section-three .photo-images {
-    grid-column: auto;
-    grid-row: auto;
     width: calc(var(--photo-card-width) * 0.7);
     height: calc(var(--photo-card-height) * 0.7);
     max-width: none;
@@ -2535,15 +2544,15 @@ body.is-click-surprise-active *::selection {
   }
 
   .section-three .photo-content-bottom p {
-    font-size: 13px;
-    line-height: 20px;
+    font-size: var(--mobile-copy-size);
+    line-height: var(--mobile-copy-line);
   }
 
   .section-portfolio {
     min-height: 0;
     margin-top: 0;
     margin-bottom: 0;
-    gap: 24px;
+    gap: var(--mobile-card-gap);
     height: auto;
     max-height: none;
     padding-top: 48px;
@@ -2615,7 +2624,7 @@ body.is-click-surprise-active *::selection {
   }
 
   .portfolio-featured__head h2 {
-    font-size: clamp(42px, 12vw, 58px);
+    font-size: var(--mobile-section-title-size);
     line-height: 0.9;
     margin-top: 0;
     box-sizing: border-box;
@@ -2690,8 +2699,8 @@ body.is-click-surprise-active *::selection {
     flex: 0 1 auto;
     max-width: none;
     width: 100%;
-    font-size: 13px;
-    line-height: 20px;
+    font-size: var(--mobile-copy-size);
+    line-height: var(--mobile-copy-line);
     min-height: 0;
     text-align: left;
   }

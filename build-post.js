@@ -38,6 +38,29 @@ function copyFile(src, dest) {
   console.log(`Copied ${src} -> ${dest}`);
 }
 
+function buildProjectHtml() {
+  const templatePath = './project.html';
+  const manifestPath = './dist/.vite/project-manifest.json';
+  const outputPath = './dist/project.html';
+
+  if (!fs.existsSync(templatePath) || !fs.existsSync(manifestPath)) return;
+
+  const template = fs.readFileSync(templatePath, 'utf-8');
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
+  const entry = manifest['src/project-page-entry.jsx'];
+  if (!entry || !entry.file) return;
+
+  const projectHtml = template.replace(
+    /<script type="module" src="\.\/src\/project-page-entry\.jsx"><\/script>/,
+    `<script type="module" crossorigin src="./${entry.file}"></script>`
+  );
+
+  fs.writeFileSync(outputPath, projectHtml);
+  console.log('Generated dist/project.html from template');
+}
+
+buildProjectHtml();
+
 copyDir('imag', 'dist/imag');
 copyDir('vendor', 'dist/vendor');
 copyDir('js', 'dist/js');
