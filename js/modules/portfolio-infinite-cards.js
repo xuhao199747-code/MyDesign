@@ -1,4 +1,15 @@
 (function registerPortfolioInfiniteCardsModule() {
+  const siteRuntime = window.__siteRuntime || {};
+  const siteSections = window.__siteSections || {};
+  const queryElement =
+    siteRuntime.queryElement || ((selector, root = document) => root.querySelector(selector));
+  const registerSiteModule =
+    siteRuntime.registerSiteModule ||
+    ((moduleName, initModule) => {
+      if (!window.__siteModules) window.__siteModules = {};
+      window.__siteModules[moduleName] = initModule;
+    });
+
   function initPortfolioInfiniteCards(options = {}) {
     const {
       infiniteCardsConfig = {},
@@ -11,9 +22,10 @@
     if (typeof gsap === "undefined") return;
     if (typeof Draggable === "undefined") return;
 
-    const root = document.querySelector(".portfolio-cards-section");
-    const gallery = document.querySelector(".portfolio-gallery");
-    const cardsRoot = document.querySelector(".portfolio-cards");
+    const portfolioElements = siteSections.getHomeSectionElements?.().portfolio || {};
+    const root = portfolioElements.section || queryElement(".portfolio-cards-section");
+    const gallery = portfolioElements.gallery || queryElement(".portfolio-gallery");
+    const cardsRoot = portfolioElements.cardsRoot || queryElement(".portfolio-cards");
     if (!root || !gallery || !cardsRoot) return;
     if (root.dataset.portfolioCardsReady === "true") return;
     root.dataset.portfolioCardsReady = "true";
@@ -238,6 +250,5 @@
     void draggable;
   }
 
-  if (!window.__siteModules) window.__siteModules = {};
-  window.__siteModules.initPortfolioInfiniteCardsModule = initPortfolioInfiniteCards;
+  registerSiteModule("initPortfolioInfiniteCardsModule", initPortfolioInfiniteCards);
 })();

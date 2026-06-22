@@ -1,4 +1,15 @@
 (function registerLogoPhysicsModule() {
+  const siteRuntime = window.__siteRuntime || {};
+  const siteSections = window.__siteSections || {};
+  const queryElement =
+    siteRuntime.queryElement || ((selector, root = document) => root.querySelector(selector));
+  const registerSiteModule =
+    siteRuntime.registerSiteModule ||
+    ((moduleName, initModule) => {
+      if (!window.__siteModules) window.__siteModules = {};
+      window.__siteModules[moduleName] = initModule;
+    });
+
   function initLogoPhysicsModule(options = {}) {
     const {
       logoPhysicsConfig = {},
@@ -21,7 +32,8 @@
       },
     } = options;
 
-    const logoWall = document.querySelector(".logo-wall");
+    const aboutElements = siteSections.getHomeSectionElements?.().about || {};
+    const logoWall = aboutElements.logoWall || queryElement(".logo-wall");
     if (!logoWall) return;
     if (logoWall.dataset.logoPhysicsReady === "true") return;
     logoWall.dataset.logoPhysicsReady = "true";
@@ -299,6 +311,5 @@
     });
   }
 
-  if (!window.__siteModules) window.__siteModules = {};
-  window.__siteModules.initLogoPhysicsModule = initLogoPhysicsModule;
+  registerSiteModule("initLogoPhysicsModule", initLogoPhysicsModule);
 })();

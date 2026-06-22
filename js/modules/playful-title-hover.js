@@ -1,4 +1,15 @@
 (function registerPlayfulTitleHoverModule() {
+  const siteRuntime = window.__siteRuntime || {};
+  const queryElements =
+    siteRuntime.queryElements ||
+    ((selector, root = document) => Array.from(root.querySelectorAll(selector)));
+  const registerSiteModule =
+    siteRuntime.registerSiteModule ||
+    ((moduleName, initModule) => {
+      if (!window.__siteModules) window.__siteModules = {};
+      window.__siteModules[moduleName] = initModule;
+    });
+
   function initPlayfulTitleHoverModule(options = {}) {
     const {
       selectors = [],
@@ -15,7 +26,7 @@
       );
     };
 
-    document.querySelectorAll(selectors.join(",")).forEach((title) => {
+    queryElements(selectors.join(",")).forEach((title) => {
       if (title.dataset.playTitleReady === "true") return;
 
       const originalText = title.textContent || "";
@@ -27,9 +38,10 @@
       title.setAttribute("aria-label", accessibleText);
 
       const fragment = document.createDocumentFragment();
-      const isPhotoTitle = title.matches(".photo-top");
-      const isPortfolioTitle = title.matches(".portfolio-top");
-      const isFeaturedTitle = title.matches(".portfolio-featured__head h2");
+      const sectionNode = title.getAttribute("data-section-node");
+      const isPhotoTitle = sectionNode === "photo-title";
+      const isPortfolioTitle = sectionNode === "portfolio-title";
+      const isFeaturedTitle = sectionNode === "featured-title";
       let charIndex = 0;
       let iCountForPortfolio = 0;
 
@@ -149,6 +161,5 @@
     });
   }
 
-  if (!window.__siteModules) window.__siteModules = {};
-  window.__siteModules.initPlayfulTitleHoverModule = initPlayfulTitleHoverModule;
+  registerSiteModule("initPlayfulTitleHoverModule", initPlayfulTitleHoverModule);
 })();

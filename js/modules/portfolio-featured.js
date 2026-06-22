@@ -1,4 +1,15 @@
 (function registerPortfolioFeaturedModule() {
+  const siteRuntime = window.__siteRuntime || {};
+  const siteSections = window.__siteSections || {};
+  const queryElement =
+    siteRuntime.queryElement || ((selector, root = document) => root.querySelector(selector));
+  const registerSiteModule =
+    siteRuntime.registerSiteModule ||
+    ((moduleName, initModule) => {
+      if (!window.__siteModules) window.__siteModules = {};
+      window.__siteModules[moduleName] = initModule;
+    });
+
   function initPortfolioFeaturedShowcase(options = {}) {
     const {
       featuredConfig = {},
@@ -11,14 +22,18 @@
         },
       },
     } = options;
-    const root = document.querySelector(".portfolio-featured");
+    const featuredElements = siteSections.getHomeSectionElements?.().featured || {};
+    const root = featuredElements.root || queryElement(".portfolio-featured");
     if (!root) return;
     if (root.dataset.portfolioFeaturedReady === "true") return;
 
-    const stage = root.querySelector(".portfolio-featured__stage");
-    const titleLink = root.querySelector(".portfolio-featured__title");
-    const prevButton = root.querySelector(".portfolio-featured__nav--prev");
-    const nextButton = root.querySelector(".portfolio-featured__nav--next");
+    const stage = featuredElements.stage || queryElement(".portfolio-featured__stage", root);
+    const titleLink =
+      featuredElements.titleLink || queryElement(".portfolio-featured__title", root);
+    const prevButton =
+      featuredElements.prevButton || queryElement(".portfolio-featured__nav--prev", root);
+    const nextButton =
+      featuredElements.nextButton || queryElement(".portfolio-featured__nav--next", root);
     if (!stage) return;
     root.dataset.portfolioFeaturedReady = "true";
 
@@ -558,6 +573,5 @@
     initWithDelay();
   }
 
-  if (!window.__siteModules) window.__siteModules = {};
-  window.__siteModules.initPortfolioFeaturedModule = initPortfolioFeaturedShowcase;
+  registerSiteModule("initPortfolioFeaturedModule", initPortfolioFeaturedShowcase);
 })();

@@ -1,3 +1,5 @@
+import "./app.tailwind.css";
+
 import { runBootstrapTasks, whenElementPresent } from "./lib/bootstrap-page.js";
 
 runBootstrapTasks([

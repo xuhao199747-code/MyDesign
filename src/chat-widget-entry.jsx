@@ -1,13 +1,13 @@
 import React from "react";
-import "./components/chat-widget.tailwind.css";
 import { ChatWidget } from "./components/chat-widget.jsx";
+import { getElementById } from "./lib/dom-target.js";
 import { mountReactRoot } from "./lib/mount-react-root.js";
 import { getSiteConfigSection } from "./lib/site-config.js";
 
 const assistantWidgetConfig = getSiteConfigSection("assistantWidget");
 
 export function mountChatWidget() {
-  const mount = document.getElementById("chatWidgetRoot");
+  const mount = getElementById("chatWidgetRoot");
   return mountReactRoot(
     mount,
     <ChatWidget

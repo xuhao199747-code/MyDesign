@@ -28,6 +28,36 @@
       mobileMenuOutsideClose: true,
     },
 
+    // Shared navbar defaults for detail pages and isolated shells.
+    navbar: {
+      mobileBreakpoint: 768,
+      scrollThreshold: 8,
+      closeOnHashChange: true,
+      syncOnPageShow: true,
+    },
+
+    // Project detail page rendering defaults.
+    projectDetail: {
+      documentTitleSuffix: "XUHAO DESIGN",
+      closeOnHashChange: false,
+    },
+
+    // React menu icon mount config.
+    menuIcon: {
+      size: 24,
+      duration: 1,
+      color: "#0f172a",
+    },
+
+    // React cursor ring behavior config.
+    cursorRing: {
+      followEase: 0.22,
+      assistantBlockSelectors:
+        "#chatWidgetRoot, .site-assistant__panel, .site-assistant__trigger",
+      interactiveSelectors:
+        "a, button, input, textarea, select, label, [role='button'], .photo-hover-hitbox, .bounceCardsContainer .card, .portfolio-featured__cell",
+    },
+
     // React bounce cards section mount config.
     portfolioBounceCards: {
       cardSlugs: ["profile", "sneakers", "about", "portrait"],
@@ -135,6 +165,232 @@
       idleScale: 1,
       hiddenCellScale: 0.6,
       hiddenCellTranslateY: 10,
+    },
+
+    // Static copy for homepage content blocks.
+    homeContent: {
+      about: {
+        logoAltPrefix: "工具图标",
+        introAriaLabel:
+          "大家好，我是徐浩，从事产品和设计工作，专注于设计和构建数字产品、品牌和体验。",
+        introGreeting: "大家好，我是",
+        introName: "徐浩",
+        introRole: "从事产品和设计工作💻，",
+        introFocusPrefix: "专注于设计和构建",
+        introFocusProducts: "数字产品🌐、",
+        introFocusBrand: "品牌和体验❤️。",
+        introAvatarSrc: "./imag/Frame 2085668692.png",
+        introEmojiSrc: "./imag/Group 1940698323.png",
+      },
+      photo: {
+        metaLeftLabel: "BASED",
+        metaLeftValue: "杭州",
+        metaRightLabel: "Designer",
+        metaRightValue: "UI/UX",
+        copyPrimary: "用逻辑构建界面，以温度传递品牌基因！",
+        copySecondary: "让界面更有逻辑，让设计更有温度!",
+      },
+      footer: {
+        followLabel: "FOLLOW ME",
+        followValue: "wechat →",
+        locationLabel: "CURRENT LOCATION",
+        locationValue: "浙江杭州市余杭区 →",
+        phoneLabel: "Phone",
+        phoneValue: "15004700137",
+        emailLabel: "EMAIL me",
+        emailText: "961407086@qq.com",
+        emailHref: "mailto:961407086@qq.com",
+        copy: "©2026 XUHAO DESIGN",
+        topLinkText: "Back To Top",
+      },
+      featured: {
+        title: "MY DESIGN",
+        prevLabel: "上一张",
+        nextLabel: "下一张",
+        cards: [
+          {
+            title: "Sneakers",
+            href: "./project.html?slug=sneakers",
+            image: "./imag/portfolio-cards1.webp",
+            alt: "Sneakers 项目",
+          },
+          {
+            title: "Profile",
+            href: "./project.html?slug=profile",
+            image: "./imag/photo1.png",
+            alt: "Profile 项目",
+          },
+          {
+            title: "About",
+            href: "./project.html?slug=about",
+            image: "./imag/Image2.webp",
+            alt: "About 项目",
+          },
+        ],
+      },
+    },
+
+    // Clean template data for homepage sections.
+    homeTemplates: {
+      about: {
+        logoAltPrefix: "Tool Icon",
+        logoItems: [
+          "./imag/logo/logo1.webp",
+          "./imag/logo/logo2.webp",
+          "./imag/logo/logo3.webp",
+          "./imag/logo/logo4.webp",
+          "./imag/logo/logo5.webp",
+          "./imag/logo/logo6.webp",
+          "./imag/logo/logo7.webp",
+          "./imag/logo/logo8.webp",
+          "./imag/logo/logo9.webp",
+          "./imag/logo/logo10.webp",
+          "./imag/logo/logo11.webp",
+          "./imag/logo/logo12.webp",
+          "./imag/logo/logo13.webp",
+          "./imag/logo/logo14.webp",
+          "./imag/logo/logo15.webp",
+          "./imag/logo/logo16.webp",
+          "./imag/logo/logo17.webp",
+          "./imag/logo/logo18.png",
+          "./imag/logo/logo19.png",
+        ],
+        introAriaLabel:
+          "大家好，我是徐浩，从事产品和设计工作，专注于设计和构建数字产品、品牌和体验。",
+        introGreeting: "大家好，我是",
+        introName: "徐浩",
+        introRole: "从事产品和设计工作💻，",
+        introFocusPrefix: "专注于设计和构建",
+        introFocusProducts: "数字产品🌐、",
+        introFocusBrand: "品牌和体验❤️。",
+        introAvatarSrc: "./imag/Frame 2085668692.png",
+        introEmojiSrc: "./imag/Group 1940698323.png",
+      },
+      photo: {
+        metaLeftLabel: "BASED",
+        metaLeftValue: "杭州",
+        metaRightLabel: "Designer",
+        metaRightValue: "UI/UX",
+        copyPrimary: "用逻辑构建界面，以温度传递品牌基因！",
+        copySecondary: "让界面更有逻辑，让设计更有温度!",
+      },
+      footer: {
+        followLabel: "FOLLOW ME",
+        followValue: "wechat →",
+        locationLabel: "CURRENT LOCATION",
+        locationValue: "浙江杭州市余杭区 →",
+        phoneLabel: "Phone",
+        phoneValue: "15004700137",
+        emailLabel: "EMAIL me",
+        emailText: "961407086@qq.com",
+        emailHref: "mailto:961407086@qq.com",
+        copy: "©2026 XUHAO DESIGN",
+        topLinkText: "Back To Top",
+      },
+      featured: {
+        title: "MY DESIGN",
+        prevLabel: "上一张",
+        nextLabel: "下一张",
+        cards: [
+          {
+            title: "Sneakers",
+            href: "./project.html?slug=sneakers",
+            image: "./imag/portfolio-cards1.webp",
+            alt: "Sneakers 项目",
+          },
+          {
+            title: "Profile",
+            href: "./project.html?slug=profile",
+            image: "./imag/photo1.png",
+            alt: "Profile 项目",
+          },
+          {
+            title: "About",
+            href: "./project.html?slug=about",
+            image: "./imag/Image2.webp",
+            alt: "About 项目",
+          },
+        ],
+      },
+    },
+
+    // Layout baseline tokens for homepage sections.
+    homeLayout: {
+      about: {
+        section: {
+          layoutSection: "about",
+          contentWidth: "var(--page-content-width)",
+          titleGap: "var(--module-title-gap)",
+        },
+        nodes: {
+          head: "content-width",
+          intro: "content-width",
+          logoWall: "content-width",
+        },
+      },
+      photo: {
+        section: {
+          layoutSection: "photo",
+          contentWidth: "var(--page-content-width)",
+          titleGap: "24px",
+          vars: {
+            "--layout-photo-spacing": "24px",
+            "--layout-photo-card-height":
+              "clamp(220px, calc(var(--module-media-space) - 84px), 400px)",
+            "--layout-photo-card-width": "calc(var(--layout-photo-card-height) * 0.75)",
+          },
+        },
+        nodes: {
+          title: "wide-title",
+          content: "content-width",
+          copy: "content-width",
+          imagesWrap: "media-card",
+        },
+      },
+      portfolio: {
+        section: {
+          layoutSection: "portfolio",
+          contentWidth: "var(--page-content-width)",
+          titleGap: "var(--module-title-gap)",
+        },
+        nodes: {
+          title: "wide-title",
+          gallery: "full-bleed-stage",
+        },
+      },
+      featured: {
+        section: {
+          layoutSection: "featured",
+          contentWidth: "var(--page-content-width)",
+          titleGap: "var(--module-title-gap)",
+        },
+        nodes: {
+          head: "content-width",
+          root: "full-bleed-stage",
+          stage: "full-bleed-stage",
+          actions: "action-row",
+        },
+      },
+      footer: {
+        section: {
+          layoutSection: "footer",
+          contentWidth: "var(--page-content-width)",
+          titleGap: "var(--module-title-gap)",
+          vars: {
+            "--layout-footer-panel-width": "var(--page-max-width)",
+            "--layout-footer-panel-height":
+              "min(450px, calc(var(--screen-module-height) - 220px))",
+            "--layout-footer-grid-gap": "24px",
+            "--layout-footer-inline-padding": "24px",
+          },
+        },
+        nodes: {
+          panel: "content-width",
+          contain: "content-width",
+          grid: "content-grid",
+          barInner: "content-width",
+        },
+      },
     },
 
     // Hero sprite tracking.
@@ -274,9 +530,9 @@
     // Decorative title treatment.
     playfulTitle: {
       selectors: [
-        ".photo-top",
-        ".portfolio-top",
-        ".portfolio-featured__head h2",
+        '[data-section-node="photo-title"]',
+        '[data-section-node="portfolio-title"]',
+        '[data-section-node="featured-title"]',
       ],
       rotatePattern: [-5, 4, -2, 5, -4, 3],
       assets: {

@@ -11,9 +11,8 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="./styles.css" />
-    <link rel="stylesheet" href="./project-detail.css" />
   </head>
-  <body class="project-page">
+  <body class="min-h-screen bg-[var(--color-surface)]">
     <svg class="liquid-glass-filter" aria-hidden="true" focusable="false">
       <filter
         id="liquid-glass-nav"
@@ -63,18 +62,18 @@
       </nav>
     </header>
 
-    <main class="project-shell">
-      <section class="project-media" aria-label="项目主视觉">
-        <img id="projectImage" src="./imag/portfolio-cards1.webp" alt="" fetchpriority="high" decoding="async" />
+    <main class="mx-auto mt-8 mb-24 grid w-[min(1200px,calc(100%-48px))] grid-cols-1 gap-7 md:grid-cols-[minmax(0,1.2fr)_minmax(280px,0.8fr)] md:gap-12 md:items-start md:mt-8 md:mb-24 max-md:mt-[calc(env(safe-area-inset-top,0px)+88px)] max-md:mb-12 max-md:w-[calc(100%-32px)]">
+      <section class="relative overflow-hidden rounded-[22px] bg-[#f7f7f7] shadow-[0_28px_72px_rgba(15,23,42,0.08)] md:rounded-[28px]" aria-label="项目主视觉">
+        <img id="projectImage" class="block aspect-square w-full object-cover" src="./imag/portfolio-cards1.webp" alt="" fetchpriority="high" decoding="async" />
       </section>
 
-      <section class="project-copy" aria-label="项目介绍">
-        <p class="project-kicker" id="projectCategory">Project</p>
-        <h1 class="project-heading" id="projectTitle">Sneakers</h1>
-        <p class="project-summary" id="projectSummary"></p>
-        <p class="project-body" id="projectDescription"></p>
-        <ul class="project-tags" id="projectTags"></ul>
-        <a class="project-back" href="./index.html#portfolio">Back To Home</a>
+      <section class="flex flex-col gap-[18px] pt-0 md:gap-6 md:pt-3" aria-label="项目介绍">
+        <p id="projectCategory" class="m-0 text-[13px] font-semibold uppercase tracking-[0.12em] text-[var(--color-muted)]">Project</p>
+        <h1 id="projectTitle" class="m-0 font-[var(--title-font)] text-[clamp(42px,12vw,64px)] leading-[0.9] text-[var(--color-title)] md:text-[clamp(52px,7vw,88px)]">Sneakers</h1>
+        <p id="projectSummary" class="m-0 text-[16px] leading-[1.6] text-[var(--color-soft-text)] md:text-[clamp(18px,2vw,24px)] md:leading-[1.55]"></p>
+        <p id="projectDescription" class="m-0 text-[15px] leading-[1.68] text-[var(--color-text)] md:text-[16px] md:leading-[1.72]"></p>
+        <ul id="projectTags" class="m-0 flex list-none flex-wrap gap-3 p-0 [&>li]:rounded-full [&>li]:border [&>li]:border-[var(--color-line)] [&>li]:bg-[var(--color-surface)] [&>li]:px-4 [&>li]:py-[10px] [&>li]:text-[13px] [&>li]:text-[var(--color-text)]"></ul>
+        <a class="inline-flex w-fit items-center justify-center rounded-full bg-[var(--color-text)] px-[18px] py-3 text-[14px] font-semibold text-[var(--color-on-dark)] no-underline" href="./index.html#portfolio">Back To Home</a>
       </section>
     </main>
     <script type="module" src="./src/project-page-entry.jsx"></script>

@@ -2,7 +2,11 @@ import { useEffect, useRef } from "react";
 
 import "./CursorRing.css";
 
-export default function CursorRing() {
+export default function CursorRing({
+  followEase = 0.22,
+  assistantBlockSelectors = "#chatWidgetRoot, .site-assistant__panel, .site-assistant__trigger",
+  interactiveSelectors = "a, button, input, textarea, select, label, [role='button'], .photo-hover-hitbox, .bounceCardsContainer .card, .portfolio-featured__cell",
+}) {
   const lensRef = useRef(null);
   const ringRef = useRef(null);
   const dotRef = useRef(null);
@@ -26,8 +30,7 @@ export default function CursorRing() {
     let isLocked = false;
 
     const isInsideAssistant = (target) =>
-      target instanceof Element &&
-      Boolean(target.closest("#chatWidgetRoot, .site-assistant__panel, .site-assistant__trigger"));
+      target instanceof Element && Boolean(target.closest(assistantBlockSelectors));
 
     const updatePointer = (event) => {
       if (isInsideAssistant(event.target)) {
@@ -42,23 +45,9 @@ export default function CursorRing() {
       lens.classList.add("is-visible");
       ring.classList.add("is-visible");
       dot.classList.add("is-visible");
-    };
-
-    const updateInteractiveState = (event) => {
-      if (isInsideAssistant(event.target)) {
-        lens.classList.remove("is-interactive");
-        ring.classList.remove("is-interactive");
-        return;
-      }
-      if (isLocked) return;
       const target = event.target;
       const isInteractive =
-        target instanceof Element &&
-        Boolean(
-          target.closest(
-            "a, button, input, textarea, select, label, [role='button'], .photo-hover-hitbox, .bounceCardsContainer .card, .portfolio-featured__cell"
-          )
-        );
+        target instanceof Element && Boolean(target.closest(interactiveSelectors));
 
       lens.classList.toggle("is-interactive", isInteractive);
       ring.classList.toggle("is-interactive", isInteractive);
@@ -67,8 +56,8 @@ export default function CursorRing() {
     const animate = () => {
       const pointer = pointerRef.current;
       const ringPos = ringPosRef.current;
-      ringPos.x += (pointer.x - ringPos.x) * 0.22;
-      ringPos.y += (pointer.y - ringPos.y) * 0.22;
+      ringPos.x += (pointer.x - ringPos.x) * followEase;
+      ringPos.y += (pointer.y - ringPos.y) * followEase;
       lens.style.transform = `translate3d(${ringPos.x}px, ${ringPos.y}px, 0) translate(-50%, -50%)`;
       ring.style.transform = `translate3d(${ringPos.x}px, ${ringPos.y}px, 0) translate(-50%, -50%)`;
       frameId = window.requestAnimationFrame(animate);
@@ -96,9 +85,6 @@ export default function CursorRing() {
     };
 
     window.addEventListener("pointermove", updatePointer, { passive: true });
-    window.addEventListener("pointermove", updateInteractiveState, {
-      passive: true,
-    });
     window.addEventListener("site-assistant:cursor-lock", handleCursorLock);
     window.addEventListener("pointerleave", hide);
     window.addEventListener("blur", hide);
@@ -107,14 +93,13 @@ export default function CursorRing() {
 
     return () => {
       window.removeEventListener("pointermove", updatePointer);
-      window.removeEventListener("pointermove", updateInteractiveState);
       window.removeEventListener("site-assistant:cursor-lock", handleCursorLock);
       window.removeEventListener("pointerleave", hide);
       window.removeEventListener("blur", hide);
       window.removeEventListener("focus", show);
       window.cancelAnimationFrame(frameId);
     };
-  }, []);
+  }, [assistantBlockSelectors, followEase, interactiveSelectors]);
 
   return (
     <>

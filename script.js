@@ -4,63 +4,57 @@
  * This file is the single orchestration layer that runs them exactly once.
  */
 
-const siteConfig = window.__siteConfig || {};
-const siteUtils = window.__siteUtils || {};
-const siteHelpers = window.__siteHelpers || {};
-const siteModules = window.__siteModules || {};
-const bootConfig = siteConfig.boot || {};
+const siteRuntime = window.__siteRuntime || {};
+const getSiteGlobal =
+  siteRuntime.getSiteGlobal || ((key, fallbackValue = {}) => window[key] || fallbackValue);
+const getSiteConfigSection =
+  siteRuntime.getSiteConfigSection ||
+  ((sectionName, fallbackValue = {}) =>
+    (window.__getSiteConfigSection && window.__getSiteConfigSection(sectionName)) ||
+    (window.__siteConfig && window.__siteConfig[sectionName]) ||
+    fallbackValue);
+
+const siteUtils = getSiteGlobal("__siteUtils");
+const siteHelpers = getSiteGlobal("__siteHelpers");
+const siteModules = getSiteGlobal("__siteModules");
+const bootConfig = getSiteConfigSection("boot");
+const buildConfigOptions = (configName, extraOptions = {}) => ({
+  ...extraOptions,
+  [`${configName}Config`]: getSiteConfigSection(configName),
+});
+const getPlayfulTitleOptions = () => {
+  const playfulTitleConfig = getSiteConfigSection("playfulTitle");
+  return {
+    selectors: playfulTitleConfig.selectors || [],
+    rotatePattern: playfulTitleConfig.rotatePattern || [],
+    assets: playfulTitleConfig.assets || {},
+  };
+};
 
 const moduleOptionFactories = {
+  initSiteLayoutModule: () => ({
+    homeLayoutConfig: getSiteConfigSection("homeLayout"),
+  }),
+  initSiteContentModule: () => ({
+    homeContentConfig: getSiteConfigSection("homeContent"),
+    homeTemplateConfig: getSiteConfigSection("homeTemplates"),
+  }),
   initSiteShellModule: () => ({
-    shellConfig: siteConfig.shell || {},
+    shellConfig: getSiteConfigSection("shell"),
     siteUtils,
   }),
-  initPreloaderModule: () => ({
-    preloaderConfig: siteConfig.preloader || {},
-    siteUtils,
-  }),
-  initHeroTextFloatModule: () => ({
-    heroTextFloatConfig: siteConfig.heroTextFloat || {},
-    siteUtils,
-  }),
-  initPhotoRevealModule: () => ({
-    photoRevealConfig: siteConfig.photoReveal || {},
-    siteUtils,
-    siteHelpers,
-  }),
-  initWorksSwipePreviewModule: () => ({
-    worksSwipePreviewConfig: siteConfig.worksSwipePreview || {},
-    siteUtils,
-  }),
-  initPortfolioInfiniteCardsModule: () => ({
-    infiniteCardsConfig: siteConfig.infiniteCards || {},
-    siteUtils,
-    siteHelpers,
-  }),
-  initPortfolioFeaturedModule: () => ({
-    featuredConfig: siteConfig.portfolioFeatured || {},
-    siteUtils,
-    siteHelpers,
-  }),
-  initHeadTrackerModule: () => ({
-    headTrackerConfig: siteConfig.headTracker || {},
-    siteHelpers,
-    siteUtils,
-  }),
-  initPlayfulTitleHoverModule: () => ({
-    selectors: siteConfig.playfulTitle?.selectors || [],
-    rotatePattern: siteConfig.playfulTitle?.rotatePattern || [],
-    assets: siteConfig.playfulTitle?.assets || {},
-  }),
-  initLogoPhysicsModule: () => ({
-    logoPhysicsConfig: siteConfig.logoPhysics || {},
-    siteHelpers,
-    siteUtils,
-  }),
-  initClickSurpriseBurstModule: () => ({
-    clickSurpriseConfig: siteConfig.clickSurprise || {},
-    siteUtils,
-  }),
+  initPreloaderModule: () => buildConfigOptions("preloader", { siteUtils }),
+  initHeroTextFloatModule: () => buildConfigOptions("heroTextFloat", { siteUtils }),
+  initPhotoRevealModule: () => buildConfigOptions("photoReveal", { siteUtils, siteHelpers }),
+  initWorksSwipePreviewModule: () => buildConfigOptions("worksSwipePreview", { siteUtils }),
+  initPortfolioInfiniteCardsModule: () =>
+    buildConfigOptions("infiniteCards", { siteUtils, siteHelpers }),
+  initPortfolioFeaturedModule: () =>
+    buildConfigOptions("portfolioFeatured", { siteUtils, siteHelpers }),
+  initHeadTrackerModule: () => buildConfigOptions("headTracker", { siteHelpers, siteUtils }),
+  initPlayfulTitleHoverModule: getPlayfulTitleOptions,
+  initLogoPhysicsModule: () => buildConfigOptions("logoPhysics", { siteHelpers, siteUtils }),
+  initClickSurpriseBurstModule: () => buildConfigOptions("clickSurprise", { siteUtils }),
 };
 
 const moduleBootOrder = Object.keys(moduleOptionFactories);

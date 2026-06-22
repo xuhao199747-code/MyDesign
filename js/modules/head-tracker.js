@@ -1,4 +1,15 @@
 (function registerHeadTrackerModule() {
+  const siteRuntime = window.__siteRuntime || {};
+  const siteSections = window.__siteSections || {};
+  const queryElement =
+    siteRuntime.queryElement || ((selector, root = document) => root.querySelector(selector));
+  const registerSiteModule =
+    siteRuntime.registerSiteModule ||
+    ((moduleName, initModule) => {
+      if (!window.__siteModules) window.__siteModules = {};
+      window.__siteModules[moduleName] = initModule;
+    });
+
   function initHeadTrackerModule(options = {}) {
     const {
       headTrackerConfig = {},
@@ -27,12 +38,14 @@
       },
     } = options;
 
-    const tracker = document.querySelector("[data-head-tracker]");
+    const homeElements = siteSections.getHomeSectionElements?.().home || {};
+    const tracker = homeElements.tracker || queryElement("[data-head-tracker]");
     if (!tracker) return;
     if (tracker.dataset.headTrackerReady === "true") return;
     tracker.dataset.headTrackerReady = "true";
 
-    const canvas = tracker.querySelector(".head-tracker__sprite");
+    const canvas =
+      homeElements.trackerCanvas || tracker.querySelector(".head-tracker__sprite");
     if (!(canvas instanceof HTMLCanvasElement)) return;
 
     const context = canvas.getContext("2d", { alpha: false });
@@ -323,6 +336,5 @@
     );
   }
 
-  if (!window.__siteModules) window.__siteModules = {};
-  window.__siteModules.initHeadTrackerModule = initHeadTrackerModule;
+  registerSiteModule("initHeadTrackerModule", initHeadTrackerModule);
 })();

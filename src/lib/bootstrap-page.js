@@ -1,14 +1,27 @@
+import { getElementById } from "./dom-target.js";
+
 export function runBootstrapTasks(tasks) {
   return Promise.all(tasks.map((task) => task()));
 }
 
 export function whenElementPresent(elementId, loader) {
   return () => {
-    if (!document.getElementById(elementId)) {
+    if (!getElementById(elementId)) {
       return null;
     }
 
     return loader();
+  };
+}
+
+export function wrapBootstrapTask(task, label = "bootstrap") {
+  return async () => {
+    try {
+      return await task();
+    } catch (error) {
+      console.error(`[${label}]`, error);
+      return null;
+    }
   };
 }
 

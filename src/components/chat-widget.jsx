@@ -1,22 +1,23 @@
 import React, { useEffect, useRef, useState } from "react";
 
-const createMessageId = (prefix) => `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+const createMessageId = (prefix) =>
+  `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
 const defaultBuildAssistantReply = () =>
-  "当前先保留这个安全版本。下一步再把真正的 AI 和 Elements 组件稳定接回去。";
+  "Safe mode is active for now. Real AI and Elements will be wired back in after the page is stable.";
 
 export function ChatWidget({
   title = "Site Assistant",
-  subtitle = "右下角弹窗模式",
-  triggerLabel = "助手",
-  closeLabel = "关闭助手",
-  inputPlaceholder = "先恢复入口，下一步再接 AI",
-  submitLabel = "发送",
+  subtitle = "Bottom-right modal",
+  triggerLabel = "Chat",
+  closeLabel = "Close assistant",
+  inputPlaceholder = "Safe mode first, AI next",
+  submitLabel = "Send",
   initialMessages = [
     {
       id: "welcome",
       role: "assistant",
-      text: "助手入口已经恢复。现在先用独立弹窗模式接回，避免影响你原来的页面模块。",
+      text: "Assistant entry is back. Safe mode stays on first so the page layout remains stable.",
     },
   ],
   buildAssistantReply = defaultBuildAssistantReply,

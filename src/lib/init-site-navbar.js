@@ -1,18 +1,31 @@
+import { getElementById, queryElement } from "./dom-target.js";
+import { getSiteConfigSection } from "./site-config.js";
+
 export function initSiteNavbar(options = {}) {
+  const navbarConfig = getSiteConfigSection("navbar");
   const {
-    mobileBreakpoint = 768,
-    scrollThreshold = 8,
-    closeOnHashChange = true,
-    syncOnPageShow = true,
+    mobileBreakpoint = navbarConfig.mobileBreakpoint ?? 768,
+    scrollThreshold = navbarConfig.scrollThreshold ?? 8,
+    closeOnHashChange = navbarConfig.closeOnHashChange ?? true,
+    syncOnPageShow = navbarConfig.syncOnPageShow ?? true,
   } = options;
 
-  const menuToggle = document.getElementById("menuToggle");
-  const menuWrap = document.getElementById("menuWrap");
-  const navbar = document.querySelector(".navbar");
+  const menuToggle = getElementById("menuToggle");
+  const menuWrap = getElementById("menuWrap");
+  const navbar = queryElement(".navbar");
+  let scrollFrame = 0;
 
   const updateNavbarScrolledState = () => {
     if (!navbar) return;
     navbar.classList.toggle("navbar--scrolled", window.scrollY > scrollThreshold);
+  };
+
+  const queueNavbarScrolledState = () => {
+    if (scrollFrame) return;
+    scrollFrame = window.requestAnimationFrame(() => {
+      scrollFrame = 0;
+      updateNavbarScrolledState();
+    });
   };
 
   if (menuToggle && menuWrap) {
@@ -48,8 +61,11 @@ export function initSiteNavbar(options = {}) {
 
     menuToggle.addEventListener("pointerdown", handleTogglePress);
 
-    menuWrap.querySelectorAll("a").forEach((link) => {
-      link.addEventListener("click", closeMenu);
+    menuWrap.addEventListener("click", (event) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      if (!target.closest("a")) return;
+      closeMenu();
     });
 
     document.addEventListener("click", (event) => {
@@ -80,7 +96,7 @@ export function initSiteNavbar(options = {}) {
 
   if (navbar) {
     updateNavbarScrolledState();
-    window.addEventListener("scroll", updateNavbarScrolledState, { passive: true });
+    window.addEventListener("scroll", queueNavbarScrolledState, { passive: true });
   }
 
   return {

@@ -11,6 +11,9 @@ export default defineConfig({
   base: './',
   plugins: [react({ fastRefresh: false }), tailwindcss()],
   resolve: {
+    alias: {
+      '@': path.resolve(__dirname, 'src'),
+    },
     extensions: ['.js', '.jsx', '.json'],
   },
   publicDir: 'public',

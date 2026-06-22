@@ -1,4 +1,17 @@
 (function registerWorksSwipePreviewModule() {
+  const siteRuntime = window.__siteRuntime || {};
+  const queryElement =
+    siteRuntime.queryElement || ((selector, root = document) => root.querySelector(selector));
+  const queryElements =
+    siteRuntime.queryElements ||
+    ((selector, root = document) => Array.from(root.querySelectorAll(selector)));
+  const registerSiteModule =
+    siteRuntime.registerSiteModule ||
+    ((moduleName, initModule) => {
+      if (!window.__siteModules) window.__siteModules = {};
+      window.__siteModules[moduleName] = initModule;
+    });
+
   function initWorksSwipePreview(options = {}) {
     if (typeof gsap === "undefined") return;
     const {
@@ -10,13 +23,13 @@
       },
     } = options;
 
-    const previewRoot = document.querySelector(".works-swipe-section");
+    const previewRoot = queryElement(".works-swipe-section");
     if (!previewRoot) return;
     if (previewRoot.dataset.worksPreviewReady === "true") return;
 
-    const previewImage = previewRoot.querySelector(".works-swipe-preview__image");
-    const previewCaption = previewRoot.querySelector(".works-swipe-preview__caption");
-    const items = Array.from(previewRoot.querySelectorAll("[data-preview-image]"));
+    const previewImage = queryElement(".works-swipe-preview__image", previewRoot);
+    const previewCaption = queryElement(".works-swipe-preview__caption", previewRoot);
+    const items = queryElements("[data-preview-image]", previewRoot);
     if (!previewImage || !previewCaption || !items.length) return;
     previewRoot.dataset.worksPreviewReady = "true";
 
@@ -132,6 +145,5 @@
     window.addEventListener("scroll", invalidatePreviewRootRect, { passive: true });
   }
 
-  if (!window.__siteModules) window.__siteModules = {};
-  window.__siteModules.initWorksSwipePreviewModule = initWorksSwipePreview;
+  registerSiteModule("initWorksSwipePreviewModule", initWorksSwipePreview);
 })();

@@ -1,4 +1,16 @@
 (function registerHeroTextFloatModule() {
+  const siteRuntime = window.__siteRuntime || {};
+  const siteSections = window.__siteSections || {};
+  const queryElements =
+    siteRuntime.queryElements ||
+    ((selector, root = document) => Array.from(root.querySelectorAll(selector)));
+  const registerSiteModule =
+    siteRuntime.registerSiteModule ||
+    ((moduleName, initModule) => {
+      if (!window.__siteModules) window.__siteModules = {};
+      window.__siteModules[moduleName] = initModule;
+    });
+
   function initHeroTextFloat(options = {}) {
     const {
       heroTextFloatConfig = {},
@@ -11,7 +23,8 @@
         },
       },
     } = options;
-    const heroTexts = document.querySelectorAll(".hero-nav__text");
+    const homeElements = siteSections.getHomeSectionElements?.().home || {};
+    const heroTexts = homeElements.heroTexts || queryElements(".hero-nav__text");
     if (!heroTexts.length) return;
     if (document.body.dataset.heroTextFloatReady === "true") return;
     document.body.dataset.heroTextFloatReady = "true";
@@ -604,6 +617,5 @@
     document.addEventListener("mousemove", handleMouseMove, { passive: true });
   }
 
-  if (!window.__siteModules) window.__siteModules = {};
-  window.__siteModules.initHeroTextFloatModule = initHeroTextFloat;
+  registerSiteModule("initHeroTextFloatModule", initHeroTextFloat);
 })();

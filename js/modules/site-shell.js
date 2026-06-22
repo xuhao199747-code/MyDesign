@@ -1,4 +1,17 @@
 (function registerSiteShellModule() {
+  const siteRuntime = window.__siteRuntime || {};
+  const siteSections = window.__siteSections || {};
+  const getElementById =
+    siteRuntime.getElementById || ((elementId) => document.getElementById(elementId));
+  const queryElement =
+    siteRuntime.queryElement || ((selector, root = document) => root.querySelector(selector));
+  const registerSiteModule =
+    siteRuntime.registerSiteModule ||
+    ((moduleName, initModule) => {
+      if (!window.__siteModules) window.__siteModules = {};
+      window.__siteModules[moduleName] = initModule;
+    });
+
   function initSiteShellModule(options = {}) {
     const {
       shellConfig = {},
@@ -11,10 +24,10 @@
         },
       },
     } = options;
-
-    const nav = document.querySelector(".navbar");
-    const toggle = document.getElementById("menuToggle");
-    const wrap = document.getElementById("menuWrap");
+    const shellElements = siteSections.getShellElements?.().primary || {};
+    const nav = shellElements.navbar || queryElement(".navbar");
+    const toggle = shellElements.menuToggle || getElementById("menuToggle");
+    const wrap = shellElements.menuWrap || getElementById("menuWrap");
     const navbarScrollThreshold = siteUtils.getNumberOption(
       shellConfig,
       "navbarScrollThreshold",
@@ -99,7 +112,7 @@
       const href = link.getAttribute("href");
       if (!href || href === "#") return;
 
-      const target = document.querySelector(href);
+      const target = queryElement(href);
       if (!target) return;
 
       event.preventDefault();
@@ -112,6 +125,5 @@
     });
   }
 
-  if (!window.__siteModules) window.__siteModules = {};
-  window.__siteModules.initSiteShellModule = initSiteShellModule;
+  registerSiteModule("initSiteShellModule", initSiteShellModule);
 })();

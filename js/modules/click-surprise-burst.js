@@ -1,4 +1,14 @@
 (function registerClickSurpriseBurstModule() {
+  const siteRuntime = window.__siteRuntime || {};
+  const queryElement =
+    siteRuntime.queryElement || ((selector, root = document) => root.querySelector(selector));
+  const registerSiteModule =
+    siteRuntime.registerSiteModule ||
+    ((moduleName, initModule) => {
+      if (!window.__siteModules) window.__siteModules = {};
+      window.__siteModules[moduleName] = initModule;
+    });
+
   function initClickSurpriseBurstModule(options = {}) {
     if (document.body.dataset.clickSurpriseReady === "true") return;
     document.body.dataset.clickSurpriseReady = "true";
@@ -78,7 +88,7 @@
     const stickerDelayStepMs = siteUtils.getNumberOption(clickSurpriseConfig, "stickerDelayStepMs", 28);
     const angleSpreadRatio = siteUtils.getNumberOption(clickSurpriseConfig, "angleSpreadRatio", 0.94);
 
-    const existingLayer = document.querySelector(".click-surprise-layer");
+    const existingLayer = queryElement(".click-surprise-layer");
     const layer = existingLayer || document.createElement("div");
     if (!existingLayer) {
       layer.className = "click-surprise-layer";
@@ -172,6 +182,5 @@
     });
   }
 
-  if (!window.__siteModules) window.__siteModules = {};
-  window.__siteModules.initClickSurpriseBurstModule = initClickSurpriseBurstModule;
+  registerSiteModule("initClickSurpriseBurstModule", initClickSurpriseBurstModule);
 })();

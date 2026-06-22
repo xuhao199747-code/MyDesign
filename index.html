@@ -23,21 +23,21 @@
     <link rel="preload" as="font" href="./font/LuckiestGuy-Regular.ttf" crossorigin />
   </head>
   <body>
-    <div id="preloader" class="preloader" aria-label="页面加载中">
+    <div id="preloader" data-system-node="preloader" class="preloader" aria-label="页面加载中">
       <div class="preloader__content">
         <div class="preloader__logo">XH</div>
         <div class="preloader__type">
-          <span class="preloader__type-text"></span>
+          <span data-system-node="preloader-type-text" class="preloader__type-text"></span>
           <span class="preloader__type-caret"></span>
         </div>
         <div class="preloader__progress">
-          <div class="preloader__bar"></div>
+          <div data-system-node="preloader-bar" class="preloader__bar"></div>
         </div>
-        <span class="preloader__text">LOADING</span>
+        <span data-system-node="preloader-text" class="preloader__text">LOADING</span>
       </div>
     </div>
-    <div id="ribbonsRoot" class="ribbons-cursor-layer" aria-hidden="true"></div>
-    <div id="chatWidgetRoot"></div>
+    <div id="ribbonsRoot" data-system-node="cursor-root" class="ribbons-cursor-layer" aria-hidden="true"></div>
+    <div id="chatWidgetRoot" data-system-node="assistant-root"></div>
     <svg class="liquid-glass-filter" aria-hidden="true" focusable="false">
       <filter
         id="liquid-glass-nav"
@@ -71,14 +71,14 @@
       </filter>
     </svg>
     <!-- 1网页导航 -->
-    <header class="navbar">
-        <a class="brand" href="#home" aria-label="XHDESIGN 首页">
-          <img src="./favicon.png" alt="XHDESIGN" />
+    <header class="navbar fixed left-[max(16px,env(safe-area-inset-left,0px))] right-[max(16px,env(safe-area-inset-right,0px))] top-[max(12px,env(safe-area-inset-top,0px))] z-[200] flex h-12 items-center justify-between overflow-visible rounded-[200px] px-[5px] py-[6px] md:sticky md:left-auto md:right-auto md:top-4 md:z-[100] md:mx-auto md:h-12 md:w-[var(--page-frame-width)] md:justify-normal md:px-5 md:py-0" data-site-shell="primary" data-shell-node="navbar">
+        <a class="brand mr-2 flex min-w-0 shrink-0 items-center md:mr-0" data-shell-node="brand" href="#home" aria-label="XHDESIGN 首页">
+          <img class="block h-9 w-9 rounded-[10px] object-cover md:h-[38px] md:w-[38px] md:rounded-[11px]" src="./favicon.png" alt="XHDESIGN" />
         </a>
-        <button class="menu-toggle" id="menuToggle" aria-label="切换导航菜单">
+        <button class="menu-toggle inline-flex h-9 w-9 min-h-9 min-w-9 shrink-0 items-center justify-center rounded-full border-0 bg-white/25 p-0 text-[14px] font-medium text-[var(--color-text)] shadow-[inset_0_1px_0_rgba(255,255,255,0.34),0_8px_18px_rgba(15,23,42,0.08)] outline-none transition-[background,transform,box-shadow] duration-200 md:hidden" id="menuToggle" data-shell-node="menu-toggle" aria-label="切换导航菜单">
         </button>
-        <nav class="menu-wrap" id="menuWrap" aria-label="主导航">
-          <ul class="menu">
+        <nav class="menu-wrap" id="menuWrap" data-shell-node="menu-wrap" aria-label="主导航">
+          <ul class="menu pointer-events-none relative m-0 flex h-auto w-min min-w-full flex-wrap items-start justify-center gap-x-3 gap-y-[14px] p-0 md:pointer-events-auto md:w-auto md:min-w-0 md:flex-nowrap md:items-center md:gap-4">
             <li><a href="#about">简历</a></li>
             <li><a href="#portfolio">作品</a></li>
             <li>
@@ -118,16 +118,18 @@
     </header>
     <main class="site-main">
       <!-- 内容区域0：角色特写首屏；鼠标方向控制转头 -->
-      <section id="home" class="head-hero" aria-label="角色特写首屏">
+      <section id="home" data-site-section="home" class="head-hero" aria-label="角色特写首屏">
         <div
           class="head-tracker"
+          data-section-node="head-tracker"
           data-head-tracker
           data-frame="0"
           data-direction="center"
           aria-label="根据鼠标方向转头的角色"
         >
-          <div class="head-tracker__stage">
+          <div class="head-tracker__stage" data-section-node="head-tracker-stage">
             <img
+              data-section-node="head-tracker-poster"
               class="head-tracker__poster"
               src="./imag/frame_front.webp"
               alt=""
@@ -136,6 +138,7 @@
               aria-hidden="true"
             />
             <canvas
+              data-section-node="head-tracker-canvas"
               class="head-tracker__sprite"
               width="1280"
               height="720"
@@ -143,19 +146,20 @@
             ></canvas>
           </div>
         </div>
-        <div class="hero-nav" aria-label="首屏装饰文字">
-          <span class="hero-nav__text hero-nav__text--left">WORKS</span>
-          <span class="hero-nav__text hero-nav__text--right">EXHIBITIONS</span>
+        <div class="hero-nav" data-section-node="hero-nav" aria-label="首屏装饰文字">
+          <span data-section-node="hero-nav-text-left" class="hero-nav__text hero-nav__text--left">WORKS</span>
+          <span data-section-node="hero-nav-text-right" class="hero-nav__text hero-nav__text--right">EXHIBITIONS</span>
         </div>
       </section>
 
       <!-- 内容区域2：介绍与技能 -->
-      <section id="about" class="container section-two flex flex-col items-center justify-center" aria-labelledby="aboutIntro">
-        <div class="section-two-head flex w-full items-center justify-center">
-          <p id="aboutIntro" class="section-two-intro m-0 w-full max-w-[1200px] text-[clamp(28px,2.65vw,40px)] font-black leading-[1.34] text-[color:var(--color-title)]" aria-label="大家好，我是徐浩，从事设计工作，专注于设计和构建数字产品、品牌和体验。">
+      <section id="about" data-site-section="about" class="container section-two flex w-[var(--page-frame-width)] flex-col items-center justify-center" aria-labelledby="aboutIntro">
+        <div class="section-two-head flex w-full items-center justify-center" data-section-node="about-head">
+          <p id="aboutIntro" data-section-node="about-intro" class="section-two-intro m-0 w-full max-w-[1200px] font-black leading-[1.34] text-[color:var(--color-title)] text-[clamp(28px,2.65vw,40px)]" aria-label="大家好，我是徐浩，从事设计工作，专注于设计和构建数字产品、品牌和体验。">
             大家好， 我是
             <img
-              class="section-two-intro__sticker section-two-intro__sticker--avatar"
+              data-section-node="about-intro-avatar"
+              class="section-two-intro__sticker section-two-intro__sticker--avatar inline-block h-[1.46em] w-[1.46em] object-contain align-[-0.14em]"
               src="./imag/Frame 2085668692.png"
               alt=""
               loading="lazy"
@@ -163,7 +167,8 @@
             />
             徐浩
             <img
-              class="section-two-intro__sticker section-two-intro__sticker--emoji"
+              data-section-node="about-intro-emoji"
+              class="section-two-intro__sticker section-two-intro__sticker--emoji inline-block h-[1.1em] w-[1.1em] object-contain align-[-0.1em]"
               src="./imag/Group 1940698323.png"
               alt=""
               loading="lazy"
@@ -174,38 +179,38 @@
             <span class="section-two-intro__nowrap">品牌和体验❤️。</span>
           </p>
         </div>
-        <div id="works" class="logo-wall relative w-full max-w-[1200px] overflow-hidden" aria-label="技能工具图标列表">
-          <img src="./imag/logo/logo1.webp" alt="工具图标 1" loading="lazy" decoding="async" />
-          <img src="./imag/logo/logo2.webp" alt="工具图标 2" loading="lazy" decoding="async" />
-          <img src="./imag/logo/logo3.webp" alt="工具图标 3" loading="lazy" decoding="async" />
-          <img src="./imag/logo/logo4.webp" alt="工具图标 4" loading="lazy" decoding="async" />
-          <img src="./imag/logo/logo5.webp" alt="工具图标 5" loading="lazy" decoding="async" />
-          <img src="./imag/logo/logo6.webp" alt="工具图标 6" loading="lazy" decoding="async" />
-          <img src="./imag/logo/logo7.webp" alt="工具图标 7" loading="lazy" decoding="async" />
-          <img src="./imag/logo/logo8.webp" alt="工具图标 8" loading="lazy" decoding="async" />
-          <img src="./imag/logo/logo9.webp" alt="工具图标 9" loading="lazy" decoding="async" />
-          <img src="./imag/logo/logo10.webp" alt="工具图标 10" loading="lazy" decoding="async" />
-          <img src="./imag/logo/logo11.webp" alt="工具图标 11" loading="lazy" decoding="async" />
-          <img src="./imag/logo/logo12.webp" alt="工具图标 12" loading="lazy" decoding="async" />
-          <img src="./imag/logo/logo13.webp" alt="工具图标 13" loading="lazy" decoding="async" />
-          <img src="./imag/logo/logo14.webp" alt="工具图标 14" loading="lazy" decoding="async" />
-          <img src="./imag/logo/logo15.webp" alt="工具图标 15" loading="lazy" decoding="async" />
-          <img src="./imag/logo/logo16.webp" alt="工具图标 16" loading="lazy" decoding="async" />
-          <img src="./imag/logo/logo17.webp" alt="工具图标 17" loading="lazy" decoding="async" />
-          <img src="./imag/logo/logo18.png" alt="工具图标 18" loading="lazy" decoding="async" />
-          <img src="./imag/logo/logo19.png" alt="工具图标 19" loading="lazy" decoding="async" />
+        <div id="works" data-section-node="logo-wall" class="logo-wall relative z-[-1] box-border h-[min(200px,calc(var(--module-content-space)*0.34))] w-full max-w-[1200px] overflow-hidden pb-2" aria-label="技能工具图标列表">
+          <img class="absolute left-0 top-0 block h-16 w-16 object-contain opacity-0 [transform:translate3d(0,-260px,0)_rotate(-8deg)] [will-change:transform,opacity]" src="./imag/logo/logo1.webp" alt="工具图标 1" loading="lazy" decoding="async" />
+          <img class="absolute left-0 top-0 block h-16 w-16 object-contain opacity-0 [transform:translate3d(0,-260px,0)_rotate(-8deg)] [will-change:transform,opacity]" src="./imag/logo/logo2.webp" alt="工具图标 2" loading="lazy" decoding="async" />
+          <img class="absolute left-0 top-0 block h-16 w-16 object-contain opacity-0 [transform:translate3d(0,-260px,0)_rotate(-8deg)] [will-change:transform,opacity]" src="./imag/logo/logo3.webp" alt="工具图标 3" loading="lazy" decoding="async" />
+          <img class="absolute left-0 top-0 block h-16 w-16 object-contain opacity-0 [transform:translate3d(0,-260px,0)_rotate(-8deg)] [will-change:transform,opacity]" src="./imag/logo/logo4.webp" alt="工具图标 4" loading="lazy" decoding="async" />
+          <img class="absolute left-0 top-0 block h-16 w-16 object-contain opacity-0 [transform:translate3d(0,-260px,0)_rotate(-8deg)] [will-change:transform,opacity]" src="./imag/logo/logo5.webp" alt="工具图标 5" loading="lazy" decoding="async" />
+          <img class="absolute left-0 top-0 block h-16 w-16 object-contain opacity-0 [transform:translate3d(0,-260px,0)_rotate(-8deg)] [will-change:transform,opacity]" src="./imag/logo/logo6.webp" alt="工具图标 6" loading="lazy" decoding="async" />
+          <img class="absolute left-0 top-0 block h-16 w-16 object-contain opacity-0 [transform:translate3d(0,-260px,0)_rotate(-8deg)] [will-change:transform,opacity]" src="./imag/logo/logo7.webp" alt="工具图标 7" loading="lazy" decoding="async" />
+          <img class="absolute left-0 top-0 block h-16 w-16 object-contain opacity-0 [transform:translate3d(0,-260px,0)_rotate(-8deg)] [will-change:transform,opacity]" src="./imag/logo/logo8.webp" alt="工具图标 8" loading="lazy" decoding="async" />
+          <img class="absolute left-0 top-0 block h-16 w-16 object-contain opacity-0 [transform:translate3d(0,-260px,0)_rotate(-8deg)] [will-change:transform,opacity]" src="./imag/logo/logo9.webp" alt="工具图标 9" loading="lazy" decoding="async" />
+          <img class="absolute left-0 top-0 block h-16 w-16 object-contain opacity-0 [transform:translate3d(0,-260px,0)_rotate(-8deg)] [will-change:transform,opacity]" src="./imag/logo/logo10.webp" alt="工具图标 10" loading="lazy" decoding="async" />
+          <img class="absolute left-0 top-0 block h-16 w-16 object-contain opacity-0 [transform:translate3d(0,-260px,0)_rotate(-8deg)] [will-change:transform,opacity]" src="./imag/logo/logo11.webp" alt="工具图标 11" loading="lazy" decoding="async" />
+          <img class="absolute left-0 top-0 block h-16 w-16 object-contain opacity-0 [transform:translate3d(0,-260px,0)_rotate(-8deg)] [will-change:transform,opacity]" src="./imag/logo/logo12.webp" alt="工具图标 12" loading="lazy" decoding="async" />
+          <img class="absolute left-0 top-0 block h-16 w-16 object-contain opacity-0 [transform:translate3d(0,-260px,0)_rotate(-8deg)] [will-change:transform,opacity]" src="./imag/logo/logo13.webp" alt="工具图标 13" loading="lazy" decoding="async" />
+          <img class="absolute left-0 top-0 block h-16 w-16 object-contain opacity-0 [transform:translate3d(0,-260px,0)_rotate(-8deg)] [will-change:transform,opacity]" src="./imag/logo/logo14.webp" alt="工具图标 14" loading="lazy" decoding="async" />
+          <img class="absolute left-0 top-0 block h-16 w-16 object-contain opacity-0 [transform:translate3d(0,-260px,0)_rotate(-8deg)] [will-change:transform,opacity]" src="./imag/logo/logo15.webp" alt="工具图标 15" loading="lazy" decoding="async" />
+          <img class="absolute left-0 top-0 block h-16 w-16 object-contain opacity-0 [transform:translate3d(0,-260px,0)_rotate(-8deg)] [will-change:transform,opacity]" src="./imag/logo/logo16.webp" alt="工具图标 16" loading="lazy" decoding="async" />
+          <img class="absolute left-0 top-0 block h-16 w-16 object-contain opacity-0 [transform:translate3d(0,-260px,0)_rotate(-8deg)] [will-change:transform,opacity]" src="./imag/logo/logo17.webp" alt="工具图标 17" loading="lazy" decoding="async" />
+          <img class="absolute left-0 top-0 block h-16 w-16 object-contain opacity-0 [transform:translate3d(0,-260px,0)_rotate(-8deg)] [will-change:transform,opacity]" src="./imag/logo/logo18.png" alt="工具图标 18" loading="lazy" decoding="async" />
+          <img class="absolute left-0 top-0 block h-16 w-16 object-contain opacity-0 [transform:translate3d(0,-260px,0)_rotate(-8deg)] [will-change:transform,opacity]" src="./imag/logo/logo19.png" alt="工具图标 19" loading="lazy" decoding="async" />
         </div>
       </section>
 
       <!-- 内容区域3：个人照片 -->
-      <section id="photo" class="container section-three flex flex-col items-center justify-center" aria-labelledby="photoTitle">
-        <h2 id="photoTitle" class="section-title photo-top mb-0 w-screen max-w-none text-[var(--portfolio-title-size)] text-[color:var(--color-title)]">LET'S WORK</h2>
-        <div class="photo-content flex items-center justify-center">
-          <dl class="photo-meta m-0 flex flex-col items-start justify-center gap-2 p-0">
-            <dt>BASED</dt>
-            <dd>杭州</dd>
+      <section id="photo" data-site-section="photo" class="container section-three flex flex-col items-center justify-center gap-[var(--photo-spacing)] [--photo-card-height:clamp(220px,calc(var(--module-media-space)-84px),400px)] [--photo-card-width:calc(var(--photo-card-height)*0.75)] [--photo-spacing:24px]" aria-labelledby="photoTitle">
+        <h2 id="photoTitle" data-section-node="photo-title" class="section-title photo-top mb-0 w-screen max-w-none text-[var(--portfolio-title-size)] text-[color:var(--color-title)]">LET'S WORK</h2>
+        <div class="photo-content flex w-auto items-center justify-center gap-[var(--photo-spacing)]" data-section-node="photo-content">
+          <dl data-section-node="photo-meta-left" class="photo-meta m-0 flex flex-col items-start justify-center gap-2 p-0">
+            <dt data-section-node="photo-meta-left-label" class="m-0 w-full text-left text-[12px] font-normal leading-[1.33] text-[var(--color-muted)]">BASED</dt>
+            <dd data-section-node="photo-meta-left-value" class="m-0 w-full text-left text-[14px] font-medium leading-[1.43] text-[var(--color-text)]">杭州</dd>
           </dl>
-          <div class="photo-images relative z-[1] m-0 overflow-hidden rounded-[var(--radius-card)]" data-href="./project.html?slug=profile" data-link-label="查看 Profile">
+          <div data-section-node="photo-images" class="photo-images relative z-[1] m-0 block h-[var(--photo-card-height)] w-[var(--photo-card-width)] overflow-hidden rounded-[var(--radius-card)] [transform-origin:center] [transform-style:preserve-3d] [will-change:transform]" data-href="./project.html?slug=profile" data-link-label="查看 Profile">
             <img
               class="photo-image photo-image-front absolute inset-0 h-full w-full object-cover"
               src="./imag/photo1.png"
@@ -221,44 +226,47 @@
               decoding="async"
             />
           </div>
-          <dl class="photo-meta m-0 flex flex-col items-start justify-center gap-2 p-0">
-            <dt>Designer</dt>
-            <dd>UI/UX</dd>
+          <dl data-section-node="photo-meta-right" class="photo-meta m-0 flex flex-col items-start justify-center gap-2 p-0">
+            <dt data-section-node="photo-meta-right-label" class="m-0 w-full text-left text-[12px] font-normal leading-[1.33] text-[var(--color-muted)]">Designer</dt>
+            <dd data-section-node="photo-meta-right-value" class="m-0 w-full text-left text-[14px] font-medium leading-[1.43] text-[var(--color-text)]">UI/UX</dd>
           </dl>
         </div>
-        <div class="photo-content-bottom mt-6 flex w-full flex-col items-center gap-2">
-          <p class="m-0 text-center text-[14px] font-medium leading-[1.43] text-[color:var(--color-text)]">用逻辑构建界面，以温度传递品牌基因！</p>
-          <p class="m-0 text-center text-[14px] font-medium leading-[1.43] text-[color:var(--color-text)]">让界面更有逻辑，让设计更有温度!</p>
+        <div class="photo-content-bottom mt-0 flex w-full flex-col items-center gap-2" data-section-node="photo-copy">
+          <p data-section-node="photo-copy-line-primary" class="m-0 text-center text-[14px] font-medium leading-[1.43] text-[color:var(--color-text)]">用逻辑构建界面，以温度传递品牌基因！</p>
+          <p data-section-node="photo-copy-line-secondary" class="m-0 text-center text-[14px] font-medium leading-[1.43] text-[color:var(--color-text)]">让界面更有逻辑，让设计更有温度!</p>
         </div>
       </section>
 
       <!-- 内容区域4：作品 — VIBE CODING 无限滚动卡片 -->
       <section
         id="portfolio"
+        data-site-section="portfolio"
         class="container section-portfolio portfolio-cards-section relative flex flex-col items-center justify-center"
         aria-labelledby="portfolioTitle"
       >
-        <h2 id="portfolioTitle" class="section-title portfolio-top relative z-10 flex items-center justify-center pt-0 text-[var(--portfolio-title-size)] text-[color:var(--color-title)]">VIBE CODING</h2>
-        <div class="portfolio-gallery portfolio-gallery--bounce relative flex items-center justify-center overflow-visible bg-[var(--color-surface)]">
-          <div id="portfolioBounceCardsRoot"></div>
+        <h2 id="portfolioTitle" data-section-node="portfolio-title" class="section-title portfolio-top relative z-10 flex items-center justify-center pt-0 text-[var(--portfolio-title-size)] text-[color:var(--color-title)]">VIBE CODING</h2>
+        <div data-section-node="portfolio-gallery" class="portfolio-gallery portfolio-gallery--bounce relative flex items-center justify-center overflow-visible bg-[var(--color-surface)]">
+          <div id="portfolioBounceCardsRoot" data-section-node="portfolio-bounce-root"></div>
         </div>
       </section>
 
       <!-- 内容区域4.5：作品 — MY DESIGN 轮播 -->
         <section
           id="portfolio-featured"
-          class="section-portfolio-featured relative flex flex-col items-center justify-center"
+          data-site-section="featured"
+          class="section-portfolio-featured relative flex flex-col items-center justify-center overflow-visible"
           aria-labelledby="portfolioFeaturedTitle"
         >
-        <header class="portfolio-featured__head flex items-center justify-center text-center">
-          <h2 id="portfolioFeaturedTitle" class="m-0 font-[var(--title-font)] text-[var(--portfolio-title-size)] font-normal uppercase leading-[0.86] text-[color:var(--color-title)]">MY DESIGN</h2>
+        <header class="portfolio-featured__head m-0 box-border flex w-screen max-w-none items-center justify-center self-center px-0 pt-0 text-center" data-section-node="featured-head">
+          <h2 id="portfolioFeaturedTitle" data-section-node="featured-title" class="m-0 font-[var(--title-font)] text-[var(--portfolio-title-size)] font-normal uppercase leading-[0.86] text-[color:var(--color-title)]">MY DESIGN</h2>
         </header>
         <div
-          class="portfolio-featured relative left-auto w-screen overflow-visible p-0"
+          data-section-node="featured-root"
+          class="portfolio-featured relative left-auto h-[clamp(360px,var(--module-media-space),560px)] w-screen overflow-visible p-0 touch-pan-y [--featured-card-w:min(430px,28vw)] [--featured-gap:clamp(42px,6vw,112px)] [overscroll-behavior-x:none] max-md:h-auto max-md:[--featured-card-w:min(280px,72vw)] max-md:[--featured-gap:24px]"
           aria-label="作品展示对比版本"
           data-active-index="0"
         >
-          <div class="portfolio-featured__stage relative w-full overflow-visible">
+          <div data-section-node="featured-stage" class="portfolio-featured__stage relative h-[min(100%,520px)] w-full overflow-visible max-md:h-auto">
             <button
               type="button"
               class="portfolio-featured__card"
@@ -268,7 +276,7 @@
               data-href="./project.html?slug=sneakers"
               aria-label="查看 Sneakers"
             >
-              <img src="./imag/portfolio-cards1.webp" alt="Sneakers 项目" loading="lazy" decoding="async" />
+              <img class="pointer-events-none block h-full w-full object-cover" src="./imag/portfolio-cards1.webp" alt="Sneakers 项目" loading="lazy" decoding="async" />
             </button>
             <button
               type="button"
@@ -279,7 +287,7 @@
               data-href="./project.html?slug=profile"
               aria-label="查看 Profile"
             >
-              <img src="./imag/photo1.png" alt="Profile 项目" loading="lazy" decoding="async" />
+              <img class="pointer-events-none block h-full w-full object-cover" src="./imag/photo1.png" alt="Profile 项目" loading="lazy" decoding="async" />
             </button>
             <button
               type="button"
@@ -290,18 +298,20 @@
               data-href="./project.html?slug=about"
               aria-label="查看 About"
             >
-              <img src="./imag/Image2.webp" alt="About 项目" loading="lazy" decoding="async" />
+              <img class="pointer-events-none block h-full w-full object-cover" src="./imag/Image2.webp" alt="About 项目" loading="lazy" decoding="async" />
             </button>
           </div>
-          <div class="portfolio-featured__actions hidden">
+          <div data-section-node="featured-actions" class="portfolio-featured__actions hidden">
             <button
               type="button"
+              data-section-node="featured-prev"
               class="portfolio-featured__nav portfolio-featured__nav--prev"
               aria-label="上一张"
             >
               上一张
             </button>
             <a
+              data-section-node="featured-title-link"
               href="./project.html?slug=sneakers"
               class="portfolio-featured__title inline-flex items-center justify-center rounded-[var(--radius-pill)] bg-black px-5 py-2 text-[14px] font-medium text-white no-underline"
             >
@@ -309,6 +319,7 @@
             </a>
             <button
               type="button"
+              data-section-node="featured-next"
               class="portfolio-featured__nav portfolio-featured__nav--next"
               aria-label="下一张"
             >
@@ -316,41 +327,41 @@
             </button>
           </div>
         </div>
-        <div class="portfolio-drag-proxy" aria-hidden="true"></div>
+        <div data-section-node="featured-drag-proxy" class="portfolio-drag-proxy" aria-hidden="true"></div>
       </section>
 
     </main>
 
     <!-- 页脚 Demo：联系信息 + Xuhao；中间区背景图在 styles.css → .footer-demo__stage -->
-    <footer id="contact" class="footer-demo flex flex-col justify-center gap-[var(--module-title-gap)] py-0 font-[var(--body-font)]">
-      <div class="footer-demo__panel mx-auto rounded-[var(--radius-panel)] bg-[#4b68f0] bg-[length:contain] bg-no-repeat bg-bottom text-white">
-        <div class="footer-demo__contain mx-auto px-6">
-          <div class="footer-demo__grid grid grid-cols-4 gap-6">
-            <div>
-              <p class="footer-demo__label m-0 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/70">FOLLOW ME</p>
-              <p class="footer-demo__value mt-2 text-[clamp(14px,1.6vw,17px)] font-medium leading-[1.35]">wechat →</p>
+    <footer id="contact" data-site-section="footer" class="footer-demo flex flex-col justify-center gap-[var(--module-title-gap)] py-0 font-[var(--body-font)]">
+      <div data-section-node="footer-panel" class="footer-demo__panel mx-auto rounded-[var(--radius-panel)] bg-[#4b68f0] bg-[length:contain] bg-no-repeat bg-bottom text-white">
+        <div data-section-node="footer-contain" class="footer-demo__contain mx-auto w-full px-4 md:px-6">
+          <div data-section-node="footer-grid" class="footer-demo__grid grid grid-cols-2 gap-x-8 gap-y-9 md:grid-cols-4 md:gap-6">
+            <div data-section-node="footer-item-follow">
+              <p data-section-node="footer-follow-label" class="footer-demo__label m-0 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/70">FOLLOW ME</p>
+              <p data-section-node="footer-follow-value" class="footer-demo__value mt-2 text-[clamp(14px,1.6vw,17px)] font-medium leading-[1.35]">wechat →</p>
             </div>
-            <div>
-              <p class="footer-demo__label m-0 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/70">CURRENT LOCATION</p>
-              <p class="footer-demo__value mt-2 text-[clamp(14px,1.6vw,17px)] font-medium leading-[1.35]">浙江杭州市余杭区 →</p>
+            <div data-section-node="footer-item-location">
+              <p data-section-node="footer-location-label" class="footer-demo__label m-0 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/70">CURRENT LOCATION</p>
+              <p data-section-node="footer-location-value" class="footer-demo__value mt-2 text-[clamp(14px,1.6vw,17px)] font-medium leading-[1.35]">浙江杭州市余杭区 →</p>
             </div>
-            <div>
-              <p class="footer-demo__label m-0 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/70">Phone</p>
-              <p class="footer-demo__value mt-2 text-[clamp(14px,1.6vw,17px)] font-medium leading-[1.35]">15004700137</p>
+            <div data-section-node="footer-item-phone">
+              <p data-section-node="footer-phone-label" class="footer-demo__label m-0 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/70">Phone</p>
+              <p data-section-node="footer-phone-value" class="footer-demo__value mt-2 text-[clamp(14px,1.6vw,17px)] font-medium leading-[1.35]">15004700137</p>
             </div>
-            <div>
-              <p class="footer-demo__label m-0 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/70">EMAIL me</p>
+            <div data-section-node="footer-item-email">
+              <p data-section-node="footer-email-label" class="footer-demo__label m-0 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/70">EMAIL me</p>
               <p class="footer-demo__value mt-2 text-[clamp(14px,1.6vw,17px)] font-medium leading-[1.35]">
-                <a class="border-b border-white/35 no-underline transition-colors duration-150 hover:border-white" href="mailto:961407086@qq.com">961407086@qq.com</a>
+                <a data-section-node="footer-email-link" class="border-b border-white/35 no-underline transition-colors duration-150 hover:border-white" href="mailto:961407086@qq.com">961407086@qq.com</a>
               </p>
             </div>
           </div>
         </div>
       </div>
-      <div class="footer-demo__bar bg-white py-5">
-        <div class="footer-demo__contain footer-demo__bar-inner flex flex-wrap items-center justify-between gap-x-6 gap-y-4">
-          <span class="footer-demo__copy text-[13px] font-medium text-neutral-500">©2026 XUHAO DESIGN</span>
-          <a class="footer-demo__top-link text-[13px] font-semibold text-neutral-500 no-underline transition-colors duration-150 hover:text-black" href="#home">Back To Top</a>
+      <div data-section-node="footer-bar" class="footer-demo__bar bg-white py-5">
+        <div data-section-node="footer-bar-inner" class="footer-demo__contain footer-demo__bar-inner flex w-full flex-wrap items-center justify-between gap-x-6 gap-y-4 px-3 md:px-6">
+          <span data-section-node="footer-copy" class="footer-demo__copy text-[13px] font-medium text-neutral-500">©2026 XUHAO DESIGN</span>
+          <a data-section-node="footer-top-link" class="footer-demo__top-link text-[13px] font-semibold text-neutral-500 no-underline transition-colors duration-150 hover:text-black" href="#home">Back To Top</a>
         </div>
       </div>
     </footer>
@@ -361,6 +372,10 @@
     <script src="./js/site-utils.js"></script>
     <script src="./js/site-helpers.js"></script>
     <script src="./js/site-config.js"></script>
+    <script src="./js/site-runtime.js"></script>
+    <script src="./js/site-sections.js"></script>
+    <script src="./js/modules/site-layout.js"></script>
+    <script src="./js/modules/site-content.js"></script>
     <script src="./js/modules/site-shell.js"></script>
     <script src="./js/modules/preloader.js"></script>
     <script src="./js/modules/hero-text-float.js"></script>

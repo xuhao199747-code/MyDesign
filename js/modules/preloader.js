@@ -1,4 +1,17 @@
 (function registerPreloaderModule() {
+  const siteRuntime = window.__siteRuntime || {};
+  const siteSections = window.__siteSections || {};
+  const getElementById =
+    siteRuntime.getElementById || ((elementId) => document.getElementById(elementId));
+  const queryElement =
+    siteRuntime.queryElement || ((selector, root = document) => root.querySelector(selector));
+  const registerSiteModule =
+    siteRuntime.registerSiteModule ||
+    ((moduleName, initModule) => {
+      if (!window.__siteModules) window.__siteModules = {};
+      window.__siteModules[moduleName] = initModule;
+    });
+
   function initPreloader(options = {}) {
     const {
       preloaderConfig = {},
@@ -11,10 +24,15 @@
         },
       },
     } = options;
-    const preloader = document.getElementById("preloader");
-    const progressBar = document.querySelector(".preloader__bar");
-    const progressText = document.querySelector(".preloader__text");
-    const typeText = document.querySelector(".preloader__type-text");
+    const systemElements = siteSections.getSystemElements?.() || {};
+    const preloader = systemElements.preloader || getElementById("preloader");
+    const progressBar =
+      systemElements.preloaderBar || queryElement(".preloader__bar", preloader || document);
+    const progressText =
+      systemElements.preloaderText || queryElement(".preloader__text", preloader || document);
+    const typeText =
+      systemElements.preloaderTypeText ||
+      queryElement(".preloader__type-text", preloader || document);
 
     if (!preloader) return;
     if (preloader.dataset.preloaderReady === "true") return;
@@ -210,6 +228,5 @@
     }, siteUtils.getNumberOption(preloaderConfig, "maxDisplayMs", 7000));
   }
 
-  if (!window.__siteModules) window.__siteModules = {};
-  window.__siteModules.initPreloaderModule = initPreloader;
+  registerSiteModule("initPreloaderModule", initPreloader);
 })();
