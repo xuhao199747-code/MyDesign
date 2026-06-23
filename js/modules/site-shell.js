@@ -116,8 +116,11 @@
       if (!target) return;
 
       event.preventDefault();
-      const y = target.getBoundingClientRect().top + window.scrollY - anchorOffset;
-      window.scrollTo({ top: y, behavior: "smooth" });
+      const isBrandLink = link.classList.contains("brand");
+      const y = isBrandLink
+        ? 0
+        : target.getBoundingClientRect().top + window.scrollY - anchorOffset;
+      window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
 
       if (window.location.hash !== href) {
         window.history.replaceState(null, "", href);

@@ -11,6 +11,94 @@
     return Object.freeze(value);
   };
 
+  const projectCatalog = [
+    {
+      slug: "profile",
+      title: "Profile",
+      category: "VIBE CODING",
+      image: "./imag/photo1.png",
+      summary: "个人展示页与信息架构整理，聚焦视觉表达、身份识别和内容层级。",
+      description:
+        "这个项目围绕个人主页的视觉呈现展开，重点优化了首屏识别、内容编排和品牌语气，让用户在短时间内理解角色定位与作品方向。",
+      tags: ["Brand", "Portfolio", "UI"],
+    },
+    {
+      slug: "sneakers",
+      title: "Sneakers",
+      category: "MY DESIGN",
+      image: "./imag/portfolio-cards1.webp",
+      summary: "电商鞋服专题页，强调卡片节奏、醒目标识与产品转化链路。",
+      description:
+        "Sneakers 项目聚焦产品信息与活动视觉的组合表达，通过高反差主视觉、卡片式陈列和明确的行动路径，提高了浏览效率与转化感知。",
+      tags: ["E-commerce", "Campaign", "Visual"],
+    },
+    {
+      slug: "about",
+      title: "About",
+      category: "MY DESIGN",
+      image: "./imag/Image2.webp",
+      summary: "关于页与介绍型版面的系统整理，统一语气、图文关系和阅读节奏。",
+      description:
+        "About 项目主要处理品牌自我介绍和方法论表达，目标是把信息从“堆叠”变成“叙述”，让版面更有结构，也更有可信度。",
+      tags: ["Content", "Storytelling", "Layout"],
+    },
+    {
+      slug: "portrait",
+      title: "Portrait",
+      category: "VIBE CODING",
+      image: "./imag/photo2.png",
+      summary: "视觉实验型人物展示页，强调图像裁切、氛围塑造和轻交互反馈。",
+      description:
+        "Portrait 项目通过人物影像和轻量动效的组合强化氛围表达，在不打断阅读的前提下增加页面记忆点，适合用于品牌或设计展示场景。",
+      tags: ["Art Direction", "Motion", "Showcase"],
+    },
+  ];
+
+  const logoItems = [
+    "./imag/logo/logo1.webp",
+    "./imag/logo/logo2.webp",
+    "./imag/logo/logo3.webp",
+    "./imag/logo/logo4.webp",
+    "./imag/logo/logo5.webp",
+    "./imag/logo/logo6.webp",
+    "./imag/logo/logo7.webp",
+    "./imag/logo/logo8.webp",
+    "./imag/logo/logo9.webp",
+    "./imag/logo/logo10.webp",
+    "./imag/logo/logo11.webp",
+    "./imag/logo/logo12.webp",
+    "./imag/logo/logo13.webp",
+    "./imag/logo/logo14.webp",
+    "./imag/logo/logo15.webp",
+    "./imag/logo/logo16.webp",
+    "./imag/logo/logo17.webp",
+    "./imag/logo/logo18.png",
+    "./imag/logo/logo19.png",
+  ];
+
+  const heroCriticalResources = [
+    "./imag/frame_front.webp",
+    "./imag/sprite.webp",
+    "./imag/sprite_2.webp",
+    "./imag/sprite_3.webp",
+    "./imag/sprite_4.webp",
+  ];
+
+  const sharedImageResources = [
+    ...new Set([
+      ...projectCatalog.map((item) => item.image).filter(Boolean),
+      "./imag/Frame 2085668692.png",
+      "./imag/Group 1940698323.png",
+      "./imag/Bottom information.png",
+      ...logoItems,
+    ]),
+  ];
+
+  const sharedFontResources = [
+    "./font/ArchivoBlack-Regular.ttf",
+    "./font/LuckiestGuy-Regular.ttf",
+  ];
+
   const siteConfig = {
 
     // Boot and diagnostics.
@@ -41,6 +129,9 @@
       documentTitleSuffix: "XUHAO DESIGN",
       closeOnHashChange: false,
     },
+
+    // Shared project catalog for homepage modules and detail pages.
+    projectCatalog,
 
     // React menu icon mount config.
     menuIcon: {
@@ -100,43 +191,8 @@
 
     // Preload timing and asset lists.
     preloader: {
-      criticalResources: [
-        "./imag/frame_front.webp",
-        "./imag/sprite.webp",
-        "./imag/sprite_2.webp",
-        "./imag/sprite_3.webp",
-        "./imag/sprite_4.webp",
-      ],
-      nonCriticalResources: [
-        "./imag/photo1.png",
-        "./imag/photo2.png",
-        "./imag/portfolio-cards1.webp",
-        "./imag/Frame 2085668692.png",
-        "./imag/Group 1940698323.png",
-        "./imag/Bottom information.png",
-        "./imag/Image2.webp",
-        "./imag/logo/logo1.webp",
-        "./imag/logo/logo2.webp",
-        "./imag/logo/logo3.webp",
-        "./imag/logo/logo4.webp",
-        "./imag/logo/logo5.webp",
-        "./imag/logo/logo6.webp",
-        "./imag/logo/logo7.webp",
-        "./imag/logo/logo8.webp",
-        "./imag/logo/logo9.webp",
-        "./imag/logo/logo10.webp",
-        "./imag/logo/logo11.webp",
-        "./imag/logo/logo12.webp",
-        "./imag/logo/logo13.webp",
-        "./imag/logo/logo14.webp",
-        "./imag/logo/logo15.webp",
-        "./imag/logo/logo16.webp",
-        "./imag/logo/logo17.webp",
-        "./imag/logo/logo18.png",
-        "./imag/logo/logo19.png",
-        "./font/ArchivoBlack-Regular.ttf",
-        "./font/LuckiestGuy-Regular.ttf",
-      ],
+      criticalResources: heroCriticalResources,
+      nonCriticalResources: [...sharedImageResources, ...sharedFontResources],
       phrases: [
         "Please wait a moment.",
         "Loading the full experience.",
@@ -170,7 +226,6 @@
     // Static copy for homepage content blocks.
     homeContent: {
       about: {
-        logoAltPrefix: "工具图标",
         introAriaLabel:
           "大家好，我是徐浩，从事产品和设计工作，专注于设计和构建数字产品、品牌和体验。",
         introGreeting: "大家好，我是",
@@ -207,189 +262,15 @@
         title: "MY DESIGN",
         prevLabel: "上一张",
         nextLabel: "下一张",
-        cards: [
-          {
-            title: "Sneakers",
-            href: "./project.html?slug=sneakers",
-            image: "./imag/portfolio-cards1.webp",
-            alt: "Sneakers 项目",
-          },
-          {
-            title: "Profile",
-            href: "./project.html?slug=profile",
-            image: "./imag/photo1.png",
-            alt: "Profile 项目",
-          },
-          {
-            title: "About",
-            href: "./project.html?slug=about",
-            image: "./imag/Image2.webp",
-            alt: "About 项目",
-          },
-        ],
+        cardSlugs: ["sneakers", "profile", "about"],
       },
     },
 
     // Clean template data for homepage sections.
     homeTemplates: {
       about: {
-        logoAltPrefix: "Tool Icon",
-        logoItems: [
-          "./imag/logo/logo1.webp",
-          "./imag/logo/logo2.webp",
-          "./imag/logo/logo3.webp",
-          "./imag/logo/logo4.webp",
-          "./imag/logo/logo5.webp",
-          "./imag/logo/logo6.webp",
-          "./imag/logo/logo7.webp",
-          "./imag/logo/logo8.webp",
-          "./imag/logo/logo9.webp",
-          "./imag/logo/logo10.webp",
-          "./imag/logo/logo11.webp",
-          "./imag/logo/logo12.webp",
-          "./imag/logo/logo13.webp",
-          "./imag/logo/logo14.webp",
-          "./imag/logo/logo15.webp",
-          "./imag/logo/logo16.webp",
-          "./imag/logo/logo17.webp",
-          "./imag/logo/logo18.png",
-          "./imag/logo/logo19.png",
-        ],
-        introAriaLabel:
-          "大家好，我是徐浩，从事产品和设计工作，专注于设计和构建数字产品、品牌和体验。",
-        introGreeting: "大家好，我是",
-        introName: "徐浩",
-        introRole: "从事产品和设计工作💻，",
-        introFocusPrefix: "专注于设计和构建",
-        introFocusProducts: "数字产品🌐、",
-        introFocusBrand: "品牌和体验❤️。",
-        introAvatarSrc: "./imag/Frame 2085668692.png",
-        introEmojiSrc: "./imag/Group 1940698323.png",
-      },
-      photo: {
-        metaLeftLabel: "BASED",
-        metaLeftValue: "杭州",
-        metaRightLabel: "Designer",
-        metaRightValue: "UI/UX",
-        copyPrimary: "用逻辑构建界面，以温度传递品牌基因！",
-        copySecondary: "让界面更有逻辑，让设计更有温度!",
-      },
-      footer: {
-        followLabel: "FOLLOW ME",
-        followValue: "wechat →",
-        locationLabel: "CURRENT LOCATION",
-        locationValue: "浙江杭州市余杭区 →",
-        phoneLabel: "Phone",
-        phoneValue: "15004700137",
-        emailLabel: "EMAIL me",
-        emailText: "961407086@qq.com",
-        emailHref: "mailto:961407086@qq.com",
-        copy: "©2026 XUHAO DESIGN",
-        topLinkText: "Back To Top",
-      },
-      featured: {
-        title: "MY DESIGN",
-        prevLabel: "上一张",
-        nextLabel: "下一张",
-        cards: [
-          {
-            title: "Sneakers",
-            href: "./project.html?slug=sneakers",
-            image: "./imag/portfolio-cards1.webp",
-            alt: "Sneakers 项目",
-          },
-          {
-            title: "Profile",
-            href: "./project.html?slug=profile",
-            image: "./imag/photo1.png",
-            alt: "Profile 项目",
-          },
-          {
-            title: "About",
-            href: "./project.html?slug=about",
-            image: "./imag/Image2.webp",
-            alt: "About 项目",
-          },
-        ],
-      },
-    },
-
-    // Layout baseline tokens for homepage sections.
-    homeLayout: {
-      about: {
-        section: {
-          layoutSection: "about",
-          contentWidth: "var(--page-content-width)",
-          titleGap: "var(--module-title-gap)",
-        },
-        nodes: {
-          head: "content-width",
-          intro: "content-width",
-          logoWall: "content-width",
-        },
-      },
-      photo: {
-        section: {
-          layoutSection: "photo",
-          contentWidth: "var(--page-content-width)",
-          titleGap: "24px",
-          vars: {
-            "--layout-photo-spacing": "24px",
-            "--layout-photo-card-height":
-              "clamp(220px, calc(var(--module-media-space) - 84px), 400px)",
-            "--layout-photo-card-width": "calc(var(--layout-photo-card-height) * 0.75)",
-          },
-        },
-        nodes: {
-          title: "wide-title",
-          content: "content-width",
-          copy: "content-width",
-          imagesWrap: "media-card",
-        },
-      },
-      portfolio: {
-        section: {
-          layoutSection: "portfolio",
-          contentWidth: "var(--page-content-width)",
-          titleGap: "var(--module-title-gap)",
-        },
-        nodes: {
-          title: "wide-title",
-          gallery: "full-bleed-stage",
-        },
-      },
-      featured: {
-        section: {
-          layoutSection: "featured",
-          contentWidth: "var(--page-content-width)",
-          titleGap: "var(--module-title-gap)",
-        },
-        nodes: {
-          head: "content-width",
-          root: "full-bleed-stage",
-          stage: "full-bleed-stage",
-          actions: "action-row",
-        },
-      },
-      footer: {
-        section: {
-          layoutSection: "footer",
-          contentWidth: "var(--page-content-width)",
-          titleGap: "var(--module-title-gap)",
-          vars: {
-            "--layout-footer-panel-width": "var(--page-max-width)",
-            "--layout-footer-panel-height":
-              "min(450px, calc(var(--screen-module-height) - 220px))",
-            "--layout-footer-grid-gap": "24px",
-            "--layout-footer-inline-padding": "24px",
-          },
-        },
-        nodes: {
-          panel: "content-width",
-          contain: "content-width",
-          grid: "content-grid",
-          barInner: "content-width",
-        },
+        logoAltPrefix: "工具图标",
+        logoItems,
       },
     },
 

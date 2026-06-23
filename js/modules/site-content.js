@@ -1,6 +1,7 @@
 (function registerSiteContentModule() {
   const siteRuntime = window.__siteRuntime || {};
   const siteSections = window.__siteSections || {};
+  const siteConfig = window.__siteConfig || {};
   const registerSiteModule =
     siteRuntime.registerSiteModule ||
     ((moduleName, initModule) => {
@@ -8,88 +9,21 @@
       window.__siteModules[moduleName] = initModule;
     });
 
-  const defaultTemplates = {
+  const defaultSectionContent = {
     about: {
-      logoAltPrefix: "Tool Icon",
-      logoItems: [
-        "./imag/logo/logo1.webp",
-        "./imag/logo/logo2.webp",
-        "./imag/logo/logo3.webp",
-        "./imag/logo/logo4.webp",
-        "./imag/logo/logo5.webp",
-        "./imag/logo/logo6.webp",
-        "./imag/logo/logo7.webp",
-        "./imag/logo/logo8.webp",
-        "./imag/logo/logo9.webp",
-        "./imag/logo/logo10.webp",
-        "./imag/logo/logo11.webp",
-        "./imag/logo/logo12.webp",
-        "./imag/logo/logo13.webp",
-        "./imag/logo/logo14.webp",
-        "./imag/logo/logo15.webp",
-        "./imag/logo/logo16.webp",
-        "./imag/logo/logo17.webp",
-        "./imag/logo/logo18.png",
-        "./imag/logo/logo19.png",
-      ],
-      introAriaLabel:
-        "大家好，我是徐浩，从事产品和设计工作，专注于设计和构建数字产品、品牌和体验。",
-      introGreeting: "大家好，我是",
-      introName: "徐浩",
-      introRole: "从事产品和设计工作💻，",
-      introFocusPrefix: "专注于设计和构建",
-      introFocusProducts: "数字产品🌐、",
-      introFocusBrand: "品牌和体验❤️。",
-      introAvatarSrc: "./imag/Frame 2085668692.png",
-      introEmojiSrc: "./imag/Group 1940698323.png",
+      ...(siteConfig.homeContent?.about || {}),
+      ...(siteConfig.homeTemplates?.about || {}),
     },
-    photo: {
-      metaLeftLabel: "BASED",
-      metaLeftValue: "杭州",
-      metaRightLabel: "Designer",
-      metaRightValue: "UI/UX",
-      copyPrimary: "用逻辑构建界面，以温度传递品牌基因！",
-      copySecondary: "让界面更有逻辑，让设计更有温度!",
-    },
-    featured: {
-      title: "MY DESIGN",
-      prevLabel: "上一张",
-      nextLabel: "下一张",
-      cards: [
-        {
-          title: "Sneakers",
-          href: "./project.html?slug=sneakers",
-          image: "./imag/portfolio-cards1.webp",
-          alt: "Sneakers 项目",
-        },
-        {
-          title: "Profile",
-          href: "./project.html?slug=profile",
-          image: "./imag/photo1.png",
-          alt: "Profile 项目",
-        },
-        {
-          title: "About",
-          href: "./project.html?slug=about",
-          image: "./imag/Image2.webp",
-          alt: "About 项目",
-        },
-      ],
-    },
-    footer: {
-      followLabel: "FOLLOW ME",
-      followValue: "wechat →",
-      locationLabel: "CURRENT LOCATION",
-      locationValue: "浙江杭州市余杭区 →",
-      phoneLabel: "Phone",
-      phoneValue: "15004700137",
-      emailLabel: "EMAIL me",
-      emailText: "961407086@qq.com",
-      emailHref: "mailto:961407086@qq.com",
-      copy: "©2026 XUHAO DESIGN",
-      topLinkText: "Back To Top",
-    },
+    photo: { ...(siteConfig.homeContent?.photo || {}) },
+    featured: { ...(siteConfig.homeContent?.featured || {}) },
+    footer: { ...(siteConfig.homeContent?.footer || {}) },
   };
+  const projectCatalog = Array.isArray(siteConfig.projectCatalog)
+    ? siteConfig.projectCatalog
+    : [];
+  const projectCatalogBySlug = new Map(
+    projectCatalog.map((item) => [item.slug, item])
+  );
 
   function setNodeText(node, value) {
     if (!node || typeof value !== "string") return;
@@ -214,9 +148,29 @@
     return card;
   }
 
+  function resolveFeaturedCards(featuredContent = {}) {
+    if (Array.isArray(featuredContent.cards) && featuredContent.cards.length) {
+      return featuredContent.cards;
+    }
+
+    const slugs = Array.isArray(featuredContent.cardSlugs)
+      ? featuredContent.cardSlugs
+      : [];
+
+    return slugs
+      .map((slug) => projectCatalogBySlug.get(slug))
+      .filter(Boolean)
+      .map((item) => ({
+        title: item.title,
+        href: `./project.html?slug=${item.slug}`,
+        image: item.image,
+        alt: `${item.title} 项目`,
+      }));
+  }
+
   function mergeSectionContent(sectionName, homeContentConfig = {}, homeTemplateConfig = {}) {
     return {
-      ...(defaultTemplates[sectionName] || {}),
+      ...(defaultSectionContent[sectionName] || {}),
       ...(homeContentConfig[sectionName] || {}),
       ...(homeTemplateConfig[sectionName] || {}),
     };
@@ -339,12 +293,13 @@
   }
 
   function buildFeaturedStage(stage, featuredContent) {
-    if (!stage || !Array.isArray(featuredContent.cards) || !featuredContent.cards.length) {
+    const cards = resolveFeaturedCards(featuredContent);
+    if (!stage || !cards.length) {
       return;
     }
 
     const fragment = document.createDocumentFragment();
-    featuredContent.cards.forEach((item, index) => {
+    cards.forEach((item, index) => {
       fragment.appendChild(createFeaturedCard(item, index));
     });
     stage.replaceChildren(fragment);
@@ -392,6 +347,7 @@
     const photoContent = mergeSectionContent("photo", homeContentConfig, homeTemplateConfig);
     const featuredContent = mergeSectionContent("featured", homeContentConfig, homeTemplateConfig);
     const footerContent = mergeSectionContent("footer", homeContentConfig, homeTemplateConfig);
+    const resolvedFeaturedCards = resolveFeaturedCards(featuredContent);
 
     initSectionContent(aboutElements, () => {
       buildLogoWall(aboutElements.logoWall, aboutContent);
@@ -405,8 +361,8 @@
     initSectionContent(featuredElements, () => {
       buildFeaturedStage(featuredElements.stage, featuredContent);
       setNodeText(featuredElements.title, featuredContent.title || "");
-      setNodeText(featuredElements.titleLink, featuredContent.cards?.[0]?.title || "");
-      setNodeHref(featuredElements.titleLink, featuredContent.cards?.[0]?.href || "#portfolio");
+      setNodeText(featuredElements.titleLink, resolvedFeaturedCards[0]?.title || "");
+      setNodeHref(featuredElements.titleLink, resolvedFeaturedCards[0]?.href || "#portfolio");
       setNodeText(featuredElements.prevButton, featuredContent.prevLabel || "");
       setNodeText(featuredElements.nextButton, featuredContent.nextLabel || "");
       setNodeAttr(

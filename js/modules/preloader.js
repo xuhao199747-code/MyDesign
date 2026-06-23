@@ -39,45 +39,18 @@
     preloader.dataset.preloaderReady = "true";
 
     // 关键资源：首屏必须加载完才显示
-    const criticalResources = siteUtils.getArrayOption(preloaderConfig, "criticalResources", [
-      "./imag/frame_front.webp",
-      "./imag/sprite.webp",
-      "./imag/sprite_2.webp",
-      "./imag/sprite_3.webp",
-      "./imag/sprite_4.webp",
-    ]);
+    const criticalResources = siteUtils.getArrayOption(
+      preloaderConfig,
+      "criticalResources",
+      []
+    );
 
     // 非关键资源：后台并行加载，不阻塞首屏显示
-    const nonCriticalResources = siteUtils.getArrayOption(preloaderConfig, "nonCriticalResources", [
-      "./imag/photo1.png",
-      "./imag/photo2.png",
-      "./imag/portfolio-cards1.webp",
-      "./imag/Frame 2085668692.png",
-      "./imag/Group 1940698323.png",
-      "./imag/Bottom information.png",
-      "./imag/Image2.webp",
-      "./imag/logo/logo1.webp",
-      "./imag/logo/logo2.webp",
-      "./imag/logo/logo3.webp",
-      "./imag/logo/logo4.webp",
-      "./imag/logo/logo5.webp",
-      "./imag/logo/logo6.webp",
-      "./imag/logo/logo7.webp",
-      "./imag/logo/logo8.webp",
-      "./imag/logo/logo9.webp",
-      "./imag/logo/logo10.webp",
-      "./imag/logo/logo11.webp",
-      "./imag/logo/logo12.webp",
-      "./imag/logo/logo13.webp",
-      "./imag/logo/logo14.webp",
-      "./imag/logo/logo15.webp",
-      "./imag/logo/logo16.webp",
-      "./imag/logo/logo17.webp",
-      "./imag/logo/logo18.png",
-      "./imag/logo/logo19.png",
-      "./font/ArchivoBlack-Regular.ttf",
-      "./font/LuckiestGuy-Regular.ttf",
-    ]);
+    const nonCriticalResources = siteUtils.getArrayOption(
+      preloaderConfig,
+      "nonCriticalResources",
+      []
+    );
 
     const allResources = [...criticalResources, ...nonCriticalResources];
     let loadedCount = 0;

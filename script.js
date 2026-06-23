@@ -32,9 +32,6 @@ const getPlayfulTitleOptions = () => {
 };
 
 const moduleOptionFactories = {
-  initSiteLayoutModule: () => ({
-    homeLayoutConfig: getSiteConfigSection("homeLayout"),
-  }),
   initSiteContentModule: () => ({
     homeContentConfig: getSiteConfigSection("homeContent"),
     homeTemplateConfig: getSiteConfigSection("homeTemplates"),

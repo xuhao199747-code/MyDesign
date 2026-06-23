@@ -39,7 +39,7 @@
 
       const fragment = document.createDocumentFragment();
       const sectionNode = title.getAttribute("data-section-node");
-      const isPhotoTitle = sectionNode === "photo-title";
+      const isPhotoTitle = sectionNode === "photo-title" || sectionNode === "photo-title-copy";
       const isPortfolioTitle = sectionNode === "portfolio-title";
       const isFeaturedTitle = sectionNode === "featured-title";
       let charIndex = 0;

@@ -1,4 +1,9 @@
-export const projectCatalog = [
+const siteProjectCatalog =
+  typeof window !== "undefined" && Array.isArray(window.__siteConfig?.projectCatalog)
+    ? window.__siteConfig.projectCatalog
+    : null;
+
+const fallbackProjectCatalog = [
   {
     slug: "profile",
     title: "Profile",
@@ -40,6 +45,8 @@ export const projectCatalog = [
     tags: ["Art Direction", "Motion", "Showcase"],
   },
 ];
+
+export const projectCatalog = siteProjectCatalog || fallbackProjectCatalog;
 
 const projectCatalogBySlug = new Map(
   projectCatalog.map((item) => [item.slug, item])

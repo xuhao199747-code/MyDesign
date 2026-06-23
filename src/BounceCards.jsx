@@ -320,19 +320,13 @@ export default function BounceCards({
 
   return (
     <div
-      className={`bounceCardsContainer ${className}`}
+      className={`bounceCardsContainer relative mx-auto block w-full max-w-full touch-pan-y isolate aspect-[1.4] max-md:aspect-auto max-md:h-[236px] max-md:min-h-[236px] ${className}`}
       ref={containerRef}
-      style={{
-        position: "relative",
-        width: "100%",
-        height: "auto",
-        aspectRatio: "1.4",
-      }}
     >
       {entries.map((item, idx) => (
         <a
           key={item.slug || item.image}
-          className={`card card-${idx}`}
+          className={`card card-${idx} absolute left-1/2 top-1/2 aspect-square w-[min(430px,28vw)] origin-center cursor-pointer no-underline [will-change:transform] max-md:w-[min(164px,43vw)] max-md:rounded-[clamp(10px,2.5vw,14px)]`}
           ref={(node) => {
             cardRefs.current[idx] = node;
           }}
@@ -388,9 +382,9 @@ export default function BounceCards({
             }, 360);
           }}
         >
-          <div className="cardTiltSurface">
+          <div className="cardTiltSurface h-full w-full overflow-hidden rounded-[inherit] bg-slate-50 shadow-[0_22px_60px_rgba(15,23,42,0.16)]">
             <img
-              className="image"
+              className="image block h-full w-full object-cover"
               src={item.image}
               alt={item.title || `card-${idx}`}
               loading="lazy"

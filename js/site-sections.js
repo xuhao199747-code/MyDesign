@@ -8,6 +8,8 @@
   const querySection = (name) => queryElement(`[data-site-section="${name}"]`);
   const querySectionNode = (section, nodeName) =>
     queryElement(`[data-section-node="${nodeName}"]`, section || document);
+  const querySectionNodeList = (section, selector, nodeName) =>
+    queryElements(selector, querySectionNode(section, nodeName) || section || document);
   const queryShell = (name) => queryElement(`[data-site-shell="${name}"]`);
   const queryShellNode = (shell, nodeName) =>
     queryElement(`[data-shell-node="${nodeName}"]`, shell || document);
@@ -77,25 +79,20 @@
         heroNav: querySectionNode(homeSection, "hero-nav"),
         heroTextLeft: querySectionNode(homeSection, "hero-nav-text-left"),
         heroTextRight: querySectionNode(homeSection, "hero-nav-text-right"),
-        heroTexts: queryElements(".hero-nav__text", querySectionNode(homeSection, "hero-nav") || homeSection || document),
+        heroTexts: querySectionNodeList(homeSection, ".hero-nav__text", "hero-nav"),
       },
       about: {
         section: aboutSection,
         head: querySectionNode(aboutSection, "about-head"),
         intro: querySectionNode(aboutSection, "about-intro"),
-        introAvatar: querySectionNode(aboutSection, "about-intro-avatar"),
-        introEmoji: querySectionNode(aboutSection, "about-intro-emoji"),
         logoWall: querySectionNode(aboutSection, "logo-wall"),
-        logoItems: queryElements("img", querySectionNode(aboutSection, "logo-wall") || aboutSection || document),
       },
       photo: {
         section: photoSection,
         title: querySectionNode(photoSection, "photo-title"),
         content: querySectionNode(photoSection, "photo-content"),
-        metaLeft: querySectionNode(photoSection, "photo-meta-left"),
         metaLeftLabel: querySectionNode(photoSection, "photo-meta-left-label"),
         metaLeftValue: querySectionNode(photoSection, "photo-meta-left-value"),
-        metaRight: querySectionNode(photoSection, "photo-meta-right"),
         metaRightLabel: querySectionNode(photoSection, "photo-meta-right-label"),
         metaRightValue: querySectionNode(photoSection, "photo-meta-right-value"),
         imagesWrap: querySectionNode(photoSection, "photo-images"),
@@ -104,9 +101,6 @@
             ".photo-image-front",
             querySectionNode(photoSection, "photo-images") || photoSection || document
           ),
-        copy: querySectionNode(photoSection, "photo-copy"),
-        copyPrimary: querySectionNode(photoSection, "photo-copy-line-primary"),
-        copySecondary: querySectionNode(photoSection, "photo-copy-line-secondary"),
       },
       portfolio: {
         section: portfolioSection,
@@ -121,28 +115,22 @@
         title: querySectionNode(featuredSection, "featured-title"),
         root: querySectionNode(featuredSection, "featured-root"),
         stage: querySectionNode(featuredSection, "featured-stage"),
-        cards: queryElements("[data-featured-card]", querySectionNode(featuredSection, "featured-stage") || featuredSection || document),
-        actions: querySectionNode(featuredSection, "featured-actions"),
+        cards: querySectionNodeList(featuredSection, "[data-featured-card]", "featured-stage"),
         prevButton: querySectionNode(featuredSection, "featured-prev"),
         nextButton: querySectionNode(featuredSection, "featured-next"),
         titleLink: querySectionNode(featuredSection, "featured-title-link"),
-        dragProxy: querySectionNode(featuredSection, "featured-drag-proxy"),
       },
       footer: {
         section: footerSection,
         panel: querySectionNode(footerSection, "footer-panel"),
         contain: querySectionNode(footerSection, "footer-contain"),
         grid: querySectionNode(footerSection, "footer-grid"),
-        itemFollow: querySectionNode(footerSection, "footer-item-follow"),
         followLabel: querySectionNode(footerSection, "footer-follow-label"),
         followValue: querySectionNode(footerSection, "footer-follow-value"),
-        itemLocation: querySectionNode(footerSection, "footer-item-location"),
         locationLabel: querySectionNode(footerSection, "footer-location-label"),
         locationValue: querySectionNode(footerSection, "footer-location-value"),
-        itemPhone: querySectionNode(footerSection, "footer-item-phone"),
         phoneLabel: querySectionNode(footerSection, "footer-phone-label"),
         phoneValue: querySectionNode(footerSection, "footer-phone-value"),
-        itemEmail: querySectionNode(footerSection, "footer-item-email"),
         emailLabel: querySectionNode(footerSection, "footer-email-label"),
         emailLink: querySectionNode(footerSection, "footer-email-link"),
         bar: querySectionNode(footerSection, "footer-bar"),

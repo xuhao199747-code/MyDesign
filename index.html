@@ -39,39 +39,53 @@
     <div id="ribbonsRoot" data-system-node="cursor-root" class="ribbons-cursor-layer" aria-hidden="true"></div>
     <div id="chatWidgetRoot" data-system-node="assistant-root"></div>
     <svg class="liquid-glass-filter" aria-hidden="true" focusable="false">
-      <filter
-        id="liquid-glass-nav"
-        color-interpolation-filters="sRGB"
-        x="-18%"
-        y="-140%"
-        width="136%"
-        height="380%"
-      >
-        <feTurbulence
-          type="turbulence"
-          baseFrequency="0.006 0.026"
-          numOctaves="1"
-          seed="13"
-          result="noise"
-        />
-        <feGaussianBlur in="noise" stdDeviation="0.55" result="softNoise" />
-        <feDisplacementMap
-          in="SourceGraphic"
-          in2="softNoise"
-          scale="22"
-          xChannelSelector="R"
-          yChannelSelector="G"
-          result="displaced"
-        />
-        <feColorMatrix
-          in="displaced"
-          type="matrix"
-          values="1.06 0 0 0 0  0 1.05 0 0 0  0 0 1.07 0 0  0 0 0 1 0"
-        />
-      </filter>
+      <defs>
+        <filter id="glass-filter" colorInterpolationFilters="sRGB" x="0%" y="0%" width="100%" height="100%">
+          <feTurbulence type="turbulence" baseFrequency="0.015 0.03" numOctaves="2" seed="5" result="noise"/>
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="20" xChannelSelector="R" yChannelSelector="G" result="dispRed"/>
+          <feColorMatrix in="dispRed" type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" result="red"/>
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="15" xChannelSelector="R" yChannelSelector="G" result="dispGreen"/>
+          <feColorMatrix in="dispGreen" type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0" result="green"/>
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="10" xChannelSelector="R" yChannelSelector="G" result="dispBlue"/>
+          <feColorMatrix in="dispBlue" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" result="blue"/>
+          <feBlend in="red" in2="green" mode="screen" result="rg"/>
+          <feBlend in="rg" in2="blue" mode="screen" result="output"/>
+          <feGaussianBlur in="output" stdDeviation="0.3"/>
+        </filter>
+        <filter
+          id="liquid-glass-nav"
+          color-interpolation-filters="sRGB"
+          x="-18%"
+          y="-140%"
+          width="136%"
+          height="380%"
+        >
+          <feTurbulence
+            type="turbulence"
+            baseFrequency="0.006 0.026"
+            numOctaves="1"
+            seed="13"
+            result="noise"
+          />
+          <feGaussianBlur in="noise" stdDeviation="0.55" result="softNoise" />
+          <feDisplacementMap
+            in="SourceGraphic"
+            in2="softNoise"
+            scale="22"
+            xChannelSelector="R"
+            yChannelSelector="G"
+            result="displaced"
+          />
+          <feColorMatrix
+            in="displaced"
+            type="matrix"
+            values="1.06 0 0 0 0  0 1.05 0 0 0  0 0 1.07 0 0  0 0 0 1 0"
+          />
+        </filter>
+      </defs>
     </svg>
     <!-- 1网页导航 -->
-    <header class="navbar fixed left-[max(16px,env(safe-area-inset-left,0px))] right-[max(16px,env(safe-area-inset-right,0px))] top-[max(12px,env(safe-area-inset-top,0px))] z-[200] flex h-12 items-center justify-between overflow-visible rounded-[200px] px-[5px] py-[6px] md:sticky md:left-auto md:right-auto md:top-4 md:z-[100] md:mx-auto md:h-12 md:w-[var(--page-frame-width)] md:justify-normal md:px-5 md:py-0" data-site-shell="primary" data-shell-node="navbar">
+    <header class="navbar glass-surface glass-surface--svg fixed left-[max(16px,env(safe-area-inset-left,0px))] right-[max(16px,env(safe-area-inset-right,0px))] top-[max(12px,env(safe-area-inset-top,0px))] z-[200] flex h-12 items-center justify-between overflow-visible rounded-[200px] px-[5px] py-[6px] md:sticky md:left-auto md:right-auto md:top-4 md:z-[100] md:mx-auto md:h-12 md:w-[var(--page-frame-width)] md:justify-normal md:pl-[6px] md:pr-[16px] md:py-0" data-site-shell="primary" data-shell-node="navbar" style="--glass-frost: 0.18; --glass-saturation: 1; --filter-id: url(#glass-filter);">
         <a class="brand mr-2 flex min-w-0 shrink-0 items-center md:mr-0" data-shell-node="brand" href="#home" aria-label="XHDESIGN 首页">
           <img class="block h-9 w-9 rounded-[10px] object-cover md:h-[38px] md:w-[38px] md:rounded-[11px]" src="./favicon.png" alt="XHDESIGN" />
         </a>
@@ -118,19 +132,19 @@
     </header>
     <main class="site-main">
       <!-- 内容区域0：角色特写首屏；鼠标方向控制转头 -->
-      <section id="home" data-site-section="home" class="head-hero" aria-label="角色特写首屏">
+      <section id="home" data-site-section="home" class="head-hero relative isolate w-full overflow-hidden bg-[var(--sprite-stage-bg)] h-[100svh] min-h-[620px] mt-[-64px] max-md:min-h-[560px] max-md:mt-[calc((env(safe-area-inset-top,0px)+48px+clamp(32px,6vw,56px))*-1)]" aria-label="角色特写首屏">
         <div
-          class="head-tracker"
+          class="head-tracker relative z-0 h-full w-full [contain:layout_paint]"
           data-section-node="head-tracker"
           data-head-tracker
           data-frame="0"
           data-direction="center"
           aria-label="根据鼠标方向转头的角色"
         >
-          <div class="head-tracker__stage" data-section-node="head-tracker-stage">
+          <div class="head-tracker__stage absolute inset-0 h-full w-full overflow-hidden bg-[var(--sprite-stage-bg)] [transform:translateZ(0)]" data-section-node="head-tracker-stage">
             <img
               data-section-node="head-tracker-poster"
-              class="head-tracker__poster"
+              class="head-tracker__poster absolute left-1/2 top-1/2 block h-[max(100svh,56.25vw)] w-[max(100vw,177.778svh)] -translate-x-1/2 -translate-y-1/2 object-cover object-center"
               src="./imag/frame_front.webp"
               alt=""
               fetchpriority="high"
@@ -139,16 +153,16 @@
             />
             <canvas
               data-section-node="head-tracker-canvas"
-              class="head-tracker__sprite"
+              class="head-tracker__sprite absolute left-1/2 top-1/2 block h-[max(100svh,56.25vw)] w-[max(100vw,177.778svh)] -translate-x-1/2 -translate-y-1/2"
               width="1280"
               height="720"
               aria-hidden="true"
             ></canvas>
           </div>
         </div>
-        <div class="hero-nav" data-section-node="hero-nav" aria-label="首屏装饰文字">
-          <span data-section-node="hero-nav-text-left" class="hero-nav__text hero-nav__text--left">WORKS</span>
-          <span data-section-node="hero-nav-text-right" class="hero-nav__text hero-nav__text--right">EXHIBITIONS</span>
+        <div class="hero-nav pointer-events-none absolute inset-0 left-1/2 z-20 flex w-full max-w-[var(--page-max-width)] -translate-x-1/2 items-center justify-between px-5 max-md:left-0 max-md:max-w-none max-md:translate-x-0 max-md:overflow-visible max-md:px-[calc(14px+env(safe-area-inset-left,0px))] max-md:pr-[calc(14px+env(safe-area-inset-right,0px))] max-md:pb-[max(20px,4vh)]" data-section-node="hero-nav" aria-label="首屏装饰文字">
+          <span data-section-node="hero-nav-text-left" class="hero-nav__text hero-nav__text--left relative inline-block max-md:max-w-[calc(50%-12px)] max-md:whitespace-nowrap">WORKS</span>
+          <span data-section-node="hero-nav-text-right" class="hero-nav__text hero-nav__text--right relative inline-block max-md:max-w-[calc(50%-12px)] max-md:whitespace-nowrap">EXHIBITIONS</span>
         </div>
       </section>
 
@@ -204,7 +218,7 @@
 
       <!-- 内容区域3：个人照片 -->
       <section id="photo" data-site-section="photo" class="container section-three flex flex-col items-center justify-center gap-[var(--photo-spacing)] [--photo-card-height:clamp(220px,calc(var(--module-media-space)-84px),400px)] [--photo-card-width:calc(var(--photo-card-height)*0.75)] [--photo-spacing:24px]" aria-labelledby="photoTitle">
-        <h2 id="photoTitle" data-section-node="photo-title" class="section-title photo-top mb-0 w-screen max-w-none text-[var(--portfolio-title-size)] text-[color:var(--color-title)]">LET'S WORK</h2>
+        <h2 id="photoTitle" data-section-node="photo-title" class="section-title photo-top mb-0 w-screen max-w-none text-[var(--portfolio-title-size)] text-[color:var(--color-title)] max-md:mt-0 max-md:box-border max-md:pt-[0.34em] max-md:text-[var(--mobile-section-title-size)]">LET'S WORK</h2>
         <div class="photo-content flex w-auto items-center justify-center gap-[var(--photo-spacing)]" data-section-node="photo-content">
           <dl data-section-node="photo-meta-left" class="photo-meta m-0 flex flex-col items-start justify-center gap-2 p-0">
             <dt data-section-node="photo-meta-left-label" class="m-0 w-full text-left text-[12px] font-normal leading-[1.33] text-[var(--color-muted)]">BASED</dt>
@@ -241,12 +255,12 @@
       <section
         id="portfolio"
         data-site-section="portfolio"
-        class="container section-portfolio portfolio-cards-section relative flex flex-col items-center justify-center"
+        class="container section-portfolio portfolio-cards-section relative flex w-[var(--page-frame-width)] flex-col items-center justify-center overflow-visible max-md:h-auto max-md:max-h-none max-md:gap-[var(--mobile-card-gap)] max-md:mb-0 max-md:mt-0 max-md:pb-[env(safe-area-inset-bottom,0)] max-md:pt-12"
         aria-labelledby="portfolioTitle"
       >
-        <h2 id="portfolioTitle" data-section-node="portfolio-title" class="section-title portfolio-top relative z-10 flex items-center justify-center pt-0 text-[var(--portfolio-title-size)] text-[color:var(--color-title)]">VIBE CODING</h2>
-        <div data-section-node="portfolio-gallery" class="portfolio-gallery portfolio-gallery--bounce relative flex items-center justify-center overflow-visible bg-[var(--color-surface)]">
-          <div id="portfolioBounceCardsRoot" data-section-node="portfolio-bounce-root"></div>
+        <h2 id="portfolioTitle" data-section-node="portfolio-title" class="section-title portfolio-top relative z-10 flex items-center justify-center pt-0 text-[var(--portfolio-title-size)] text-[color:var(--color-title)] max-md:mb-0 max-md:mt-0 max-md:h-auto max-md:flex-[0_1_auto] max-md:items-end max-md:justify-center max-md:pt-[0.18em] max-md:text-[var(--mobile-section-title-size)]">VIBE CODING</h2>
+        <div data-section-node="portfolio-gallery" class="portfolio-gallery portfolio-gallery--bounce relative flex h-[clamp(340px,var(--module-media-space),520px)] w-full items-center justify-center overflow-visible bg-[var(--color-surface)] isolate [transform:translateZ(0)] max-md:h-auto max-md:min-h-[320px] max-md:items-start max-md:pb-[max(12px,env(safe-area-inset-bottom,0px))]">
+          <div id="portfolioBounceCardsRoot" data-section-node="portfolio-bounce-root" class="flex w-full justify-center"></div>
         </div>
       </section>
 
@@ -254,19 +268,19 @@
         <section
           id="portfolio-featured"
           data-site-section="featured"
-          class="section-portfolio-featured relative flex flex-col items-center justify-center overflow-visible"
+          class="section-portfolio-featured relative flex flex-col items-center justify-center overflow-visible max-md:min-h-0 max-md:gap-0 max-md:pb-0 max-md:pt-[var(--mobile-module-lead-gap)] max-md:mb-[var(--section-gap-y-sm)]"
           aria-labelledby="portfolioFeaturedTitle"
         >
-        <header class="portfolio-featured__head m-0 box-border flex w-screen max-w-none items-center justify-center self-center px-0 pt-0 text-center" data-section-node="featured-head">
-          <h2 id="portfolioFeaturedTitle" data-section-node="featured-title" class="m-0 font-[var(--title-font)] text-[var(--portfolio-title-size)] font-normal uppercase leading-[0.86] text-[color:var(--color-title)]">MY DESIGN</h2>
+        <header class="portfolio-featured__head m-0 box-border flex w-screen max-w-none items-center justify-center self-center px-0 pt-0 text-center max-md:my-0" data-section-node="featured-head">
+          <h2 id="portfolioFeaturedTitle" data-section-node="featured-title" class="m-0 font-[var(--title-font)] text-[var(--portfolio-title-size)] font-normal uppercase leading-[0.86] text-[color:var(--color-title)] max-md:mt-0 max-md:box-border max-md:pt-[0.18em] max-md:text-[var(--mobile-section-title-size)] max-md:leading-[0.9]">MY DESIGN</h2>
         </header>
         <div
           data-section-node="featured-root"
-          class="portfolio-featured relative left-auto h-[clamp(360px,var(--module-media-space),560px)] w-screen overflow-visible p-0 touch-pan-y [--featured-card-w:min(430px,28vw)] [--featured-gap:clamp(42px,6vw,112px)] [overscroll-behavior-x:none] max-md:h-auto max-md:[--featured-card-w:min(280px,72vw)] max-md:[--featured-gap:24px]"
+          class="portfolio-featured relative left-auto h-[clamp(360px,var(--module-media-space),560px)] w-screen overflow-visible p-0 touch-pan-y [--featured-card-w:min(430px,28vw)] [--featured-gap:clamp(42px,6vw,112px)] [overscroll-behavior-x:none] max-md:h-auto max-md:min-h-0 max-md:overflow-x-hidden max-md:overflow-y-hidden max-md:[--featured-card-w:min(280px,72vw)] max-md:[--featured-gap:24px]"
           aria-label="作品展示对比版本"
           data-active-index="0"
         >
-          <div data-section-node="featured-stage" class="portfolio-featured__stage relative h-[min(100%,520px)] w-full overflow-visible max-md:h-auto">
+          <div data-section-node="featured-stage" class="portfolio-featured__stage relative h-[min(100%,520px)] w-full overflow-visible max-md:mt-[var(--module-content-gap-sm)] max-md:h-[clamp(260px,72vw,340px)] max-md:overflow-hidden">
             <button
               type="button"
               class="portfolio-featured__card"
@@ -333,10 +347,10 @@
     </main>
 
     <!-- 页脚 Demo：联系信息 + Xuhao；中间区背景图在 styles.css → .footer-demo__stage -->
-    <footer id="contact" data-site-section="footer" class="footer-demo flex flex-col justify-center gap-[var(--module-title-gap)] py-0 font-[var(--body-font)]">
-      <div data-section-node="footer-panel" class="footer-demo__panel mx-auto rounded-[var(--radius-panel)] bg-[#4b68f0] bg-[length:contain] bg-no-repeat bg-bottom text-white">
-        <div data-section-node="footer-contain" class="footer-demo__contain mx-auto w-full px-4 md:px-6">
-          <div data-section-node="footer-grid" class="footer-demo__grid grid grid-cols-2 gap-x-8 gap-y-9 md:grid-cols-4 md:gap-6">
+    <footer id="contact" data-site-section="footer" class="footer-demo flex flex-col justify-center gap-[var(--module-title-gap)] py-0 font-[var(--body-font)] max-md:gap-0">
+      <div data-section-node="footer-panel" class="footer-demo__panel mx-auto h-[min(450px,calc(var(--screen-module-height)-220px))] w-[min(1280px,calc(100%-24px))] max-w-[calc(100%-24px)] rounded-[var(--radius-panel)] bg-[#4b68f0] bg-[length:contain] bg-no-repeat bg-bottom pt-[min(64px,calc(var(--screen-module-pad-y)*0.8))] text-white max-md:mb-3 max-md:ml-[max(12px,env(safe-area-inset-left,0px))] max-md:mr-[max(12px,env(safe-area-inset-right,0px))] max-md:h-auto max-md:min-h-[420px] max-md:max-w-none max-md:rounded-[28px] max-md:bg-contain max-md:bg-center max-md:bg-no-repeat max-md:px-0 max-md:pb-7 max-md:pt-8">
+        <div data-section-node="footer-contain" class="footer-demo__contain mx-auto w-[var(--page-frame-width)] px-4 md:px-6 max-md:w-full max-md:max-w-none max-md:px-3">
+          <div data-section-node="footer-grid" class="footer-demo__grid grid grid-cols-2 gap-x-8 gap-y-9 md:grid-cols-4 md:items-start md:gap-x-[clamp(20px,3vw,40px)] md:gap-y-6 md:mb-12 max-md:w-full max-md:auto-rows-auto max-md:justify-items-start">
             <div data-section-node="footer-item-follow">
               <p data-section-node="footer-follow-label" class="footer-demo__label m-0 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/70">FOLLOW ME</p>
               <p data-section-node="footer-follow-value" class="footer-demo__value mt-2 text-[clamp(14px,1.6vw,17px)] font-medium leading-[1.35]">wechat →</p>
@@ -358,8 +372,8 @@
           </div>
         </div>
       </div>
-      <div data-section-node="footer-bar" class="footer-demo__bar bg-white py-5">
-        <div data-section-node="footer-bar-inner" class="footer-demo__contain footer-demo__bar-inner flex w-full flex-wrap items-center justify-between gap-x-6 gap-y-4 px-3 md:px-6">
+      <div data-section-node="footer-bar" class="footer-demo__bar bg-white py-5 max-md:pb-[max(24px,env(safe-area-inset-bottom,0px))] max-md:pt-6">
+        <div data-section-node="footer-bar-inner" class="footer-demo__contain footer-demo__bar-inner flex w-[min(var(--page-max-width),calc(100%-24px))] max-w-none flex-wrap items-center justify-between gap-x-6 gap-y-4 px-6 max-md:m-auto max-md:w-[calc(100%-24px)] max-md:flex-nowrap max-md:gap-4 max-md:px-0">
           <span data-section-node="footer-copy" class="footer-demo__copy text-[13px] font-medium text-neutral-500">©2026 XUHAO DESIGN</span>
           <a data-section-node="footer-top-link" class="footer-demo__top-link text-[13px] font-semibold text-neutral-500 no-underline transition-colors duration-150 hover:text-black" href="#home">Back To Top</a>
         </div>
@@ -374,7 +388,6 @@
     <script src="./js/site-config.js"></script>
     <script src="./js/site-runtime.js"></script>
     <script src="./js/site-sections.js"></script>
-    <script src="./js/modules/site-layout.js"></script>
     <script src="./js/modules/site-content.js"></script>
     <script src="./js/modules/site-shell.js"></script>
     <script src="./js/modules/preloader.js"></script>

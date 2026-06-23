@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
@@ -14,36 +14,58 @@
   </head>
   <body class="min-h-screen bg-[var(--color-surface)]">
     <svg class="liquid-glass-filter" aria-hidden="true" focusable="false">
-      <filter
-        id="liquid-glass-nav"
-        color-interpolation-filters="sRGB"
-        x="-18%"
-        y="-140%"
-        width="136%"
-        height="380%"
-      >
-        <feTurbulence
-          type="turbulence"
-          baseFrequency="0.006 0.026"
-          numOctaves="1"
-          seed="13"
-          result="noise"
-        />
-        <feGaussianBlur in="noise" stdDeviation="0.55" result="softNoise" />
-        <feDisplacementMap
-          in="SourceGraphic"
-          in2="softNoise"
-          scale="22"
-          xChannelSelector="R"
-          yChannelSelector="G"
-          result="displaced"
-        />
-        <feColorMatrix
-          in="displaced"
-          type="matrix"
-          values="1.06 0 0 0 0  0 1.05 0 0 0  0 0 1.07 0 0  0 0 0 1 0"
-        />
-      </filter>
+      <defs>
+        <linearGradient id="red-grad" x1="100%" y1="0%" x2="0%" y2="0%">
+          <stop offset="0%" stop-color="#0000"/>
+          <stop offset="100%" stop-color="red"/>
+        </linearGradient>
+        <linearGradient id="blue-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#0000"/>
+          <stop offset="100%" stop-color="blue"/>
+        </linearGradient>
+        <filter id="glass-filter" colorInterpolationFilters="sRGB" x="-5%" y="-5%" width="110%" height="110%">
+          <feImage x="0" y="0" width="100%" height="100%" preserveAspectRatio="none" result="map" href="data:image/svg+xml,%3Csvg viewBox='0 0 400 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='r' x1='100%25' y1='0%25' x2='0%25' y2='0%25'%3E%3Cstop offset='0%25' stop-color='%230000'/%3E%3Cstop offset='100%25' stop-color='red'/%3E%3C/linearGradient%3E%3ClinearGradient id='b' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%230000'/%3E%3Cstop offset='100%25' stop-color='blue'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x='0' y='0' width='400' height='100' rx='50' fill='url(%23r)'/%3E%3Crect x='0' y='0' width='400' height='100' rx='50' fill='url(%23b)' style='mix-blend-mode: screen'/%3E%3C/svg%3E"/>
+          <feDisplacementMap in="SourceGraphic" in2="map" scale="-30" xChannelSelector="R" yChannelSelector="G" result="dispRed"/>
+          <feColorMatrix in="dispRed" type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" result="red"/>
+          <feDisplacementMap in="SourceGraphic" in2="map" scale="-20" xChannelSelector="R" yChannelSelector="G" result="dispGreen"/>
+          <feColorMatrix in="dispGreen" type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0" result="green"/>
+          <feDisplacementMap in="SourceGraphic" in2="map" scale="-10" xChannelSelector="R" yChannelSelector="G" result="dispBlue"/>
+          <feColorMatrix in="dispBlue" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" result="blue"/>
+          <feBlend in="red" in2="green" mode="screen" result="rg"/>
+          <feBlend in="rg" in2="blue" mode="screen" result="output"/>
+          <feGaussianBlur in="output" stdDeviation="0.3"/>
+        </filter>
+        <filter
+          id="liquid-glass-nav"
+          color-interpolation-filters="sRGB"
+          x="-18%"
+          y="-140%"
+          width="136%"
+          height="380%"
+        >
+          <feTurbulence
+            type="turbulence"
+            baseFrequency="0.006 0.026"
+            numOctaves="1"
+            seed="13"
+            result="noise"
+          />
+          <feGaussianBlur in="noise" stdDeviation="0.55" result="softNoise" />
+          <feDisplacementMap
+            in="SourceGraphic"
+            in2="softNoise"
+            scale="22"
+            xChannelSelector="R"
+            yChannelSelector="G"
+            result="displaced"
+          />
+          <feColorMatrix
+            in="displaced"
+            type="matrix"
+            values="1.06 0 0 0 0  0 1.05 0 0 0  0 0 1.07 0 0  0 0 0 1 0"
+          />
+        </filter>
+      </defs>
     </svg>
 
     <header class="navbar">
