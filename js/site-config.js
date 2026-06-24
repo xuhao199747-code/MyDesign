@@ -89,7 +89,6 @@
       ...projectCatalog.map((item) => item.image).filter(Boolean),
       "./imag/Frame 2085668692.png",
       "./imag/Group 1940698323.png",
-      "./imag/Bottom information.png",
       ...logoItems,
     ]),
   ];

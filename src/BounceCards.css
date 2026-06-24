@@ -1,5 +1,6 @@
 .bounceCardsContainer {
   position: relative;
+  overflow: visible;
 }
 
 .bounceCardsContainer .card {
@@ -15,6 +16,7 @@
   cursor: pointer;
   will-change: transform;
   text-decoration: none;
+  overflow: visible;
 }
 
 .bounceCardsContainer .cardTiltSurface {

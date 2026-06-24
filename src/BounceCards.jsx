@@ -320,13 +320,13 @@ export default function BounceCards({
 
   return (
     <div
-      className={`bounceCardsContainer relative mx-auto block w-full max-w-full touch-pan-y isolate aspect-[1.4] max-md:aspect-auto max-md:h-[236px] max-md:min-h-[236px] ${className}`}
+      className={`bounceCardsContainer relative block h-[clamp(340px,var(--module-media-space),520px)] w-full max-w-none touch-pan-y isolate overflow-visible max-md:h-[236px] max-md:min-h-[236px] max-md:w-full ${className}`}
       ref={containerRef}
     >
       {entries.map((item, idx) => (
         <a
           key={item.slug || item.image}
-          className={`card card-${idx} absolute left-1/2 top-1/2 aspect-square w-[min(430px,28vw)] origin-center cursor-pointer no-underline [will-change:transform] max-md:w-[min(164px,43vw)] max-md:rounded-[clamp(10px,2.5vw,14px)]`}
+          className={`card card-${idx} absolute left-1/2 top-1/2 aspect-square h-[min(100%,430px)] w-auto max-w-[28vw] origin-center cursor-pointer no-underline [will-change:transform] max-md:h-[min(236px,43vw)] max-md:max-w-none max-md:w-[min(164px,43vw)] max-md:rounded-[clamp(10px,2.5vw,14px)]`}
           ref={(node) => {
             cardRefs.current[idx] = node;
           }}

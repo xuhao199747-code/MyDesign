@@ -42,12 +42,19 @@
   min-width: 1ch;
 }
 
-.preloader__type-caret {
+.preloader__type-text::after {
+  content: "";
+  display: inline-block;
   width: 2px;
   height: 1.1em;
   margin-left: 8px;
+  vertical-align: -0.08em;
   background: #ffffff;
   animation: preloaderCaretBlink 0.85s steps(1, end) infinite;
+}
+
+.preloader__type-caret {
+  display: none;
 }
 
 .preloader__progress {
@@ -1464,6 +1471,15 @@ body.is-click-surprise-active *::selection {
   transform: none;
 }
 
+.portfolio-featured[data-portfolio-featured-layout="pending"] .portfolio-featured__stage {
+  opacity: 0;
+}
+
+.portfolio-featured[data-portfolio-featured-layout="ready"] .portfolio-featured__stage {
+  opacity: 1;
+  transition: opacity 0.18s ease-out;
+}
+
 .portfolio-featured__track {
   align-items: flex-start;
   display: flex;
@@ -1830,12 +1846,44 @@ body.is-click-surprise-active *::selection {
 }
 
 .footer-demo__panel {
-  background-image: url("./imag/Bottom information.png");
-  background-repeat: no-repeat;
-  background-position: center bottom;
-  background-size: contain;
+  --footer-morph-progress: 0;
+  position: relative;
+  overflow: hidden;
   color: var(--color-on-dark);
-  background-color: #4b68f0;
+  background-color: #131515;
+}
+
+.footer-demo__morph {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.footer-demo__morph-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.footer-demo__morph path[data-footer-morph-layer="top"] {
+  fill: #131515;
+}
+
+.footer-demo__morph path[data-footer-morph-layer="mid"] {
+  fill: #ff8b17;
+}
+
+.footer-demo__morph path[data-footer-morph-layer="base"] {
+  fill: #ebb1e9;
+}
+
+.footer-demo__reveal {
+  position: relative;
+  z-index: 3;
+  opacity: calc(0.08 + var(--footer-morph-progress) * 0.92);
+  transform: translate3d(0, calc((1 - var(--footer-morph-progress)) * 42px), 0);
+  transition: opacity 0.18s linear, transform 0.18s linear;
 }
 
 .footer-demo__grid > * {

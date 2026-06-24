@@ -52,6 +52,7 @@ const moduleOptionFactories = {
   initPlayfulTitleHoverModule: getPlayfulTitleOptions,
   initLogoPhysicsModule: () => buildConfigOptions("logoPhysics", { siteHelpers, siteUtils }),
   initClickSurpriseBurstModule: () => buildConfigOptions("clickSurprise", { siteUtils }),
+  initFooterMorphPanelModule: () => ({ siteUtils }),
 };
 
 const moduleBootOrder = Object.keys(moduleOptionFactories);

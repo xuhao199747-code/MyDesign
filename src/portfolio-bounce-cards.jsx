@@ -16,7 +16,7 @@ export function mountPortfolioBounceCards() {
   return mountReactRoot(
     mount,
     <BounceCards
-      className="custom-bounceCards w-full max-w-full"
+      className="custom-bounceCards w-full max-w-none"
       cards={cards}
       animationDelay={portfolioBounceCardsConfig.animationDelay}
       animationStagger={portfolioBounceCardsConfig.animationStagger}

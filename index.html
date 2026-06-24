@@ -255,12 +255,12 @@
       <section
         id="portfolio"
         data-site-section="portfolio"
-        class="container section-portfolio portfolio-cards-section relative flex w-[var(--page-frame-width)] flex-col items-center justify-center overflow-visible max-md:h-auto max-md:max-h-none max-md:gap-[var(--mobile-card-gap)] max-md:mb-0 max-md:mt-0 max-md:pb-[env(safe-area-inset-bottom,0)] max-md:pt-12"
+        class="section-portfolio portfolio-cards-section relative flex w-full flex-col items-center justify-center overflow-visible max-md:h-auto max-md:max-h-none max-md:gap-[var(--mobile-card-gap)] max-md:mb-0 max-md:mt-0 max-md:pb-[env(safe-area-inset-bottom,0)] max-md:pt-12"
         aria-labelledby="portfolioTitle"
       >
         <h2 id="portfolioTitle" data-section-node="portfolio-title" class="section-title portfolio-top relative z-10 flex items-center justify-center pt-0 text-[var(--portfolio-title-size)] text-[color:var(--color-title)] max-md:mb-0 max-md:mt-0 max-md:h-auto max-md:flex-[0_1_auto] max-md:items-end max-md:justify-center max-md:pt-[0.18em] max-md:text-[var(--mobile-section-title-size)]">VIBE CODING</h2>
-        <div data-section-node="portfolio-gallery" class="portfolio-gallery portfolio-gallery--bounce relative flex h-[clamp(340px,var(--module-media-space),520px)] w-full items-center justify-center overflow-visible bg-[var(--color-surface)] isolate [transform:translateZ(0)] max-md:h-auto max-md:min-h-[320px] max-md:items-start max-md:pb-[max(12px,env(safe-area-inset-bottom,0px))]">
-          <div id="portfolioBounceCardsRoot" data-section-node="portfolio-bounce-root" class="flex w-full justify-center"></div>
+        <div data-section-node="portfolio-gallery" class="portfolio-gallery portfolio-gallery--bounce relative flex h-[clamp(340px,var(--module-media-space),520px)] w-full max-w-none items-center justify-center overflow-visible bg-[var(--color-surface)] isolate [transform:translateZ(0)] max-md:h-auto max-md:min-h-[320px] max-md:items-start max-md:pb-[max(12px,env(safe-area-inset-bottom,0px))]">
+          <div id="portfolioBounceCardsRoot" data-section-node="portfolio-bounce-root" class="relative flex w-full max-w-none justify-center overflow-visible"></div>
         </div>
       </section>
 
@@ -348,8 +348,15 @@
 
     <!-- 页脚 Demo：联系信息 + Xuhao；中间区背景图在 styles.css → .footer-demo__stage -->
     <footer id="contact" data-site-section="footer" class="footer-demo flex flex-col justify-center gap-[var(--module-title-gap)] py-0 font-[var(--body-font)] max-md:gap-0">
-      <div data-section-node="footer-panel" class="footer-demo__panel mx-auto h-[min(450px,calc(var(--screen-module-height)-220px))] w-[min(1280px,calc(100%-24px))] max-w-[calc(100%-24px)] rounded-[var(--radius-panel)] bg-[#4b68f0] bg-[length:contain] bg-no-repeat bg-bottom pt-[min(64px,calc(var(--screen-module-pad-y)*0.8))] text-white max-md:mb-3 max-md:ml-[max(12px,env(safe-area-inset-left,0px))] max-md:mr-[max(12px,env(safe-area-inset-right,0px))] max-md:h-auto max-md:min-h-[420px] max-md:max-w-none max-md:rounded-[28px] max-md:bg-contain max-md:bg-center max-md:bg-no-repeat max-md:px-0 max-md:pb-7 max-md:pt-8">
-        <div data-section-node="footer-contain" class="footer-demo__contain mx-auto w-[var(--page-frame-width)] px-4 md:px-6 max-md:w-full max-md:max-w-none max-md:px-3">
+      <div data-section-node="footer-panel" class="footer-demo__panel h-[100svh] min-h-[680px] w-full rounded-none pt-0 text-white max-md:min-h-[100svh] max-md:pb-0 max-md:pt-0">
+        <div data-section-node="footer-morph-overlay" class="footer-demo__morph" aria-hidden="true">
+          <svg class="footer-demo__morph-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <path data-footer-morph-layer="top" d="" />
+            <path data-footer-morph-layer="mid" d="" />
+            <path data-footer-morph-layer="base" d="" />
+          </svg>
+        </div>
+        <div data-section-node="footer-contain" class="footer-demo__contain footer-demo__reveal mx-auto flex h-full w-full items-end px-[max(24px,calc((100vw-var(--page-max-width))/2))] pb-[clamp(40px,8vh,84px)] md:px-[max(40px,calc((100vw-var(--page-max-width))/2))] max-md:w-full max-md:max-w-none max-md:px-3 max-md:pb-[max(28px,env(safe-area-inset-bottom,0px)+20px)]">
           <div data-section-node="footer-grid" class="footer-demo__grid grid grid-cols-2 gap-x-8 gap-y-9 md:grid-cols-4 md:items-start md:gap-x-[clamp(20px,3vw,40px)] md:gap-y-6 md:mb-12 max-md:w-full max-md:auto-rows-auto max-md:justify-items-start">
             <div data-section-node="footer-item-follow">
               <p data-section-node="footer-follow-label" class="footer-demo__label m-0 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/70">FOLLOW ME</p>
@@ -370,12 +377,6 @@
               </p>
             </div>
           </div>
-        </div>
-      </div>
-      <div data-section-node="footer-bar" class="footer-demo__bar bg-white py-5 max-md:pb-[max(24px,env(safe-area-inset-bottom,0px))] max-md:pt-6">
-        <div data-section-node="footer-bar-inner" class="footer-demo__contain footer-demo__bar-inner flex w-[min(var(--page-max-width),calc(100%-24px))] max-w-none flex-wrap items-center justify-between gap-x-6 gap-y-4 px-6 max-md:m-auto max-md:w-[calc(100%-24px)] max-md:flex-nowrap max-md:gap-4 max-md:px-0">
-          <span data-section-node="footer-copy" class="footer-demo__copy text-[13px] font-medium text-neutral-500">©2026 XUHAO DESIGN</span>
-          <a data-section-node="footer-top-link" class="footer-demo__top-link text-[13px] font-semibold text-neutral-500 no-underline transition-colors duration-150 hover:text-black" href="#home">Back To Top</a>
         </div>
       </div>
     </footer>
@@ -400,6 +401,7 @@
     <script src="./js/modules/playful-title-hover.js"></script>
     <script src="./js/modules/click-surprise-burst.js"></script>
     <script src="./js/modules/logo-physics.js"></script>
+    <script src="./js/modules/footer-morph-panel.js"></script>
     <script type="module" src="./src/bootstrap.jsx"></script>
     <script src="./script.js"></script>
   </body>
