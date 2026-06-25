@@ -268,118 +268,133 @@
         <section
           id="portfolio-featured"
           data-site-section="featured"
-          class="section-portfolio-featured relative flex flex-col items-center justify-center overflow-visible max-md:min-h-0 max-md:gap-0 max-md:pb-0 max-md:pt-[var(--mobile-module-lead-gap)] max-md:mb-[var(--section-gap-y-sm)]"
+          class="section-portfolio-featured relative overflow-visible"
           aria-labelledby="portfolioFeaturedTitle"
         >
-        <header class="portfolio-featured__head m-0 box-border flex w-screen max-w-none items-center justify-center self-center px-0 pt-0 text-center max-md:my-0" data-section-node="featured-head">
-          <h2 id="portfolioFeaturedTitle" data-section-node="featured-title" class="m-0 font-[var(--title-font)] text-[var(--portfolio-title-size)] font-normal uppercase leading-[0.86] text-[color:var(--color-title)] max-md:mt-0 max-md:box-border max-md:pt-[0.18em] max-md:text-[var(--mobile-section-title-size)] max-md:leading-[0.9]">MY DESIGN</h2>
-        </header>
-        <div
-          data-section-node="featured-root"
-          class="portfolio-featured relative left-auto h-[clamp(360px,var(--module-media-space),560px)] w-screen overflow-visible p-0 touch-pan-y [--featured-card-w:min(430px,28vw)] [--featured-gap:clamp(42px,6vw,112px)] [overscroll-behavior-x:none] max-md:h-auto max-md:min-h-0 max-md:overflow-x-hidden max-md:overflow-y-hidden max-md:[--featured-card-w:min(280px,72vw)] max-md:[--featured-gap:24px]"
-          aria-label="作品展示对比版本"
-          data-active-index="0"
-        >
-          <div data-section-node="featured-stage" class="portfolio-featured__stage relative h-[min(100%,520px)] w-full overflow-visible max-md:mt-[var(--module-content-gap-sm)] max-md:h-[clamp(260px,72vw,340px)] max-md:overflow-hidden">
-            <button
-              type="button"
-              class="portfolio-featured__card"
-              data-featured-card
-              data-index="0"
-              data-title="Sneakers"
-              data-href="./project.html?slug=sneakers"
-              aria-label="查看 Sneakers"
-            >
-              <img class="pointer-events-none block h-full w-full object-cover" src="./imag/portfolio-cards1.webp" alt="Sneakers 项目" loading="lazy" decoding="async" />
-            </button>
-            <button
-              type="button"
-              class="portfolio-featured__card"
-              data-featured-card
-              data-index="1"
-              data-title="Profile"
-              data-href="./project.html?slug=profile"
-              aria-label="查看 Profile"
-            >
-              <img class="pointer-events-none block h-full w-full object-cover" src="./imag/photo1.png" alt="Profile 项目" loading="lazy" decoding="async" />
-            </button>
-            <button
-              type="button"
-              class="portfolio-featured__card"
-              data-featured-card
-              data-index="2"
-              data-title="About"
-              data-href="./project.html?slug=about"
-              aria-label="查看 About"
-            >
-              <img class="pointer-events-none block h-full w-full object-cover" src="./imag/Image2.webp" alt="About 项目" loading="lazy" decoding="async" />
-            </button>
+          <div data-section-node="featured-pin" class="mydesign-morph__pin">
+            <div data-section-node="featured-first-screen" class="mydesign-morph__first">
+              <header class="portfolio-featured__head m-0 box-border flex w-screen max-w-none items-center justify-center self-center px-0 pt-0 text-center max-md:my-0" data-section-node="featured-head">
+                <h2 id="portfolioFeaturedTitle" data-section-node="featured-title" class="m-0 font-[var(--title-font)] text-[var(--portfolio-title-size)] font-normal uppercase leading-[0.86] text-[color:var(--color-title)] max-md:mt-0 max-md:box-border max-md:pt-[0.18em] max-md:text-[var(--mobile-section-title-size)] max-md:leading-[0.9]">MY DESIGN</h2>
+              </header>
+              <div
+                data-section-node="featured-root"
+                class="portfolio-featured relative left-auto h-[clamp(360px,var(--module-media-space),560px)] w-screen overflow-visible p-0 touch-pan-y [--featured-card-w:min(430px,28vw)] [--featured-gap:clamp(42px,6vw,112px)] [overscroll-behavior-x:none] max-md:h-auto max-md:min-h-0 max-md:overflow-x-hidden max-md:overflow-y-hidden max-md:[--featured-card-w:min(280px,72vw)] max-md:[--featured-gap:24px]"
+                aria-label="作品展示对比版本"
+                data-active-index="0"
+              >
+                <div data-section-node="featured-stage" class="portfolio-featured__stage relative h-[min(100%,520px)] w-full overflow-visible max-md:mt-[var(--module-content-gap-sm)] max-md:h-[clamp(260px,72vw,340px)] max-md:overflow-hidden">
+                  <button
+                    type="button"
+                    class="portfolio-featured__card"
+                    data-featured-card
+                    data-index="0"
+                    data-title="Sneakers"
+                    data-href="./project.html?slug=sneakers"
+                    aria-label="查看 Sneakers"
+                  >
+                    <img class="pointer-events-none block h-full w-full object-cover" src="./imag/portfolio-cards1.webp" alt="Sneakers 项目" loading="lazy" decoding="async" />
+                  </button>
+                  <button
+                    type="button"
+                    class="portfolio-featured__card"
+                    data-featured-card
+                    data-index="1"
+                    data-title="Profile"
+                    data-href="./project.html?slug=profile"
+                    aria-label="查看 Profile"
+                  >
+                    <img class="pointer-events-none block h-full w-full object-cover" src="./imag/photo1.png" alt="Profile 项目" loading="lazy" decoding="async" />
+                  </button>
+                  <button
+                    type="button"
+                    class="portfolio-featured__card"
+                    data-featured-card
+                    data-index="2"
+                    data-title="About"
+                    data-href="./project.html?slug=about"
+                    aria-label="查看 About"
+                  >
+                    <img class="pointer-events-none block h-full w-full object-cover" src="./imag/Image2.webp" alt="About 项目" loading="lazy" decoding="async" />
+                  </button>
+                </div>
+                <div data-section-node="featured-actions" class="portfolio-featured__actions hidden">
+                  <button
+                    type="button"
+                    data-section-node="featured-prev"
+                    class="portfolio-featured__nav portfolio-featured__nav--prev"
+                    aria-label="上一张"
+                  >
+                    上一张
+                  </button>
+                  <a
+                    data-section-node="featured-title-link"
+                    href="./project.html?slug=sneakers"
+                    class="portfolio-featured__title inline-flex items-center justify-center rounded-[var(--radius-pill)] bg-black px-5 py-2 text-[14px] font-medium text-white no-underline"
+                  >
+                    Sneakers
+                  </a>
+                  <button
+                    type="button"
+                    data-section-node="featured-next"
+                    class="portfolio-featured__nav portfolio-featured__nav--next"
+                    aria-label="下一张"
+                  >
+                    下一张
+                  </button>
+                </div>
+              </div>
+              <div data-section-node="featured-drag-proxy" class="portfolio-drag-proxy" aria-hidden="true"></div>
+            </div>
+
+            <div data-section-node="featured-morph-overlay" class="mydesign-morph__overlay" aria-hidden="true">
+              <svg class="mydesign-morph__svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="featuredGradientLayerA" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#9fd8ff" />
+                    <stop offset="100%" stop-color="#1E6BFF" />
+                  </linearGradient>
+                  <linearGradient id="featuredGradientLayerB" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#86c9ff" />
+                    <stop offset="100%" stop-color="#d5fbff" />
+                  </linearGradient>
+                </defs>
+                <path data-featured-morph-layer="mid" fill="url(#featuredGradientLayerB)" d="" />
+                <path data-featured-morph-layer="top" fill="url(#featuredGradientLayerA)" d="" />
+              </svg>
+            </div>
+
+            <div data-section-node="featured-second-screen" class="mydesign-second-screen" aria-label="许浩品牌尾屏">
+              <div class="mydesign-second-screen__scene">
+                <div class="mydesign-second-screen__logo-stage" data-section-node="featured-xuhuo-logo-stage">
+                  <img class="mydesign-second-screen__logo-image" src="./imag/xuhuo-logo-stage.png" alt="Xuhao" loading="lazy" decoding="async" />
+                  <div id="myDesignLanyardRoot" class="mydesign-second-screen__lanyard"></div>
+                </div>
+                <div id="contact" data-section-node="featured-contact" class="mydesign-contact" aria-label="联系信息">
+                  <div class="mydesign-contact__item">
+                    <p class="mydesign-contact__label">FOLLOW ME</p>
+                    <p class="mydesign-contact__value">wechat →</p>
+                  </div>
+                  <div class="mydesign-contact__item">
+                    <p class="mydesign-contact__label">CURRENT LOCATION</p>
+                    <p class="mydesign-contact__value">浙江杭州市余杭区 →</p>
+                  </div>
+                  <div class="mydesign-contact__item">
+                    <p class="mydesign-contact__label">PHONE</p>
+                    <p class="mydesign-contact__value">15004700137</p>
+                  </div>
+                  <div class="mydesign-contact__item">
+                    <p class="mydesign-contact__label">EMAIL ME</p>
+                    <p class="mydesign-contact__value">
+                      <a href="mailto:961407086@qq.com">961407086@qq.com</a>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          <div data-section-node="featured-actions" class="portfolio-featured__actions hidden">
-            <button
-              type="button"
-              data-section-node="featured-prev"
-              class="portfolio-featured__nav portfolio-featured__nav--prev"
-              aria-label="上一张"
-            >
-              上一张
-            </button>
-            <a
-              data-section-node="featured-title-link"
-              href="./project.html?slug=sneakers"
-              class="portfolio-featured__title inline-flex items-center justify-center rounded-[var(--radius-pill)] bg-black px-5 py-2 text-[14px] font-medium text-white no-underline"
-            >
-              Sneakers
-            </a>
-            <button
-              type="button"
-              data-section-node="featured-next"
-              class="portfolio-featured__nav portfolio-featured__nav--next"
-              aria-label="下一张"
-            >
-              下一张
-            </button>
-          </div>
-        </div>
-        <div data-section-node="featured-drag-proxy" class="portfolio-drag-proxy" aria-hidden="true"></div>
       </section>
 
     </main>
-
-    <!-- 页脚 Demo：联系信息 + Xuhao；中间区背景图在 styles.css → .footer-demo__stage -->
-    <footer id="contact" data-site-section="footer" class="footer-demo flex flex-col justify-center gap-[var(--module-title-gap)] py-0 font-[var(--body-font)] max-md:gap-0">
-      <div data-section-node="footer-panel" class="footer-demo__panel h-[100svh] min-h-[680px] w-full rounded-none pt-0 text-white max-md:min-h-[100svh] max-md:pb-0 max-md:pt-0">
-        <div data-section-node="footer-morph-overlay" class="footer-demo__morph" aria-hidden="true">
-          <svg class="footer-demo__morph-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
-            <path data-footer-morph-layer="top" d="" />
-            <path data-footer-morph-layer="mid" d="" />
-            <path data-footer-morph-layer="base" d="" />
-          </svg>
-        </div>
-        <div data-section-node="footer-contain" class="footer-demo__contain footer-demo__reveal mx-auto flex h-full w-full items-end px-[max(24px,calc((100vw-var(--page-max-width))/2))] pb-[clamp(40px,8vh,84px)] md:px-[max(40px,calc((100vw-var(--page-max-width))/2))] max-md:w-full max-md:max-w-none max-md:px-3 max-md:pb-[max(28px,env(safe-area-inset-bottom,0px)+20px)]">
-          <div data-section-node="footer-grid" class="footer-demo__grid grid grid-cols-2 gap-x-8 gap-y-9 md:grid-cols-4 md:items-start md:gap-x-[clamp(20px,3vw,40px)] md:gap-y-6 md:mb-12 max-md:w-full max-md:auto-rows-auto max-md:justify-items-start">
-            <div data-section-node="footer-item-follow">
-              <p data-section-node="footer-follow-label" class="footer-demo__label m-0 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/70">FOLLOW ME</p>
-              <p data-section-node="footer-follow-value" class="footer-demo__value mt-2 text-[clamp(14px,1.6vw,17px)] font-medium leading-[1.35]">wechat →</p>
-            </div>
-            <div data-section-node="footer-item-location">
-              <p data-section-node="footer-location-label" class="footer-demo__label m-0 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/70">CURRENT LOCATION</p>
-              <p data-section-node="footer-location-value" class="footer-demo__value mt-2 text-[clamp(14px,1.6vw,17px)] font-medium leading-[1.35]">浙江杭州市余杭区 →</p>
-            </div>
-            <div data-section-node="footer-item-phone">
-              <p data-section-node="footer-phone-label" class="footer-demo__label m-0 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/70">Phone</p>
-              <p data-section-node="footer-phone-value" class="footer-demo__value mt-2 text-[clamp(14px,1.6vw,17px)] font-medium leading-[1.35]">15004700137</p>
-            </div>
-            <div data-section-node="footer-item-email">
-              <p data-section-node="footer-email-label" class="footer-demo__label m-0 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/70">EMAIL me</p>
-              <p class="footer-demo__value mt-2 text-[clamp(14px,1.6vw,17px)] font-medium leading-[1.35]">
-                <a data-section-node="footer-email-link" class="border-b border-white/35 no-underline transition-colors duration-150 hover:border-white" href="mailto:961407086@qq.com">961407086@qq.com</a>
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </footer>
 
     <!-- 使用本地 GSAP，避免仅 CDN 时断网 / file:// 打开导致整段交互失效 -->
     <script src="./vendor/gsap.min.js"></script>

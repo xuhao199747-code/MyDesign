@@ -1,4 +1,4 @@
-(function registerFooterMorphPanelModule() {
+(function registerFeaturedMorphPanelModule() {
   const siteRuntime = window.__siteRuntime || {};
   const querySection =
     siteRuntime.querySection ||
@@ -16,148 +16,189 @@
     });
 
   const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
-  const lerp = (start, end, progress) => start + (end - start) * progress;
+  const easeOutQuart = (t) => 1 - (1 - t) ** 4;
+  const easeInOutSine = (t) => -(Math.cos(Math.PI * t) - 1) / 2;
 
-  function buildWavePath(width, height, progress, config) {
-    const closedY = config.closedY * height;
-    const openY = config.openY * height;
-    const crest = lerp(closedY, openY, progress);
-    const amplitude = lerp(config.closedAmplitude * height, config.openAmplitude * height, progress);
-
-    const points = config.points.map((point) => ({
-      x: point.x * width,
-      y: crest + point.offset * amplitude,
-    }));
-
-    let path = `M 0 ${height} L 0 ${points[0].y}`;
-    for (let index = 0; index < points.length - 1; index += 1) {
-      const current = points[index];
-      const next = points[index + 1];
-      const cp1x = current.x + (next.x - current.x) * 0.32;
-      const cp1y = current.y;
-      const cp2x = current.x + (next.x - current.x) * 0.68;
-      const cp2y = next.y;
-      path += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${next.x} ${next.y}`;
+  function getCurve(points, numPoints) {
+    let path = "";
+    for (let index = 0; index < numPoints - 1; index += 1) {
+      const point = ((index + 1) / (numPoints - 1)) * 100;
+      const controlPoint = point - ((1 / (numPoints - 1)) * 100) / 2;
+      path += ` ${controlPoint} ${points[index]} ${controlPoint} ${points[index + 1]} ${point} ${points[index + 1]}`;
     }
-    path += ` L ${width} ${height} Z`;
     return path;
   }
 
-  function initFooterMorphPanelModule() {
-    const footer = querySection("footer");
-    const stage = querySectionNode("footer-stage", footer || document);
-    const panel = querySectionNode("footer-panel", footer || document);
-    const overlay = querySectionNode("footer-morph-overlay", footer || document);
-    const svg = overlay?.querySelector(".footer-demo__morph-svg");
-    const topPath = overlay?.querySelector('[data-footer-morph-layer="top"]');
-    const midPath = overlay?.querySelector('[data-footer-morph-layer="mid"]');
-    const basePath = overlay?.querySelector('[data-footer-morph-layer="base"]');
-    if (!footer || !stage || !panel || !overlay || !svg || !topPath || !midPath || !basePath) return;
-    if (panel.dataset.footerMorphReady === "true") return;
-    panel.dataset.footerMorphReady = "true";
+  function initFeaturedMorphPanelModule() {
+    const section = querySection("featured") || document.getElementById("portfolio-featured");
+    const pin = querySectionNode("featured-pin", section || document);
+    const overlay = querySectionNode("featured-morph-overlay", section || document);
+    const firstContent = querySectionNode("featured-first-screen", section || document);
+    const secondContent = querySectionNode("featured-second-screen", section || document);
+    const paths = overlay?.querySelectorAll(".mydesign-morph__svg path");
 
-    const gsapApi = window.gsap;
-    const state = { progress: 0 };
-    const waveConfigs = {
-      top: {
-        closedY: 0.992,
-        openY: -0.1,
-        closedAmplitude: 0.028,
-        openAmplitude: 0.46,
-        points: [
-          { x: 0, offset: -1.55 },
-          { x: 0.1, offset: 1.35 },
-          { x: 0.24, offset: 0.15 },
-          { x: 0.34, offset: -1.7 },
-          { x: 0.46, offset: 1.85 },
-          { x: 0.58, offset: -0.65 },
-          { x: 0.69, offset: 0.52 },
-          { x: 0.79, offset: -0.72 },
-          { x: 0.9, offset: 0.35 },
-          { x: 1, offset: 1.95 },
-        ],
-      },
-      mid: {
-        closedY: 1.028,
-        openY: -0.06,
-        closedAmplitude: 0.014,
-        openAmplitude: 0.4,
-        points: [
-          { x: 0, offset: -1.05 },
-          { x: 0.12, offset: 0.62 },
-          { x: 0.28, offset: -1.18 },
-          { x: 0.42, offset: 0.95 },
-          { x: 0.58, offset: -0.35 },
-          { x: 0.74, offset: 0.3 },
-          { x: 0.9, offset: -0.18 },
-          { x: 1, offset: 0.24 },
-        ],
-      },
-      base: {
-        closedY: 1.11,
-        openY: -0.08,
-        closedAmplitude: 0.006,
-        openAmplitude: 0.2,
-        points: [
-          { x: 0, offset: -1.2 },
-          { x: 0.12, offset: 0.72 },
-          { x: 0.26, offset: 0.08 },
-          { x: 0.41, offset: -1.02 },
-          { x: 0.55, offset: -0.15 },
-          { x: 0.72, offset: 0.08 },
-          { x: 0.86, offset: -0.28 },
-          { x: 1, offset: 0.22 },
-        ],
-      },
-    };
+    if (!section || !pin || !overlay || !paths?.length || !firstContent || !secondContent) return;
+    if (pin.dataset.featuredMorphReady === "true") return;
+    pin.dataset.featuredMorphReady = "true";
 
+    const numPoints = 12;
+    const numPaths = paths.length;
+    const allPoints = Array.from({ length: numPaths }, () =>
+      Array.from({ length: numPoints }, () => 100)
+    );
+    let mode = "hidden";
+    let lastRaw = 0;
     let rafId = 0;
 
-    const render = () => {
-      rafId = 0;
-      const rect = panel.getBoundingClientRect();
-      const width = Math.max(rect.width, 1);
-      const height = Math.max(rect.height, 1);
-      const baseProgress = clamp((state.progress - 0.42) / 0.58, 0, 1);
-      svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
-      panel.style.setProperty("--footer-morph-progress", state.progress.toFixed(4));
-      topPath.setAttribute("d", buildWavePath(width, height, state.progress, waveConfigs.top));
-      midPath.setAttribute("d", buildWavePath(width, height, state.progress, waveConfigs.mid));
-      basePath.setAttribute("d", buildWavePath(width, height, baseProgress, waveConfigs.base));
-      topPath.style.opacity = "1";
-      midPath.style.opacity = "1";
-      basePath.style.opacity = "1";
+    const renderMorph = () => {
+      for (let index = 0; index < numPaths; index += 1) {
+        const points = allPoints[index];
+        let d = "";
+
+        if (mode === "enterFromBottom" || mode === "wipeDown") {
+          d = `M 0 ${points[0]} C${getCurve(points, numPoints)} V 100 H 0 Z`;
+        } else if (mode === "visible") {
+          d = "M 0 0 H 100 V 100 H 0 Z";
+        }
+
+        paths[index].setAttribute("d", d);
+      }
+    };
+
+    const updateEnterByProgress = (progress) => {
+      const p = easeInOutSine(clamp(progress, 0, 1));
+
+      if (p <= 0.001) {
+        mode = "hidden";
+        renderMorph();
+        return;
+      }
+
+      if (p >= 0.995) {
+        mode = "visible";
+        renderMorph();
+        return;
+      }
+
+      mode = "enterFromBottom";
+      const waveStrength = Math.sin(p * Math.PI) * 26;
+
+      for (let pathIndex = 0; pathIndex < numPaths; pathIndex += 1) {
+        const layerDelay = pathIndex * 0.24;
+        const layerOffset = pathIndex * 9.5;
+
+        for (let pointIndex = 0; pointIndex < numPoints; pointIndex += 1) {
+          const pointDelay = (pointIndex / (numPoints - 1)) * 0.32 + layerDelay;
+          const available = 1 - pointDelay;
+          const localP = easeOutQuart(clamp((p - pointDelay) / available, 0, 1));
+          const baseY = 100 - localP * 100;
+          const wave =
+            Math.sin(pointIndex * 1.22 + p * Math.PI * 2.2 + layerOffset) *
+            waveStrength *
+            (0.65 + (1 - localP) * 0.35);
+
+          allPoints[pathIndex][pointIndex] = clamp(baseY + wave, 0, 100);
+        }
+      }
+
+      renderMorph();
+    };
+
+    const updateReturnWipeByProgress = (progress) => {
+      const p = easeInOutSine(clamp(progress, 0, 1));
+
+      if (p <= 0.001) {
+        mode = "visible";
+        for (let pathIndex = 0; pathIndex < numPaths; pathIndex += 1) {
+          for (let pointIndex = 0; pointIndex < numPoints; pointIndex += 1) {
+            allPoints[pathIndex][pointIndex] = 0;
+          }
+        }
+        renderMorph();
+        return;
+      }
+
+      if (p >= 0.995) {
+        mode = "hidden";
+        renderMorph();
+        return;
+      }
+
+      mode = "wipeDown";
+      const waveStrength = Math.sin(p * Math.PI) * 24;
+
+      for (let pathIndex = 0; pathIndex < numPaths; pathIndex += 1) {
+        const layerDelay = pathIndex * 0.22;
+        const layerOffset = pathIndex * 8.5;
+
+        for (let pointIndex = 0; pointIndex < numPoints; pointIndex += 1) {
+          const pointDelay = (pointIndex / (numPoints - 1)) * 0.28 + layerDelay;
+          const available = 1 - pointDelay;
+          const localP = easeOutQuart(clamp((p - pointDelay) / available, 0, 1));
+          const baseY = localP * 100;
+          const wave =
+            Math.sin(pointIndex * 1.18 + p * Math.PI * 2 + layerOffset) *
+            waveStrength *
+            (0.72 + (1 - localP) * 0.28);
+
+          allPoints[pathIndex][pointIndex] = clamp(baseY + wave, 0, 100);
+        }
+      }
+
+      renderMorph();
+    };
+
+    const updateContentByProgress = (progress) => {
+      const firstOut = clamp((progress - 0.18) / 0.28, 0, 1);
+      const secondIn = clamp((progress - 0.68) / 0.24, 0, 1);
+
+      firstContent.style.opacity = `${1 - firstOut}`;
+      firstContent.style.transform = `translate3d(0, ${firstOut * -48}px, 0)`;
+      firstContent.style.pointerEvents = firstOut > 0.98 ? "none" : "auto";
+
+      secondContent.style.opacity = `${secondIn}`;
+      secondContent.style.transform = `translate3d(0, ${48 - secondIn * 48}px, 0)`;
+      secondContent.style.pointerEvents = secondIn > 0.98 ? "auto" : "none";
+      pin.style.setProperty("--featured-morph-progress", secondIn.toFixed(4));
     };
 
     const requestRender = () => {
       if (rafId) return;
-      rafId = window.requestAnimationFrame(render);
+      rafId = window.requestAnimationFrame(() => {
+        rafId = 0;
+        renderMorph();
+      });
     };
 
     const updateTargetProgress = () => {
-      const stageRect = stage.getBoundingClientRect();
+      const sectionRect = section.getBoundingClientRect();
       const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 1;
-      const scrollRange = Math.max(stage.offsetHeight - viewportHeight, 1);
-      const earlyStart = viewportHeight * 1.55;
-      const entryDistance = viewportHeight + earlyStart;
-      const stickyDistance = scrollRange;
-      const totalDistance = entryDistance + stickyDistance;
-      const triggerLine = viewportHeight + earlyStart;
-      const traveled = clamp(triggerLine - stageRect.top, 0, totalDistance);
-      const target = clamp(traveled / totalDistance, 0, 1);
+      const scrollRange = Math.max(section.offsetHeight - viewportHeight, 1);
+      const raw = clamp((-sectionRect.top) / scrollRange, 0, 1);
+      const direction = raw >= lastRaw ? 1 : -1;
+      const morphStart = 0.32;
+      const morphEnd = 0.78;
+      const morphProgress = clamp((raw - morphStart) / (morphEnd - morphStart), 0, 1);
 
-      if (gsapApi) {
-        gsapApi.to(state, {
-          progress: target,
-          duration: 0.42,
-          ease: "power2.out",
-          overwrite: true,
-          onUpdate: requestRender,
-        });
+      if (raw <= morphStart) {
+        if (direction < 0) {
+          updateReturnWipeByProgress(1);
+        } else {
+          mode = "hidden";
+          renderMorph();
+        }
+      } else if (raw >= morphEnd) {
+        mode = "visible";
+        renderMorph();
+      } else if (direction >= 0) {
+        updateEnterByProgress(morphProgress);
       } else {
-        state.progress = target;
-        requestRender();
+        updateReturnWipeByProgress(1 - morphProgress);
       }
+
+      updateContentByProgress(raw);
+      lastRaw = raw;
+      requestRender();
     };
 
     window.addEventListener("scroll", updateTargetProgress, { passive: true });
@@ -165,11 +206,26 @@
     window.addEventListener("load", updateTargetProgress, { once: true });
     window.addEventListener("pageshow", updateTargetProgress, { once: true });
 
-    requestRender();
+    renderMorph();
     updateTargetProgress();
     window.setTimeout(updateTargetProgress, 120);
     window.setTimeout(updateTargetProgress, 360);
   }
 
-  registerSiteModule("initFooterMorphPanelModule", initFooterMorphPanelModule);
+  registerSiteModule("initFeaturedMorphPanelModule", initFeaturedMorphPanelModule);
+
+  const bootWhenReady = () => {
+    if (document.readyState === "loading") return;
+    initFeaturedMorphPanelModule();
+  };
+
+  if (document.readyState !== "loading") {
+    window.requestAnimationFrame(bootWhenReady);
+  } else {
+    document.addEventListener("DOMContentLoaded", bootWhenReady, { once: true });
+  }
+
+  window.addEventListener("load", bootWhenReady, { once: true });
+  window.setTimeout(bootWhenReady, 180);
+  window.setTimeout(bootWhenReady, 640);
 })();

@@ -30,4 +30,11 @@ runBootstrapTasks([
       260
     )
   ),
+  wrapBootstrapTask(
+    whenElementPresent("myDesignLanyardRoot", () =>
+      import("./mydesign-lanyard-entry.jsx").then(({ mountMyDesignLanyard }) =>
+        mountMyDesignLanyard()
+      )
+    )
+  ),
 ]);

@@ -9,6 +9,7 @@ const __dirname = path.dirname(__filename)
 
 export default defineConfig({
   base: './',
+  assetsInclude: ['**/*.glb'],
   plugins: [react({ fastRefresh: false }), tailwindcss()],
   resolve: {
     alias: {

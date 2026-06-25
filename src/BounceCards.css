@@ -1,5 +1,7 @@
 .bounceCardsContainer {
+  --bounce-card-size: var(--portfolio-bounce-card-size, clamp(220px, 24vw, 430px));
   position: relative;
+  height: var(--portfolio-bounce-stage-height, calc(var(--bounce-card-size) * 1.08));
   overflow: visible;
 }
 
@@ -10,6 +12,8 @@
   position: absolute;
   left: 50%;
   top: 50%;
+  width: var(--bounce-card-size);
+  height: var(--bounce-card-size);
   aspect-ratio: 1;
   border-radius: var(--radius-card, clamp(12px, 3vw, 18px));
   transform-origin: 50% 50%;
@@ -50,8 +54,9 @@
 
 @media (max-width: 768px) {
   .bounceCardsContainer {
-    height: 236px !important;
-    min-height: 236px;
+    --bounce-card-size: var(--portfolio-bounce-card-size, clamp(142px, 43vw, 236px));
+    height: var(--portfolio-bounce-stage-height, calc(var(--bounce-card-size) * 1.12)) !important;
+    min-height: var(--portfolio-bounce-stage-height, calc(var(--bounce-card-size) * 1.12));
     position: relative;
     touch-action: pan-y;
   }
