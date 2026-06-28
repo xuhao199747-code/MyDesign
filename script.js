@@ -127,3 +127,128 @@ if (bootConfig.emitEvents !== false) {
 if (bootConfig.logSummary === true) {
   console.info("[site-boot] summary", bootStatus.summary);
 }
+
+(() => {
+  const trigger = document.querySelector('[data-shell-node="wechat-trigger"]');
+  const drop = document.getElementById("navWechatDrop");
+  if (!trigger || !drop || drop.dataset.wechatDropControllerReady === "true") return;
+
+  drop.dataset.wechatDropControllerReady = "true";
+  let isOpen = false;
+  let openScrollY = 0;
+  let scrollWatchFrame = null;
+  let closeTimer = null;
+
+  const updatePosition = () => {
+    const rect = trigger.getBoundingClientRect();
+    drop.style.setProperty("--wechat-drop-x", `${rect.left + rect.width / 2}px`);
+    drop.style.setProperty("--wechat-drop-y", `${rect.bottom}px`);
+  };
+
+  const closeCard = () => {
+    isOpen = false;
+    if (closeTimer) {
+      window.clearTimeout(closeTimer);
+      closeTimer = null;
+    }
+    if (scrollWatchFrame) {
+      window.cancelAnimationFrame(scrollWatchFrame);
+      scrollWatchFrame = null;
+    }
+    drop.classList.remove("is-opening");
+    drop.classList.add("is-closing");
+    trigger.setAttribute("aria-expanded", "false");
+    closeTimer = window.setTimeout(() => {
+      drop.classList.remove("is-open", "is-closing");
+      drop.setAttribute("aria-hidden", "true");
+      closeTimer = null;
+    }, 360);
+  };
+
+  const watchScrollWhileOpen = () => {
+    if (!isOpen) return;
+    if (Math.abs(window.scrollY - openScrollY) > 2) {
+      closeCard();
+      return;
+    }
+    scrollWatchFrame = window.requestAnimationFrame(watchScrollWhileOpen);
+  };
+
+  const openCard = () => {
+    updatePosition();
+    isOpen = true;
+    if (closeTimer) {
+      window.clearTimeout(closeTimer);
+      closeTimer = null;
+    }
+    openScrollY = window.scrollY;
+    drop.classList.remove("is-closing", "is-opening");
+    drop.setAttribute("aria-hidden", "false");
+    trigger.setAttribute("aria-expanded", "true");
+    void drop.offsetWidth;
+    drop.classList.add("is-open", "is-opening");
+    window.dispatchEvent(new CustomEvent("nav-wechat-card-open"));
+    window.setTimeout(() => drop.classList.remove("is-opening"), 760);
+    if (!scrollWatchFrame) {
+      scrollWatchFrame = window.requestAnimationFrame(watchScrollWhileOpen);
+    }
+  };
+
+  const toggleCard = (event) => {
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
+
+    if (isOpen) closeCard();
+    else openCard();
+
+    return false;
+  };
+
+  const isPointerInsideTrigger = (event) => {
+    if (!event || typeof event.clientX !== "number" || typeof event.clientY !== "number") {
+      return false;
+    }
+
+    const rect = trigger.getBoundingClientRect();
+    return (
+      event.clientX >= rect.left &&
+      event.clientX <= rect.right &&
+      event.clientY >= rect.top &&
+      event.clientY <= rect.bottom
+    );
+  };
+
+  trigger.setAttribute("aria-haspopup", "dialog");
+  trigger.setAttribute("aria-expanded", "false");
+  window.__toggleNavWechatCard = toggleCard;
+
+  trigger.addEventListener("click", toggleCard);
+
+  document.addEventListener(
+    "click",
+    (event) => {
+      if (!isOpen || !isPointerInsideTrigger(event)) return;
+      event.preventDefault();
+      event.stopPropagation();
+      closeCard();
+    },
+    true
+  );
+
+  window.addEventListener("scroll", () => {
+    if (isOpen) closeCard();
+  }, { passive: true });
+
+  window.addEventListener("resize", () => {
+    if (isOpen) updatePosition();
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && isOpen) closeCard();
+  });
+
+  document.addEventListener("click", (event) => {
+    if (!isOpen || drop.contains(event.target) || trigger.contains(event.target)) return;
+    closeCard();
+  });
+})();

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="860" viewBox="0 0 640 860">
+  <rect width="640" height="860" rx="46" fill="#f8fafc"/>
+  <rect x="58" y="58" width="524" height="524" rx="22" fill="#fff"/>
+  <g fill="#0f172a">
+    <path d="M96 96h138v138H96zM406 96h138v138H406zM96 406h138v138H96z"/>
+    <path d="M126 126h78v78h-78zM436 126h78v78h-78zM126 436h78v78h-78z" fill="#fff"/>
+    <path d="M280 96h34v34h-34zM348 96h34v68h-34zM280 164h102v34H280zM246 246h68v34h-68zM348 246h34v68h-34zM416 280h34v34h-34zM484 280h60v34h-60zM280 348h34v68h-34zM348 348h102v34H348zM484 348h34v34h-34zM246 450h68v34h-68zM348 416h34v68h-34zM416 416h128v34H416zM280 518h34v34h-34zM348 518h68v34h-68zM450 484h34v68h-34zM518 484h26v60h-26z"/>
+  </g>
+  <text x="320" y="672" text-anchor="middle" font-family="Arial, sans-serif" font-size="56" font-weight="800" fill="#0f172a">WECHAT</text>
+  <text x="320" y="736" text-anchor="middle" font-family="Arial, sans-serif" font-size="30" font-weight="700" letter-spacing="4" fill="#64748b">SCAN ME</text>
+  <text x="320" y="790" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="600" fill="#94a3b8">placeholder QR</text>
+</svg>

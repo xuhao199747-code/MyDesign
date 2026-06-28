@@ -72,6 +72,12 @@
     let resizeTimer = null;
     let activeTiltCell = null;
     let activeTiltRect = null;
+    let isPointerInsideRoot = false;
+    let isTouchGestureActive = false;
+    let pressedCell = null;
+    let pressedCellHref = "";
+    let shouldNavigateOnPointerUp = false;
+    let suppressNextClickNavigation = false;
 
     const wrapIndex = (index) => (index + items.length) % items.length;
     const getSlotPitch = () => {
@@ -93,6 +99,7 @@
       cell.dataset.href = item.href;
       cell.dataset.title = item.title;
       cell.href = item.href;
+      cell.draggable = false;
       cell.setAttribute("aria-label", `查看 ${item.title}`);
       cell.innerHTML =
         '<span class="portfolio-featured__tilt"><span class="portfolio-featured__media"><img alt="" /></span></span><span class="portfolio-featured__badge"></span>';
@@ -284,11 +291,106 @@
       cell.style.setProperty("--featured-tilt-scale", "1");
     };
 
+    const getRoundedRectRadius = (element, propertyName, fallback = 0) => {
+      if (!(element instanceof HTMLElement)) return fallback;
+      const value = Number.parseFloat(window.getComputedStyle(element)[propertyName]);
+      return Number.isFinite(value) ? value : fallback;
+    };
+
+    const isPointInsideInteractiveZone = (cell, clientX, clientY, inset = 0) => {
+      if (!(cell instanceof HTMLElement)) return false;
+      const rect = cell.getBoundingClientRect();
+      if (!rect.width || !rect.height) return false;
+
+      const media = cell.querySelector(".portfolio-featured__media");
+      const shapeSource = media instanceof HTMLElement ? media : cell;
+      const localX = clientX - rect.left;
+      const localY = clientY - rect.top;
+      const safeLeft = inset;
+      const safeTop = inset;
+      const safeRight = rect.width - inset;
+      const safeBottom = rect.height - inset;
+
+      if (
+        localX < safeLeft ||
+        localX > safeRight ||
+        localY < safeTop ||
+        localY > safeBottom
+      ) {
+        return false;
+      }
+
+      const safeWidth = Math.max(1, safeRight - safeLeft);
+      const safeHeight = Math.max(1, safeBottom - safeTop);
+      const maxRadius = Math.min(safeWidth, safeHeight) / 2;
+      const radii = {
+        tl: Math.min(
+          maxRadius,
+          Math.max(0, getRoundedRectRadius(shapeSource, "borderTopLeftRadius") - inset)
+        ),
+        tr: Math.min(
+          maxRadius,
+          Math.max(0, getRoundedRectRadius(shapeSource, "borderTopRightRadius") - inset)
+        ),
+        br: Math.min(
+          maxRadius,
+          Math.max(0, getRoundedRectRadius(shapeSource, "borderBottomRightRadius") - inset)
+        ),
+        bl: Math.min(
+          maxRadius,
+          Math.max(0, getRoundedRectRadius(shapeSource, "borderBottomLeftRadius") - inset)
+        ),
+      };
+
+      const x = localX - safeLeft;
+      const y = localY - safeTop;
+
+      if (radii.tl > 0 && x < radii.tl && y < radii.tl) {
+        const dx = x - radii.tl;
+        const dy = y - radii.tl;
+        return dx * dx + dy * dy <= radii.tl * radii.tl;
+      }
+      if (radii.tr > 0 && x > safeWidth - radii.tr && y < radii.tr) {
+        const dx = x - (safeWidth - radii.tr);
+        const dy = y - radii.tr;
+        return dx * dx + dy * dy <= radii.tr * radii.tr;
+      }
+      if (radii.br > 0 && x > safeWidth - radii.br && y > safeHeight - radii.br) {
+        const dx = x - (safeWidth - radii.br);
+        const dy = y - (safeHeight - radii.br);
+        return dx * dx + dy * dy <= radii.br * radii.br;
+      }
+      if (radii.bl > 0 && x < radii.bl && y > safeHeight - radii.bl) {
+        const dx = x - radii.bl;
+        const dy = y - (safeHeight - radii.bl);
+        return dx * dx + dy * dy <= radii.bl * radii.bl;
+      }
+
+      return true;
+    };
+
     track.addEventListener("click", (event) => {
-      if (!dragMoved) return;
       if (!(event.target instanceof Element)) return;
-      if (!event.target.closest(".portfolio-featured__cell")) return;
-      event.preventDefault();
+      const cell = event.target.closest(".portfolio-featured__cell");
+      if (!(cell instanceof HTMLElement)) return;
+
+      if (suppressNextClickNavigation) {
+        event.preventDefault();
+        suppressNextClickNavigation = false;
+        return;
+      }
+
+      const clickInset = siteUtils.getNumberOption(featuredConfig, "clickSafeInset", 8);
+      const isSafeClick = isPointInsideInteractiveZone(
+        cell,
+        event.clientX,
+        event.clientY,
+        clickInset
+      );
+
+      if (dragMoved || !isSafeClick) {
+        event.preventDefault();
+      }
     });
 
     track.addEventListener("pointermove", (event) => {
@@ -314,11 +416,12 @@
       }
 
       const edgeInset = siteUtils.getNumberOption(featuredConfig, "edgeInset", 14);
-      const isInsideStableHoverZone =
-        event.clientX >= activeTiltRect.left + edgeInset &&
-        event.clientX <= activeTiltRect.right - edgeInset &&
-        event.clientY >= activeTiltRect.top + edgeInset &&
-        event.clientY <= activeTiltRect.bottom - edgeInset;
+      const isInsideStableHoverZone = isPointInsideInteractiveZone(
+        cell,
+        event.clientX,
+        event.clientY,
+        edgeInset
+      );
 
       if (!isInsideStableHoverZone) {
         resetTilt(cell);
@@ -391,16 +494,81 @@
       }
     };
 
-    root.addEventListener("pointerenter", setFeaturedGestureActive);
-    root.addEventListener("pointerleave", clearFeaturedGestureActive);
-    root.addEventListener("focusin", setFeaturedGestureActive);
-    root.addEventListener("focusout", clearFeaturedGestureActive);
+    const syncFeaturedHistoryLock = () => {
+      const isFocusInsideRoot = !!document.activeElement && root.contains(document.activeElement);
+      const shouldLockHistoryGesture =
+        isPointerInsideRoot ||
+        isPointerDown ||
+        isTouchGestureActive ||
+        isFocusInsideRoot ||
+        document.documentElement.classList.contains("portfolio-featured-gesture-active");
+
+      document.documentElement.classList.toggle(
+        "portfolio-featured-history-lock",
+        shouldLockHistoryGesture
+      );
+      document.body.classList.toggle("portfolio-featured-history-lock", shouldLockHistoryGesture);
+    };
+
+    const shouldSuppressBrowserBackGesture = (event) => {
+      const target = event.target instanceof Node ? event.target : null;
+      const isTargetInsideRoot = !!target && root.contains(target);
+      const isFocusInsideRoot = !!document.activeElement && root.contains(document.activeElement);
+      const horizontalDelta = Math.abs(event.deltaX || 0);
+      const verticalDelta = Math.abs(event.deltaY || 0);
+      const threshold = siteUtils.getNumberOption(featuredConfig, "wheelDeltaThreshold", 4);
+
+      if (horizontalDelta < threshold || horizontalDelta <= verticalDelta) {
+        return false;
+      }
+
+      return (
+        isTargetInsideRoot ||
+        isPointerInsideRoot ||
+        isPointerDown ||
+        isFocusInsideRoot ||
+        document.documentElement.classList.contains("portfolio-featured-gesture-active")
+      );
+    };
+
+    const suppressBrowserBackGesture = (event) => {
+      if (!shouldSuppressBrowserBackGesture(event)) return;
+      if (event.cancelable) {
+        event.preventDefault();
+      }
+    };
+
+    window.addEventListener("wheel", suppressBrowserBackGesture, {
+      passive: false,
+      capture: true,
+    });
+
+    root.addEventListener("pointerenter", () => {
+      isPointerInsideRoot = true;
+      setFeaturedGestureActive();
+      syncFeaturedHistoryLock();
+    });
+    root.addEventListener("pointerleave", () => {
+      isPointerInsideRoot = false;
+      clearFeaturedGestureActive();
+      syncFeaturedHistoryLock();
+    });
+    root.addEventListener("focusin", () => {
+      setFeaturedGestureActive();
+      syncFeaturedHistoryLock();
+    });
+    root.addEventListener("focusout", () => {
+      clearFeaturedGestureActive();
+      syncFeaturedHistoryLock();
+    });
 
     root.addEventListener(
       "touchstart",
       (event) => {
         if (event.touches.length !== 1) return;
+        isTouchGestureActive = true;
         setFeaturedGestureActive();
+        syncFeaturedHistoryLock();
         touchStartX = event.touches[0].clientX;
         touchStartY = event.touches[0].clientY;
       },
@@ -418,24 +586,56 @@
           Math.abs(deltaX) > Math.abs(deltaY);
         if (isHorizontalGesture && event.cancelable) {
           setFeaturedGestureActive();
+          syncFeaturedHistoryLock();
           event.preventDefault();
         }
       },
       { passive: false }
     );
 
+    root.addEventListener("touchend", () => {
+      isTouchGestureActive = false;
+      syncFeaturedHistoryLock();
+    });
+
+    root.addEventListener("touchcancel", () => {
+      isTouchGestureActive = false;
+      syncFeaturedHistoryLock();
+    });
+
     root.addEventListener("pointerdown", (event) => {
+      if (event.button !== undefined && event.button !== 0) return;
+      const targetCell =
+        event.target instanceof Element
+          ? event.target.closest(".portfolio-featured__cell")
+          : null;
+      const pressInset = siteUtils.getNumberOption(featuredConfig, "pressSafeInset", 10);
+      pressedCell = targetCell instanceof HTMLElement ? targetCell : null;
+      pressedCellHref =
+        pressedCell?.getAttribute("href") || pressedCell?.dataset.href || "";
+      shouldNavigateOnPointerUp =
+        !!pressedCell &&
+        isPointInsideInteractiveZone(pressedCell, event.clientX, event.clientY, pressInset);
+      if (
+        targetCell instanceof HTMLElement &&
+        !isPointInsideInteractiveZone(targetCell, event.clientX, event.clientY, pressInset)
+      ) {
+        resetTilt(targetCell);
+        return;
+      }
       isPointerDown = true;
       dragAxis = "";
       dragMoved = false;
       dragStartX = event.clientX;
       dragStartY = event.clientY;
       initialActiveSlot = activeSlot;
+      root.setPointerCapture?.(event.pointerId);
       if (event.pointerType === "mouse") {
         dragAxis = "x";
         setFeaturedGestureActive();
         document.body.classList.add("portfolio-featured-dragging");
       }
+      syncFeaturedHistoryLock();
     });
 
     root.addEventListener("pointermove", (event) => {
@@ -466,6 +666,10 @@
         return;
       }
 
+      if (event.cancelable) {
+        event.preventDefault();
+      }
+
       if (
         Math.abs(deltaX) > siteUtils.getNumberOption(featuredConfig, "dragThreshold", 10) ||
         Math.abs(deltaY) > siteUtils.getNumberOption(featuredConfig, "dragThreshold", 10)
@@ -483,16 +687,51 @@
 
     root.addEventListener("pointerup", (event) => {
       if (!isPointerDown) return;
+      if (root.hasPointerCapture?.(event.pointerId)) {
+        root.releasePointerCapture(event.pointerId);
+      }
       isPointerDown = false;
       const releasedAxis = dragAxis;
       dragAxis = "";
       clearFeaturedGestureActive();
       document.body.classList.remove("portfolio-featured-dragging");
+      syncFeaturedHistoryLock();
 
       const deltaX = event.clientX - dragStartX;
       const deltaY = event.clientY - dragStartY;
+      const releaseCell =
+        event.target instanceof Element
+          ? event.target.closest(".portfolio-featured__cell")
+          : null;
+      const tapThreshold = siteUtils.getNumberOption(featuredConfig, "dragThreshold", 10);
+      const isTapLikeGesture =
+        Math.abs(deltaX) < tapThreshold && Math.abs(deltaY) < tapThreshold;
+      const canNavigateFromTap =
+        shouldNavigateOnPointerUp &&
+        pressedCell instanceof HTMLElement &&
+        isTapLikeGesture &&
+        isPointInsideInteractiveZone(
+          pressedCell,
+          event.clientX,
+          event.clientY,
+          siteUtils.getNumberOption(featuredConfig, "clickSafeInset", 8)
+        ) &&
+        (!releaseCell || releaseCell === pressedCell);
+
+      if (canNavigateFromTap && pressedCellHref) {
+        suppressNextClickNavigation = true;
+        window.location.assign(pressedCellHref);
+        pressedCell = null;
+        pressedCellHref = "";
+        shouldNavigateOnPointerUp = false;
+        dragMoved = false;
+        return;
+      }
 
       if (releasedAxis !== "x") {
+        pressedCell = null;
+        pressedCellHref = "";
+        shouldNavigateOnPointerUp = false;
         dragMoved = false;
         return;
       }
@@ -510,14 +749,35 @@
       window.setTimeout(() => {
         dragMoved = false;
       }, 0);
+      pressedCell = null;
+      pressedCellHref = "";
+      shouldNavigateOnPointerUp = false;
     });
 
     root.addEventListener("pointercancel", () => {
       isPointerDown = false;
       dragAxis = "";
       dragMoved = false;
+      pressedCell = null;
+      pressedCellHref = "";
+      shouldNavigateOnPointerUp = false;
       clearFeaturedGestureActive();
       document.body.classList.remove("portfolio-featured-dragging");
+      syncFeaturedHistoryLock();
+    });
+
+    root.addEventListener("lostpointercapture", () => {
+      if (!isPointerDown) return;
+      isPointerDown = false;
+      dragAxis = "";
+      dragMoved = false;
+      pressedCell = null;
+      pressedCellHref = "";
+      shouldNavigateOnPointerUp = false;
+      clearFeaturedGestureActive();
+      document.body.classList.remove("portfolio-featured-dragging");
+      syncFeaturedHistoryLock();
+      centerActiveCell(true);
     });
 
     const handleFeaturedWheel = (event) => {

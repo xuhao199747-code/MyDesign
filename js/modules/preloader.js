@@ -58,10 +58,12 @@
     let hasHidden = false;
     let criticalReady = false;
     let heroReady = false;
+    let allResourcesReady = totalCount === 0;
+    let bootReady = Boolean(window.__siteBootStatus?.completedAt);
     let minimumDisplayElapsed = false;
 
     const updateProgress = () => {
-      const percentage = Math.round((loadedCount / totalCount) * 100);
+      const percentage = totalCount ? Math.round((loadedCount / totalCount) * 100) : 100;
       if (progressBar) {
         progressBar.style.width = `${percentage}%`;
       }
@@ -123,7 +125,9 @@
     }
 
     const tryHidePreloader = () => {
-      if (!criticalReady || !heroReady || !minimumDisplayElapsed) return;
+      if (!criticalReady || !heroReady || !allResourcesReady || !bootReady || !minimumDisplayElapsed) {
+        return;
+      }
       hidePreloader();
     };
 
@@ -166,6 +170,15 @@
         { once: true }
       );
 
+      window.addEventListener(
+        "site:boot-complete",
+        () => {
+          bootReady = true;
+          tryHidePreloader();
+        },
+        { once: true }
+      );
+
       // 并行加载所有资源，而非串行等待
       const loadPromises = allResources.map((url) =>
         loadResource(url).then(() => {
@@ -174,16 +187,18 @@
         })
       );
 
-      // 等待关键资源加载完成后立即显示首屏
+      // 关键资源先到位，但不提前关闭预加载页，仍需等待全部资源与首屏动画。
       await Promise.all(
         criticalResources.map((url) => loadResource(url).catch(() => {}))
       );
+      criticalReady = true;
+      tryHidePreloader();
 
-      // 关键资源就绪，隐藏预加载遮罩
-      hidePreloader();
-
-      // 非关键资源继续在后台加载
       await Promise.all(loadPromises);
+      loadedCount = totalCount;
+      updateProgress();
+      allResourcesReady = true;
+      tryHidePreloader();
     };
 
     if (document.readyState === "loading") {
@@ -196,6 +211,8 @@
     setTimeout(() => {
       criticalReady = true;
       heroReady = true;
+      allResourcesReady = true;
+      bootReady = true;
       minimumDisplayElapsed = true;
       hidePreloader();
     }, siteUtils.getNumberOption(preloaderConfig, "maxDisplayMs", 7000));

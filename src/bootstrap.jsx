@@ -31,9 +31,9 @@ runBootstrapTasks([
     )
   ),
   wrapBootstrapTask(
-    whenElementPresent("myDesignLanyardRoot", () =>
-      import("./mydesign-lanyard-entry.jsx").then(({ mountMyDesignLanyard }) =>
-        mountMyDesignLanyard()
+    whenElementPresent("navWechatLanyardMount", () =>
+      import("./nav-wechat-lanyard-entry.jsx").then(({ mountNavWechatLanyard }) =>
+        mountNavWechatLanyard()
       )
     )
   ),

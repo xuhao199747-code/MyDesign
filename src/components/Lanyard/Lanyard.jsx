@@ -1,6 +1,6 @@
 /* eslint-disable react/no-unknown-property */
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Canvas, extend, useFrame } from "@react-three/fiber";
+import { Canvas, extend, useFrame, useThree } from "@react-three/fiber";
 import { Environment, Lightformer, useGLTF, useTexture } from "@react-three/drei";
 import {
   BallCollider,
@@ -35,6 +35,7 @@ export default function Lanyard({
   imageFit = "cover",
   lanyardImage = null,
   lanyardWidth = 1,
+  anchorSelector = null,
 }) {
   const [isMobile, setIsMobile] = useState(
     () => typeof window !== "undefined" && window.innerWidth < 768
@@ -65,6 +66,7 @@ export default function Lanyard({
             imageFit={imageFit}
             lanyardImage={lanyardImage}
             lanyardWidth={lanyardWidth}
+            anchorSelector={anchorSelector}
           />
         </Physics>
         <Environment blur={0.75}>
@@ -111,6 +113,7 @@ function Band({
   imageFit = "cover",
   lanyardImage = null,
   lanyardWidth = 1,
+  anchorSelector = null,
 }) {
   const band = useRef(null);
   const fixed = useRef(null);
@@ -118,6 +121,8 @@ function Band({
   const j2 = useRef(null);
   const j3 = useRef(null);
   const card = useRef(null);
+  const { camera, size } = useThree();
+  const [anchorPosition, setAnchorPosition] = useState([0, 4, 0]);
 
   const vec = new THREE.Vector3();
   const ang = new THREE.Vector3();
@@ -196,6 +201,81 @@ function Band({
   const [dragged, setDragged] = useState(false);
   const [hovered, setHovered] = useState(false);
 
+  const placeBodies = (positions) => {
+    positions.forEach(([ref, nextPosition]) => {
+      if (!ref.current) return;
+      ref.current.setTranslation(
+        { x: nextPosition[0], y: nextPosition[1], z: nextPosition[2] },
+        true
+      );
+      ref.current.setLinvel?.({ x: 0, y: 0, z: 0 }, true);
+      ref.current.setAngvel?.({ x: 0, y: 0, z: 0 }, true);
+      ref.current.wakeUp?.();
+      if (ref.current.lerped) {
+        ref.current.lerped.set(nextPosition[0], nextPosition[1], nextPosition[2]);
+      }
+    });
+  };
+
+  useEffect(() => {
+    if (!anchorSelector) {
+      setAnchorPosition([0, 4, 0]);
+      return undefined;
+    }
+
+    const syncAnchorPosition = () => {
+      const anchor = document.querySelector(anchorSelector);
+      if (!anchor) return;
+
+      const rect = anchor.getBoundingClientRect();
+      const anchorX = rect.left + rect.width / 2;
+      const anchorY = rect.bottom;
+      const cameraZ = Math.abs(camera.position.z);
+      const viewportHeight = 2 * Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2) * cameraZ;
+      const viewportWidth = viewportHeight * (size.width / size.height);
+      const worldX = (anchorX / size.width - 0.5) * viewportWidth;
+      const worldY = -(anchorY / size.height - 0.5) * viewportHeight;
+
+      setAnchorPosition([worldX, worldY, 0]);
+    };
+
+    syncAnchorPosition();
+    const frameId = window.requestAnimationFrame(syncAnchorPosition);
+    window.addEventListener("resize", syncAnchorPosition);
+    return () => {
+      window.cancelAnimationFrame(frameId);
+      window.removeEventListener("resize", syncAnchorPosition);
+    };
+  }, [anchorSelector, camera.fov, camera.position.z, size.height, size.width]);
+
+  useEffect(() => {
+    const [anchorX, anchorY, anchorZ] = anchorPosition;
+    placeBodies([
+      [fixed, [anchorX, anchorY, anchorZ]],
+      [j1, [anchorX + 0.5, anchorY, anchorZ]],
+      [j2, [anchorX + 1, anchorY, anchorZ]],
+      [j3, [anchorX + 1.5, anchorY, anchorZ]],
+      [card, [anchorX + 2, anchorY, anchorZ]],
+    ]);
+  }, [anchorPosition]);
+
+  useEffect(() => {
+    const handleOpen = () => {
+      const [anchorX, anchorY, anchorZ] = anchorPosition;
+      placeBodies([
+        [fixed, [anchorX, anchorY, anchorZ]],
+        [j1, [anchorX + 0.08, anchorY + 0.15, anchorZ]],
+        [j2, [anchorX + 0.16, anchorY + 0.3, anchorZ]],
+        [j3, [anchorX + 0.24, anchorY + 0.45, anchorZ]],
+        [card, [anchorX + 0.32, anchorY + 0.58, anchorZ]],
+      ]);
+      setDragged(false);
+    };
+
+    window.addEventListener("nav-wechat-card-open", handleOpen);
+    return () => window.removeEventListener("nav-wechat-card-open", handleOpen);
+  }, [anchorPosition]);
+
   useRopeJoint(fixed, j1, [[0, 0, 0], [0, 0, 0], 1]);
   useRopeJoint(j1, j2, [[0, 0, 0], [0, 0, 0], 1]);
   useRopeJoint(j2, j3, [[0, 0, 0], [0, 0, 0], 1]);
@@ -263,19 +343,31 @@ function Band({
 
   return (
     <>
-      <group position={[0, 4, 0]}>
-        <RigidBody ref={fixed} {...segmentProps} type="fixed" />
-        <RigidBody position={[0.5, 0, 0]} ref={j1} {...segmentProps}>
-          <BallCollider args={[0.1]} />
-        </RigidBody>
-        <RigidBody position={[1, 0, 0]} ref={j2} {...segmentProps}>
-          <BallCollider args={[0.1]} />
-        </RigidBody>
-        <RigidBody position={[1.5, 0, 0]} ref={j3} {...segmentProps}>
+      <group>
+        <RigidBody position={anchorPosition} ref={fixed} {...segmentProps} type="fixed" />
+        <RigidBody
+          position={[anchorPosition[0] + 0.5, anchorPosition[1], anchorPosition[2]]}
+          ref={j1}
+          {...segmentProps}
+        >
           <BallCollider args={[0.1]} />
         </RigidBody>
         <RigidBody
-          position={[2, 0, 0]}
+          position={[anchorPosition[0] + 1, anchorPosition[1], anchorPosition[2]]}
+          ref={j2}
+          {...segmentProps}
+        >
+          <BallCollider args={[0.1]} />
+        </RigidBody>
+        <RigidBody
+          position={[anchorPosition[0] + 1.5, anchorPosition[1], anchorPosition[2]]}
+          ref={j3}
+          {...segmentProps}
+        >
+          <BallCollider args={[0.1]} />
+        </RigidBody>
+        <RigidBody
+          position={[anchorPosition[0] + 2, anchorPosition[1], anchorPosition[2]]}
           ref={card}
           {...segmentProps}
           type={dragged ? "kinematicPosition" : "dynamic"}

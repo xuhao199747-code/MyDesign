@@ -96,7 +96,7 @@
             <li><a href="#about">简历</a></li>
             <li><a href="#portfolio">作品</a></li>
             <li>
-              <a href="#contact">
+              <a href="#" data-shell-node="wechat-trigger" aria-label="打开微信名片">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="20"
@@ -130,6 +130,9 @@
           </ul>
         </nav>
     </header>
+    <div id="navWechatDrop" class="nav-wechat-drop" aria-hidden="true">
+      <div id="navWechatLanyardMount" class="nav-wechat-drop__lanyard" aria-hidden="true"></div>
+    </div>
     <main class="site-main">
       <!-- 内容区域0：角色特写首屏；鼠标方向控制转头 -->
       <section id="home" data-site-section="home" class="head-hero relative isolate w-full overflow-hidden bg-[var(--sprite-stage-bg)] h-[100svh] min-h-[620px] mt-[-64px] max-md:min-h-[560px] max-md:mt-[calc((env(safe-area-inset-top,0px)+48px+clamp(32px,6vw,56px))*-1)]" aria-label="角色特写首屏">
