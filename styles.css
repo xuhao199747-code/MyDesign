@@ -70,7 +70,7 @@
   height: 100%;
   background: #ffffff;
   border-radius: 2px;
-  transition: width 0.3s ease-out;
+  transition: width 0.08s linear;
 }
 
 .preloader__text {

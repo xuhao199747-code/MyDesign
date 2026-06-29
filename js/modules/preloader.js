@@ -52,16 +52,21 @@
       []
     );
 
-    const allResources = [...criticalResources, ...nonCriticalResources];
+    const waitForAllResources = preloaderConfig.waitForAllResources !== false;
+    const allResources = [...new Set([...criticalResources, ...nonCriticalResources])];
     let loadedCount = 0;
     const totalCount = allResources.length;
     let hasHidden = false;
-    let criticalReady = false;
+    let resourcesReady = false;
     let bootReady = Boolean(window.__siteBootStatus?.completedAt);
     let minimumDisplayElapsed = false;
+    const failedResources = [];
+    const resourceProgress = new Map();
+    let targetProgress = 0;
+    let displayedProgress = 0;
+    let progressFrame = 0;
 
-    const updateProgress = () => {
-      const percentage = totalCount ? Math.round((loadedCount / totalCount) * 100) : 100;
+    const renderProgress = (percentage) => {
       if (progressBar) {
         progressBar.style.width = `${percentage}%`;
       }
@@ -70,9 +75,56 @@
       }
     };
 
+    const animateProgress = () => {
+      const delta = targetProgress - displayedProgress;
+      if (Math.abs(delta) < 0.2) {
+        displayedProgress = targetProgress;
+      } else {
+        displayedProgress += delta * 0.12;
+      }
+
+      renderProgress(Math.round(displayedProgress));
+
+      if (!hasHidden && displayedProgress < targetProgress) {
+        progressFrame = requestAnimationFrame(animateProgress);
+        return;
+      }
+
+      progressFrame = 0;
+    };
+
+    const updateProgressTarget = (nextProgress) => {
+      targetProgress = Math.max(targetProgress, Math.min(100, nextProgress));
+      if (!progressFrame) {
+        progressFrame = requestAnimationFrame(animateProgress);
+      }
+    };
+
+    const updateProgress = () => {
+      const progressItems = Array.from(resourceProgress.values());
+      const knownTotalBytes = progressItems.reduce((sum, item) => sum + (item.total || 0), 0);
+      const knownLoadedBytes = progressItems.reduce((sum, item) => {
+        if (!item.total) return sum;
+        return sum + Math.min(item.loaded, item.total);
+      }, 0);
+      const unknownItems = progressItems.filter((item) => !item.total);
+      const unknownDone = unknownItems.filter((item) => item.done).length;
+      const unknownWeight = unknownItems.length;
+      const rawPercentage = knownTotalBytes > 0
+        ? ((knownLoadedBytes + unknownDone) / (knownTotalBytes + unknownWeight)) * 100
+        : totalCount
+          ? (loadedCount / totalCount) * 100
+          : 100;
+      const percentage = resourcesReady && bootReady && minimumDisplayElapsed
+        ? 100
+        : Math.min(99, rawPercentage);
+      updateProgressTarget(percentage);
+    };
+
     const hidePreloader = () => {
       if (!preloader || hasHidden) return;
       hasHidden = true;
+      updateProgressTarget(100);
       preloader.classList.add("preloader--hidden");
       setTimeout(() => {
         preloader.remove();
@@ -123,29 +175,102 @@
     }
 
     const tryHidePreloader = () => {
-      if (!criticalReady || !bootReady || !minimumDisplayElapsed) {
+      if (!resourcesReady || !bootReady || !minimumDisplayElapsed) {
+        updateProgress();
         return;
       }
+      updateProgressTarget(100);
       hidePreloader();
     };
 
     // 预加载缓存：将已加载的 Image 对象暴露给其他模块复用
     const preloadedImages = new Map();
 
-    const loadResource = (url) => {
-      return new Promise((resolve) => {
-        if (preloadedImages.has(url)) {
+    const readResourceBytes = async (url) => {
+      const response = await fetch(url, { cache: "force-cache" });
+      if (!response.ok) {
+        throw new Error(`Failed to preload ${url}: ${response.status}`);
+      }
+
+      const total = Number(response.headers.get("content-length")) || 0;
+      const progress = resourceProgress.get(url) || { loaded: 0, total, done: false };
+      progress.total = total;
+      resourceProgress.set(url, progress);
+      updateProgress();
+
+      if (!response.body || !response.body.getReader) {
+        const blob = await response.blob();
+        progress.loaded = total || blob.size || 1;
+        progress.total = total || blob.size || 1;
+        progress.done = true;
+        updateProgress();
+        return blob;
+      }
+
+      const reader = response.body.getReader();
+      const chunks = [];
+      let loaded = 0;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        chunks.push(value);
+        loaded += value.byteLength;
+        progress.loaded = loaded;
+        updateProgress();
+      }
+
+      progress.loaded = total || loaded || 1;
+      progress.total = total || loaded || 1;
+      progress.done = true;
+      updateProgress();
+      return new Blob(chunks);
+    };
+
+    const decodeImageBlob = (url, blob) =>
+      new Promise((resolve, reject) => {
+        const objectUrl = URL.createObjectURL(blob);
+        const img = new Image();
+        img.onload = () => {
+          preloadedImages.set(url, img);
           resolve();
+        };
+        img.onerror = () => {
+          URL.revokeObjectURL(objectUrl);
+          reject(new Error(`Failed to decode image ${url}`));
+        };
+        img.src = objectUrl;
+      });
+
+    const loadResource = (url) => {
+      return new Promise(async (resolve) => {
+        if (preloadedImages.has(url)) {
+          resolve({ url, status: "cached" });
           return;
         }
-        if (url.endsWith(".ttf") || url.endsWith(".otf")) {
-          const font = new FontFace("PreloadFont", `url(${url})`);
-          font.load().then(resolve).catch(resolve);
-        } else {
-          const img = new Image();
-          img.onload = () => { preloadedImages.set(url, img); resolve(); };
-          img.onerror = resolve;
-          img.src = url;
+
+        resourceProgress.set(url, { loaded: 0, total: 0, done: false });
+
+        try {
+          const blob = await readResourceBytes(url);
+          if (url.endsWith(".ttf") || url.endsWith(".otf")) {
+            const font = new FontFace("PreloadFont", await blob.arrayBuffer());
+            const loadedFont = await font.load();
+            document.fonts?.add?.(loadedFont);
+          } else if (url.match(/\.(png|jpe?g|webp|gif|svg)$/i)) {
+            await decodeImageBlob(url, blob);
+          }
+          resolve({ url, status: "loaded" });
+        } catch (_error) {
+          const progress = resourceProgress.get(url);
+          if (progress) {
+            progress.loaded = progress.total || 1;
+            progress.total = progress.total || 1;
+            progress.done = true;
+          }
+          failedResources.push(url);
+          updateProgress();
+          resolve({ url, status: "failed" });
         }
       });
     };
@@ -168,7 +293,7 @@
         { once: true }
       );
 
-      // 并行加载所有资源，而非串行等待
+      // 并行加载所有资源；默认必须全量结算后才允许进入页面。
       const loadPromises = allResources.map((url) =>
         loadResource(url).then(() => {
           loadedCount++;
@@ -176,16 +301,29 @@
         })
       );
 
-      // 关键资源到位后即可进入页面；非关键资源继续后台加载。
-      await Promise.all(
-        criticalResources.map((url) => loadResource(url).catch(() => {}))
-      );
-      criticalReady = true;
-      tryHidePreloader();
+      if (waitForAllResources) {
+        await Promise.all(loadPromises);
+        loadedCount = totalCount;
+        if (failedResources.length) {
+          console.warn("[preloader] some resources failed to load", failedResources);
+        }
+        resourcesReady = true;
+        updateProgress();
+        tryHidePreloader();
+        return;
+      }
 
+      // 兼容模式：关键资源到位后即可进入页面；非关键资源继续后台加载。
+      await Promise.all(criticalResources.map((url) => loadResource(url)));
+      resourcesReady = true;
+      updateProgress();
+      tryHidePreloader();
       Promise.all(loadPromises).then(() => {
         loadedCount = totalCount;
         updateProgress();
+        if (failedResources.length) {
+          console.warn("[preloader] some resources failed to load", failedResources);
+        }
       });
     };
 
@@ -195,13 +333,13 @@
       startLoading();
     }
 
-    // 安全兜底：最多 7 秒后强制隐藏
+    // 安全兜底：资源异常时最多等待 15 秒，避免页面永久卡在加载层。
     setTimeout(() => {
-      criticalReady = true;
+      resourcesReady = true;
       bootReady = true;
       minimumDisplayElapsed = true;
       hidePreloader();
-    }, siteUtils.getNumberOption(preloaderConfig, "maxDisplayMs", 7000));
+    }, siteUtils.getNumberOption(preloaderConfig, "maxDisplayMs", 15000));
   }
 
   registerSiteModule("initPreloaderModule", initPreloader);
