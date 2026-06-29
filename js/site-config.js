@@ -411,12 +411,14 @@
     playfulTitle: {
       selectors: [
         '[data-section-node="photo-title"]',
+        '[data-section-node="photo-title-copy"]',
         '[data-section-node="portfolio-title"]',
         '[data-section-node="featured-title"]',
       ],
       rotatePattern: [-5, 4, -2, 5, -4, 3],
       assets: {
         workFace: "./imag/Group 1940699207.png",
+        resumeEyes: "./imag/Group 1940699211.png",
         lightBulb: "./imag/灯泡 1.png",
         designFire: "./imag/Group 1940699208.png",
       },

@@ -40,6 +40,7 @@
       const fragment = document.createDocumentFragment();
       const sectionNode = title.getAttribute("data-section-node");
       const isPhotoTitle = sectionNode === "photo-title" || sectionNode === "photo-title-copy";
+      const isResumeTitle = sectionNode === "photo-title" && accessibleText === "MY RESUME";
       const isPortfolioTitle = sectionNode === "portfolio-title";
       const isFeaturedTitle = sectionNode === "featured-title";
       let charIndex = 0;
@@ -54,6 +55,28 @@
         const text = node.textContent || "";
         Array.from(text).forEach((char) => {
           if (char === "\n") return;
+
+          if (isResumeTitle && char === "R") {
+            const group = document.createElement("span");
+            const sticker = document.createElement("span");
+            const stickerImage = document.createElement("img");
+
+            group.className = "play-title__resume-group";
+            applyTitleMotionVars(group, charIndex);
+            group.setAttribute("aria-hidden", "true");
+
+            sticker.className =
+              "play-title__sticker play-title__sticker--resume-eyes";
+            sticker.setAttribute("aria-hidden", "true");
+            stickerImage.src = assets.resumeEyes || "./imag/Group 1940699211.png";
+            stickerImage.alt = "";
+            stickerImage.decoding = "async";
+            sticker.appendChild(stickerImage);
+            group.appendChild(sticker);
+            fragment.appendChild(group);
+            charIndex += 1;
+            return;
+          }
 
           if (isPhotoTitle && char === "O") {
             const sticker = document.createElement("span");
@@ -141,7 +164,7 @@
       title.replaceChildren(fragment);
 
       const interactiveSelector =
-        ".play-title__char, .play-title__sticker--work-face, .play-title__fire-group";
+        ".play-title__char, .play-title__sticker--work-face, .play-title__sticker--resume-eyes, .play-title__fire-group, .play-title__resume-group";
 
       title.addEventListener("pointerover", (event) => {
         if (!(event.target instanceof Element)) return;

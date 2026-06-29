@@ -221,7 +221,7 @@
 
       <!-- 内容区域3：个人照片 -->
       <section id="photo" data-site-section="photo" class="container section-three flex flex-col items-center justify-center gap-[var(--photo-spacing)] [--photo-card-height:clamp(220px,calc(var(--module-media-space)-84px),400px)] [--photo-card-width:calc(var(--photo-card-height)*0.75)] [--photo-spacing:24px]" aria-labelledby="photoTitle">
-        <h2 id="photoTitle" data-section-node="photo-title" class="section-title photo-top mb-0 w-screen max-w-none text-[var(--portfolio-title-size)] text-[color:var(--color-title)] max-md:mt-0 max-md:box-border max-md:pt-[0.34em] max-md:text-[var(--mobile-section-title-size)]">LET'S WORK</h2>
+        <h2 id="photoTitle" data-section-node="photo-title" class="section-title photo-top mb-0 w-screen max-w-none text-[var(--portfolio-title-size)] text-[color:var(--color-title)] max-md:mt-0 max-md:box-border max-md:pt-[0.34em] max-md:text-[var(--mobile-section-title-size)]">MY RESUME</h2>
         <div class="photo-content flex w-auto items-center justify-center gap-[var(--photo-spacing)]" data-section-node="photo-content">
           <dl data-section-node="photo-meta-left" class="photo-meta m-0 flex flex-col items-start justify-center gap-2 p-0">
             <dt data-section-node="photo-meta-left-label" class="m-0 w-full text-left text-[12px] font-normal leading-[1.33] text-[var(--color-muted)]">BASED</dt>
@@ -261,9 +261,53 @@
         class="section-portfolio portfolio-cards-section relative flex w-full flex-col items-center justify-center overflow-visible max-md:h-auto max-md:max-h-none max-md:gap-[var(--mobile-card-gap)] max-md:mb-0 max-md:mt-0 max-md:pb-[env(safe-area-inset-bottom,0)] max-md:pt-12"
         aria-labelledby="portfolioTitle"
       >
-        <h2 id="portfolioTitle" data-section-node="portfolio-title" class="section-title portfolio-top relative z-10 flex items-center justify-center pt-0 text-[var(--portfolio-title-size)] text-[color:var(--color-title)] max-md:mb-0 max-md:mt-0 max-md:h-auto max-md:flex-[0_1_auto] max-md:items-end max-md:justify-center max-md:pt-[0.18em] max-md:text-[var(--mobile-section-title-size)]">VIBE CODING</h2>
+        <h2 id="portfolioTitle" data-section-node="photo-title-copy" class="section-title portfolio-top relative z-10 flex items-center justify-center pt-0 text-[var(--portfolio-title-size)] text-[color:var(--color-title)] max-md:mb-0 max-md:mt-0 max-md:h-auto max-md:flex-[0_1_auto] max-md:items-end max-md:justify-center max-md:pt-[0.18em] max-md:text-[var(--mobile-section-title-size)]">LET'S WORK</h2>
+        <div data-section-node="portfolio-gallery" class="portfolio-gallery portfolio-gallery--more-work relative flex w-full max-w-none items-center justify-center overflow-visible bg-[var(--color-surface)] isolate [transform:translateZ(0)]">
+          <div class="more-work-grid" data-more-work-grid>
+            <a class="more-work-card more-work-card--large more-work-card--lime" href="./project.html?slug=sneakers" aria-label="查看 Sneakers 项目">
+              <span class="more-work-card__surface">
+                <img src="./imag/portfolio-cards1.webp" alt="" loading="lazy" decoding="async" />
+              </span>
+            </a>
+            <a class="more-work-card more-work-card--cream" href="./project.html?slug=about" aria-label="查看 About 项目">
+              <span class="more-work-card__surface">
+                <img src="./imag/Image2.webp" alt="" loading="lazy" decoding="async" />
+              </span>
+            </a>
+            <a class="more-work-card more-work-card--coral" href="./project.html?slug=profile" aria-label="查看 Profile 项目">
+              <span class="more-work-card__surface">
+                <img src="./imag/photo1.png" alt="" loading="lazy" decoding="async" />
+              </span>
+            </a>
+            <a class="more-work-card more-work-card--blue" href="./project.html?slug=portrait" aria-label="查看 Portrait 项目">
+              <span class="more-work-card__surface">
+                <img src="./imag/photo2.png" alt="" loading="lazy" decoding="async" />
+              </span>
+            </a>
+            <a class="more-work-card more-work-card--mint" href="./project.html?slug=about" aria-label="查看 内容版式项目">
+              <span class="more-work-card__surface">
+                <img src="./imag/frame_front.webp" alt="" loading="lazy" decoding="async" />
+              </span>
+            </a>
+            <a class="more-work-card more-work-card--sand" href="./project.html?slug=sneakers" aria-label="查看 视觉实验项目">
+              <span class="more-work-card__surface">
+                <img src="./imag/design top.png" alt="" loading="lazy" decoding="async" />
+              </span>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- 内容区域4副本：作品 — VIBE CODING 无限滚动卡片 -->
+      <section
+        id="portfolio-copy"
+        data-site-section="portfolio-copy"
+        class="section-portfolio portfolio-cards-section relative flex w-full flex-col items-center justify-center overflow-visible max-md:h-auto max-md:max-h-none max-md:gap-[var(--mobile-card-gap)] max-md:mb-0 max-md:mt-0 max-md:pb-[env(safe-area-inset-bottom,0)] max-md:pt-12"
+        aria-labelledby="portfolioCopyTitle"
+      >
+        <h2 id="portfolioCopyTitle" data-section-node="portfolio-title" class="section-title portfolio-top relative z-10 flex items-center justify-center pt-0 text-[var(--portfolio-title-size)] text-[color:var(--color-title)] max-md:mb-0 max-md:mt-0 max-md:h-auto max-md:flex-[0_1_auto] max-md:items-end max-md:justify-center max-md:pt-[0.18em] max-md:text-[var(--mobile-section-title-size)]">VIBE CODING</h2>
         <div data-section-node="portfolio-gallery" class="portfolio-gallery portfolio-gallery--bounce relative flex h-[clamp(340px,var(--module-media-space),520px)] w-full max-w-none items-center justify-center overflow-visible bg-[var(--color-surface)] isolate [transform:translateZ(0)] max-md:h-auto max-md:min-h-[320px] max-md:items-start max-md:pb-[max(12px,env(safe-area-inset-bottom,0px))]">
-          <div id="portfolioBounceCardsRoot" data-section-node="portfolio-bounce-root" class="relative flex w-full max-w-none justify-center overflow-visible"></div>
+          <div id="portfolioBounceCardsRootCopy" data-section-node="portfolio-bounce-root" class="relative flex w-full max-w-none justify-center overflow-visible"></div>
         </div>
       </section>
 
@@ -423,6 +467,7 @@
     <script src="./js/modules/photo-reveal.js"></script>
     <script src="./js/modules/works-swipe-preview.js"></script>
     <script src="./js/modules/portfolio-infinite-cards.js"></script>
+    <script src="./js/modules/more-work-cards.js"></script>
     <script src="./js/modules/portfolio-featured.js"></script>
     <script src="./js/modules/head-tracker.js"></script>
     <script src="./js/modules/playful-title-hover.js"></script>

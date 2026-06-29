@@ -46,6 +46,7 @@ const moduleOptionFactories = {
   initWorksSwipePreviewModule: () => buildConfigOptions("worksSwipePreview", { siteUtils }),
   initPortfolioInfiniteCardsModule: () =>
     buildConfigOptions("infiniteCards", { siteUtils, siteHelpers }),
+  initMoreWorkCardsModule: () => ({}),
   initPortfolioFeaturedModule: () =>
     buildConfigOptions("portfolioFeatured", { siteUtils, siteHelpers }),
   initHeadTrackerModule: () => buildConfigOptions("headTracker", { siteHelpers, siteUtils }),

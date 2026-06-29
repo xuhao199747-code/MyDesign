@@ -9,7 +9,7 @@ import {
 
 runBootstrapTasks([
   wrapBootstrapTask(
-    whenElementPresent("portfolioBounceCardsRoot", () =>
+    whenElementPresent("portfolioBounceCardsRootCopy", () =>
       import("./portfolio-bounce-cards.jsx").then(({ mountPortfolioBounceCards }) =>
         mountPortfolioBounceCards()
       )
