@@ -41,6 +41,11 @@
     const homeElements = siteSections.getHomeSectionElements?.().home || {};
     const tracker = homeElements.tracker || queryElement("[data-head-tracker]");
     if (!tracker) return;
+    const homeSection =
+      homeElements.section ||
+      tracker.closest?.('[data-site-section="home"]') ||
+      document.getElementById("home");
+    if (!homeSection) return;
     if (tracker.dataset.headTrackerReady === "true") return;
     tracker.dataset.headTrackerReady = "true";
 
@@ -329,9 +334,17 @@
       trackerObserver.observe(tracker);
     }
 
-    window.addEventListener(
+    homeSection.addEventListener(
       "pointermove",
       (event) => queueUpdateFromPoint(event.clientX, event.clientY),
+      { passive: true }
+    );
+    homeSection.addEventListener(
+      "pointerleave",
+      () => {
+        queuedPoint = null;
+        setTargetFrame(frontFrame, "center");
+      },
       { passive: true }
     );
   }
