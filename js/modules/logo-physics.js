@@ -41,6 +41,7 @@
     let physicsStarted = false;
     let physicsRafId = null;
     let logoParticles = [];
+    let logoPhysicsTick = null;
 
     const getLogoSize = () => {
       const fallbackSize = siteUtils.getNumberOption(
@@ -150,10 +151,10 @@
         ? siteUtils.getNumberOption(logoPhysicsConfig, "floorSafeMobile", 20)
         : siteUtils.getNumberOption(logoPhysicsConfig, "floorSafeDesktop", 44);
       const floorY = logoWall.clientHeight - size - floorSafe;
-      let elapsed = 0;
       let lastTs = 0;
+      let elapsed = 0;
 
-      const tick = (ts) => {
+      logoPhysicsTick = (ts) => {
         if (!lastTs) lastTs = ts;
         const dt = Math.min(0.033, (ts - lastTs) / 1000);
         lastTs = ts;
@@ -172,9 +173,11 @@
             return;
           }
 
-          if (particle.settled) {
+          if (particle.settled && !particle.interacting) {
             return;
           }
+
+          particle.settled = false;
 
           particle.vy += gravity * dt;
           particle.vx *= drag;
@@ -212,6 +215,7 @@
             particle.av = 0;
             particle.y = particle.ground;
             particle.settled = true;
+            particle.interacting = false;
           } else {
             allSettled = false;
           }
@@ -236,19 +240,74 @@
         });
 
         if (!allSettled) {
-          physicsRafId = requestAnimationFrame(tick);
+          physicsRafId = requestAnimationFrame(logoPhysicsTick);
         } else {
           physicsRafId = null;
         }
       };
 
-      physicsRafId = requestAnimationFrame(tick);
+      physicsRafId = requestAnimationFrame(logoPhysicsTick);
 
       window.setTimeout(() => {
         logoParticles.forEach((particle) => {
           if (!particle.settled) particle.el.style.opacity = "1";
         });
       }, 120);
+    };
+
+    const kickLogoParticles = (centerParticle) => {
+      if (!centerParticle || !logoParticles.length) return;
+
+      const mobileBreakpoint = siteUtils.getNumberOption(
+        logoPhysicsConfig,
+        "mobileBreakpoint",
+        768
+      );
+      const isMobile = window.innerWidth <= mobileBreakpoint;
+      const size = getLogoSize();
+      const radius = siteUtils.getNumberOption(
+        logoPhysicsConfig,
+        "clickKickRadius",
+        isMobile ? 170 : 260
+      );
+      const centerX = centerParticle.x + size / 2;
+      const centerY = centerParticle.y + size / 2;
+      const upwardBoost = siteUtils.getNumberOption(
+        logoPhysicsConfig,
+        "clickKickUp",
+        isMobile ? 780 : 980
+      );
+      const sideBoost = siteUtils.getNumberOption(
+        logoPhysicsConfig,
+        "clickKickSide",
+        isMobile ? 260 : 360
+      );
+
+      logoParticles.forEach((particle) => {
+        if (!particle.active) return;
+
+        const particleX = particle.x + size / 2;
+        const particleY = particle.y + size / 2;
+        const dx = particleX - centerX;
+        const dy = particleY - centerY;
+        const distance = Math.hypot(dx, dy);
+        if (distance > radius && particle !== centerParticle) return;
+
+        const strength = particle === centerParticle ? 1 : Math.max(0, 1 - distance / radius);
+        const direction = dx === 0 ? siteUtils.randomInRange(-1, 1) : Math.sign(dx);
+        particle.vx += direction * sideBoost * strength;
+        particle.vy = Math.min(particle.vy, -upwardBoost * (0.42 + strength * 0.58));
+        particle.av += siteUtils.randomInRange(-260, 260) * (0.35 + strength);
+        particle.y = Math.min(particle.y, particle.ground - 2);
+        particle.settled = false;
+        particle.interacting = true;
+        particle.el.style.opacity = "1";
+      });
+
+      if (!physicsStarted) physicsStarted = true;
+      if (!physicsRafId && typeof logoPhysicsTick === "function") {
+        physicsRafId = requestAnimationFrame(logoPhysicsTick);
+      }
     };
 
     setupLogoParticles();
@@ -293,6 +352,14 @@
     );
 
     observer.observe(logoWall);
+
+    logoWall.addEventListener("click", (event) => {
+      const target = event.target instanceof Element ? event.target.closest("img") : null;
+      if (!target) return;
+
+      const centerParticle = logoParticles.find((particle) => particle.el === target);
+      kickLogoParticles(centerParticle);
+    });
 
     let resizeTimer;
     let lastViewportWidth = window.innerWidth;

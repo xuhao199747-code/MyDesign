@@ -57,8 +57,6 @@
     const totalCount = allResources.length;
     let hasHidden = false;
     let criticalReady = false;
-    let heroReady = false;
-    let allResourcesReady = totalCount === 0;
     let bootReady = Boolean(window.__siteBootStatus?.completedAt);
     let minimumDisplayElapsed = false;
 
@@ -125,7 +123,7 @@
     }
 
     const tryHidePreloader = () => {
-      if (!criticalReady || !heroReady || !allResourcesReady || !bootReady || !minimumDisplayElapsed) {
+      if (!criticalReady || !bootReady || !minimumDisplayElapsed) {
         return;
       }
       hidePreloader();
@@ -162,15 +160,6 @@
       }, siteUtils.getNumberOption(preloaderConfig, "minimumDisplayMs", 900));
 
       window.addEventListener(
-        "hero:first-frame-ready",
-        () => {
-          heroReady = true;
-          tryHidePreloader();
-        },
-        { once: true }
-      );
-
-      window.addEventListener(
         "site:boot-complete",
         () => {
           bootReady = true;
@@ -187,18 +176,17 @@
         })
       );
 
-      // 关键资源先到位，但不提前关闭预加载页，仍需等待全部资源与首屏动画。
+      // 关键资源到位后即可进入页面；非关键资源继续后台加载。
       await Promise.all(
         criticalResources.map((url) => loadResource(url).catch(() => {}))
       );
       criticalReady = true;
       tryHidePreloader();
 
-      await Promise.all(loadPromises);
-      loadedCount = totalCount;
-      updateProgress();
-      allResourcesReady = true;
-      tryHidePreloader();
+      Promise.all(loadPromises).then(() => {
+        loadedCount = totalCount;
+        updateProgress();
+      });
     };
 
     if (document.readyState === "loading") {
@@ -210,8 +198,6 @@
     // 安全兜底：最多 7 秒后强制隐藏
     setTimeout(() => {
       criticalReady = true;
-      heroReady = true;
-      allResourcesReady = true;
       bootReady = true;
       minimumDisplayElapsed = true;
       hidePreloader();

@@ -281,11 +281,11 @@
               </header>
               <div
                 data-section-node="featured-root"
-                class="portfolio-featured relative left-auto h-[clamp(360px,var(--module-media-space),560px)] w-screen overflow-visible p-0 touch-pan-y [--featured-card-w:min(430px,28vw)] [--featured-gap:clamp(42px,6vw,112px)] [overscroll-behavior-x:none] max-md:h-auto max-md:min-h-0 max-md:overflow-x-hidden max-md:overflow-y-hidden max-md:[--featured-card-w:min(280px,72vw)] max-md:[--featured-gap:24px]"
+                class="portfolio-featured relative left-auto h-[clamp(360px,var(--module-media-space),560px)] w-screen overflow-visible p-0 touch-pan-y [--featured-card-w:min(430px,28vw)] [--featured-gap:clamp(42px,6vw,112px)] [overscroll-behavior-x:none] max-md:h-auto max-md:min-h-0 max-md:overflow-visible max-md:[--featured-card-w:min(280px,72vw)] max-md:[--featured-gap:24px]"
                 aria-label="作品展示对比版本"
                 data-active-index="0"
               >
-                <div data-section-node="featured-stage" class="portfolio-featured__stage relative h-[min(100%,520px)] w-full overflow-visible max-md:mt-[var(--module-content-gap-sm)] max-md:h-[clamp(260px,72vw,340px)] max-md:overflow-hidden">
+                <div data-section-node="featured-stage" class="portfolio-featured__stage relative h-[min(100%,520px)] w-full overflow-visible max-md:mt-[var(--module-content-gap-sm)] max-md:h-[clamp(260px,72vw,340px)] max-md:overflow-visible">
                   <button
                     type="button"
                     class="portfolio-featured__card"
@@ -366,11 +366,20 @@
               </svg>
             </div>
 
-            <div data-section-node="featured-second-screen" class="mydesign-second-screen" aria-label="许浩品牌尾屏">
+            <div data-section-node="featured-second-screen" class="mydesign-second-screen" aria-label="Xuhao Creator 首屏尾屏">
               <div class="mydesign-second-screen__scene">
-                <div class="mydesign-second-screen__logo-stage" data-section-node="featured-xuhuo-logo-stage">
-                  <img class="mydesign-second-screen__logo-image" src="./imag/xuhuo-logo-stage.png" alt="Xuhao" loading="lazy" decoding="async" />
-                  <div id="myDesignLanyardRoot" class="mydesign-second-screen__lanyard"></div>
+                <div class="mydesign-jack-hero" data-section-node="featured-jack-hero">
+                  <div class="mydesign-jack-hero__title-wrap">
+                    <h3 class="mydesign-jack-hero__title">HI,IM XUHAO</h3>
+                  </div>
+                  <img
+                    class="mydesign-jack-hero__portrait"
+                    data-avatar-parallax
+                    src="./imag/xuhao-main-avatar.png"
+                    alt="Xuhao 主视觉头像"
+                    loading="lazy"
+                    decoding="async"
+                  />
                 </div>
                 <div id="contact" data-section-node="featured-contact" class="mydesign-contact" aria-label="联系信息">
                   <div class="mydesign-contact__item">

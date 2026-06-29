@@ -456,7 +456,7 @@ body.is-click-surprise-active *::selection {
   --wechat-drop-y: 64px;
   position: fixed;
   inset: 0;
-  z-index: 260;
+  z-index: 90;
   width: 100vw;
   height: 100svh;
   opacity: 0;
@@ -729,6 +729,9 @@ body.is-click-surprise-active *::selection {
 .hero-nav {
   z-index: 20;
   pointer-events: none;
+  box-sizing: border-box;
+  overflow: visible;
+  padding-inline: clamp(48px, 7vw, 128px);
 }
 
 .hero-nav__text {
@@ -748,6 +751,7 @@ body.is-click-surprise-active *::selection {
   animation: none;
   will-change: transform;
   pointer-events: auto;
+  overflow: visible;
 }
 
 .hero-nav__text::before,
@@ -1323,17 +1327,74 @@ body.is-click-surprise-active *::selection {
   position: relative;
   width: 100%;
   height: 100%;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
   align-items: center;
-  justify-content: center;
-  gap: clamp(34px, 5vh, 58px);
+  justify-items: center;
+  gap: clamp(14px, 2.8vh, 28px);
   overflow: visible;
   box-sizing: border-box;
-  padding: clamp(84px, 12vh, 128px) clamp(28px, 4vw, 72px) clamp(42px, 7vh, 78px);
+  padding: clamp(44px, 7vh, 82px) clamp(28px, 4vw, 72px) clamp(18px, 3.6vh, 38px);
   background:
     radial-gradient(circle at 36% 18%, rgba(255, 255, 255, 0.22), transparent 26%),
     linear-gradient(180deg, #2675f7 0%, #5dacff 55%, #9be8f4 100%);
+}
+
+.mydesign-jack-hero {
+  --avatar-x: 0px;
+  --avatar-y: 0px;
+  --avatar-rotate: 0deg;
+  position: relative;
+  width: min(96vw, 1600px);
+  min-height: min(70vh, 700px);
+  align-self: stretch;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
+  align-items: start;
+  overflow: visible;
+  isolation: isolate;
+}
+
+.mydesign-jack-hero__title-wrap {
+  position: relative;
+  z-index: 2;
+  align-self: start;
+  overflow: visible;
+  padding-inline: clamp(8px, 2vw, 30px);
+  transform: translate3d(0, clamp(48px, 8.5vh, 96px), 0);
+}
+
+.mydesign-jack-hero__title {
+  margin: 0;
+  font-family: var(--title-font);
+  font-size: clamp(88px, 16.2vw, 300px);
+  font-weight: 900;
+  line-height: 1.02;
+  letter-spacing: -0.065em;
+  text-align: center;
+  text-transform: uppercase;
+  white-space: nowrap;
+  background: linear-gradient(180deg, rgba(238, 248, 255, 0.98) 0%, rgba(162, 206, 235, 0.82) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 18px 38px rgba(14, 68, 126, 0.24));
+}
+
+.mydesign-jack-hero__portrait {
+  position: absolute;
+  z-index: 3;
+  left: 50%;
+  top: 58%;
+  width: clamp(360px, 42vw, 690px);
+  max-height: none;
+  object-fit: contain;
+  transform: translate3d(calc(-50% + var(--avatar-x)), calc(-50% + var(--avatar-y)), 0) rotate(var(--avatar-rotate));
+  transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+  filter: drop-shadow(0 28px 54px rgba(8, 43, 86, 0.28));
+  pointer-events: none;
+  user-select: none;
 }
 
 .mydesign-second-screen__logo-stage {
@@ -1384,11 +1445,12 @@ body.is-click-surprise-active *::selection {
 .mydesign-contact {
   position: relative;
   z-index: 6;
-  width: min(92vw, 1520px);
+  align-self: end;
+  width: min(91vw, 1360px);
   display: grid;
   grid-template-columns: 0.85fr 1.25fr 0.8fr 1.15fr;
-  column-gap: clamp(34px, 6vw, 108px);
-  row-gap: 26px;
+  column-gap: clamp(24px, 5vw, 82px);
+  row-gap: 16px;
   color: #fff;
   font-family: var(--body-font);
   text-align: left;
@@ -1409,17 +1471,17 @@ body.is-click-surprise-active *::selection {
 
 .mydesign-contact__label {
   color: rgba(255, 255, 255, 0.72);
-  font-size: clamp(11px, 1.1vw, 18px);
+  font-size: clamp(9px, 0.85vw, 14px);
   font-weight: 800;
   line-height: 1.2;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
 }
 
 .mydesign-contact__value {
-  margin-top: clamp(10px, 1.4vh, 18px);
+  margin-top: clamp(6px, 1vh, 11px);
   color: #fff;
-  font-size: clamp(20px, 2.1vw, 36px);
+  font-size: clamp(15px, 1.55vw, 28px);
   font-weight: 700;
   line-height: 1.12;
   letter-spacing: -0.035em;
@@ -1439,16 +1501,71 @@ body.is-click-surprise-active *::selection {
 
 @media (max-width: 768px) {
   #portfolio-featured.section-portfolio-featured {
-    min-height: 260svh;
+    min-height: 0;
+    background: var(--color-surface);
   }
 
   .mydesign-morph__pin {
-    min-height: 100svh;
+    position: relative;
+    height: auto;
+    min-height: 0;
+    display: block;
+    background: var(--color-surface);
+  }
+
+  .mydesign-morph__first {
+    opacity: 1 !important;
+    transform: none !important;
+    pointer-events: auto !important;
+  }
+
+  .mydesign-morph__overlay {
+    display: none;
+  }
+
+  .mydesign-second-screen {
+    position: relative;
+    inset: auto;
+    min-height: auto;
+    opacity: 1 !important;
+    transform: none !important;
+    pointer-events: auto !important;
+    overflow: visible;
   }
 
   .mydesign-second-screen__logo-stage {
     width: 118vw;
     transform: translate3d(-2vw, 0, 0);
+  }
+
+  .mydesign-second-screen__scene {
+    min-height: min(100svh, 760px);
+    height: auto;
+    grid-template-rows: minmax(0, 1fr) auto;
+    align-content: stretch;
+    gap: clamp(10px, 2vh, 18px);
+    padding: calc(env(safe-area-inset-top, 0px) + 68px) 16px max(16px, env(safe-area-inset-bottom, 0px) + 12px);
+  }
+
+  .mydesign-jack-hero {
+    width: 100%;
+    min-height: 0;
+    height: min(58svh, 470px);
+  }
+
+  .mydesign-jack-hero__title {
+    font-size: clamp(44px, 14.4vw, 82px);
+    line-height: 1.04;
+    white-space: normal;
+  }
+
+  .mydesign-jack-hero__title-wrap {
+    transform: translate3d(0, clamp(16px, 4.4vh, 40px), 0);
+  }
+
+  .mydesign-jack-hero__portrait {
+    width: clamp(250px, 70vw, 360px);
+    top: 57%;
   }
 
   .mydesign-second-screen__lanyard {
@@ -1463,34 +1580,80 @@ body.is-click-surprise-active *::selection {
     transform: translate3d(-50%, 0, 0) scale(0.42);
   }
 
-  .mydesign-second-screen__scene {
-    justify-content: center;
-    gap: clamp(24px, 5vh, 40px);
-    padding: 86px 18px max(28px, env(safe-area-inset-bottom, 0px) + 20px);
+  .mydesign-contact {
+    width: min(88vw, 500px);
+    grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+    column-gap: 10px;
+    row-gap: 10px;
+    transform: translate3d(0, -72px, 0);
   }
 
-  .mydesign-contact {
-    width: min(92vw, 520px);
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    column-gap: 22px;
-    row-gap: 22px;
+  .mydesign-contact__item:nth-child(4) {
+    padding-right: 0;
   }
 
   .mydesign-contact__label {
-    font-size: 10px;
-    letter-spacing: 0.14em;
+    font-size: clamp(8px, 2.3vw, 9px);
+    letter-spacing: 0.12em;
   }
 
   .mydesign-contact__value {
-    margin-top: 7px;
-    font-size: clamp(14px, 4vw, 18px);
-    line-height: 1.25;
-    white-space: normal;
-    overflow-wrap: anywhere;
+    margin-top: 4px;
+    font-size: clamp(12px, 3.05vw, 14px);
+    line-height: 1.16;
+    white-space: nowrap;
+    overflow-wrap: normal;
   }
 
   .mydesign-contact__value a {
     border-bottom-width: 1px;
+  }
+}
+
+@media (max-height: 520px) and (min-width: 769px) {
+  .mydesign-second-screen__scene {
+    gap: clamp(10px, 2.6vh, 18px);
+    padding: clamp(26px, 6vh, 44px) clamp(24px, 4vw, 56px) clamp(14px, 3.5vh, 24px);
+  }
+
+  .mydesign-second-screen__logo-stage {
+    width: min(66vw, 980px);
+  }
+
+  .mydesign-jack-hero {
+    min-height: min(66vh, 360px);
+    width: min(94vw, 1320px);
+  }
+
+  .mydesign-jack-hero__title {
+    font-size: clamp(68px, 13.2vw, 188px);
+    line-height: 1.02;
+  }
+
+  .mydesign-jack-hero__title-wrap {
+    transform: translate3d(0, clamp(34px, 8vh, 54px), 0);
+  }
+
+  .mydesign-jack-hero__portrait {
+    width: clamp(300px, 30vw, 470px);
+    top: 60%;
+  }
+
+  .mydesign-contact {
+    width: min(92vw, 1440px);
+    column-gap: clamp(24px, 5vw, 78px);
+    row-gap: 14px;
+  }
+
+  .mydesign-contact__label {
+    font-size: clamp(9px, 0.9vw, 13px);
+    letter-spacing: 0.16em;
+  }
+
+  .mydesign-contact__value {
+    margin-top: clamp(6px, 1vh, 10px);
+    font-size: clamp(16px, 1.7vw, 26px);
+    line-height: 1.08;
   }
 }
 
@@ -1819,6 +1982,14 @@ body.is-click-surprise-active *::selection {
 .portfolio-featured[data-portfolio-featured-layout="ready"] .portfolio-featured__stage {
   opacity: 1;
   transition: opacity 0.18s ease-out;
+}
+
+.portfolio-featured__stage > [data-featured-card] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .portfolio-featured__track {
@@ -2194,8 +2365,9 @@ body.is-click-surprise-active *::selection {
    * 勿在 html/body 设 overflow-x: hidden —— 会破坏 position: sticky 的顶栏。
    */
   html {
-    --section-gap-y-sm: 16px;
-    --mobile-module-lead-gap: 32px;
+    --section-gap-y-sm: clamp(32px, 7vh, 56px);
+    --mobile-module-lead-gap: var(--section-gap-y-sm);
+    --mobile-section-pad-y: clamp(28px, 6vh, 48px);
     --mobile-section-title-size: clamp(42px, 12vw, 58px);
     --mobile-copy-size: 13px;
     --mobile-copy-line: 20px;
@@ -2368,7 +2540,7 @@ body.is-click-surprise-active *::selection {
   .nav-wechat-drop {
     width: 100vw;
     height: 100svh;
-    z-index: 260;
+    z-index: 180;
   }
 
   .nav-wechat-drop__lanyard {
@@ -2561,7 +2733,7 @@ body.is-click-surprise-active *::selection {
   .motion3d-section {
     height: min(620px, 78vh);
     min-height: 420px;
-    margin: 0 0 var(--section-gap-y-sm);
+    margin: 0;
   }
 
   .motion3d-copy {
@@ -2581,8 +2753,8 @@ body.is-click-surprise-active *::selection {
   .section-two {
     min-height: 0;
     gap: 0;
-    padding-top: 0;
-    padding-bottom: 0;
+    padding-top: var(--mobile-section-pad-y);
+    padding-bottom: var(--mobile-section-pad-y);
     margin-top: var(--mobile-module-lead-gap);
     margin-bottom: 0;
   }
@@ -2671,8 +2843,8 @@ body.is-click-surprise-active *::selection {
     margin-top: 0;
     margin-bottom: 0;
     gap: var(--mobile-card-gap);
-    padding-top: var(--mobile-module-lead-gap);
-    padding-bottom: 0;
+    padding-top: var(--mobile-section-pad-y);
+    padding-bottom: var(--mobile-section-pad-y);
     padding-left: 0;
     padding-right: 0;
   }
@@ -2698,15 +2870,31 @@ body.is-click-surprise-active *::selection {
   }
 
   .section-portfolio.portfolio-cards-section {
-    --portfolio-bounce-card-size: clamp(142px, 43vw, 236px);
-    --portfolio-bounce-stage-height: calc(var(--portfolio-bounce-card-size) * 1.12);
+    --portfolio-bounce-card-size: clamp(130px, 36vw, 200px);
+    --portfolio-bounce-stage-height: calc(var(--portfolio-bounce-card-size) * 1.62);
+    content-visibility: visible;
+    contain-intrinsic-size: auto;
+    justify-content: flex-start;
+    gap: clamp(8px, 2vh, 16px);
+    min-height: 0;
+    height: auto;
+    padding-top: var(--mobile-section-pad-y) !important;
+    padding-bottom: var(--mobile-section-pad-y) !important;
+    margin-bottom: 0 !important;
+  }
+
+  .section-portfolio.portfolio-cards-section .portfolio-top {
+    padding-top: 0 !important;
+    line-height: 0.9;
   }
 
   .section-portfolio .portfolio-gallery--bounce {
     height: var(--portfolio-bounce-stage-height) !important;
     min-height: var(--portfolio-bounce-stage-height) !important;
     align-items: center;
-    padding-bottom: 0;
+    overflow: visible !important;
+    padding-top: clamp(8px, 2vh, 16px);
+    padding-bottom: clamp(14px, 3.2vh, 24px);
   }
 
   .section-three .photo-content {
@@ -2811,18 +2999,38 @@ body.is-click-surprise-active *::selection {
     font-size: clamp(15px, 4.3vw, 18px);
   }
 
-  .portfolio-featured {
-    --featured-card-w: min(180px, 48vw);
-    --featured-gap: clamp(24px, 8vw, 48px);
+  .mydesign-morph__first {
+    gap: clamp(10px, 2.8vh, 22px);
+    justify-content: flex-start;
+    min-height: auto;
+    padding: var(--mobile-section-pad-y) 0 var(--mobile-section-pad-y);
+    box-sizing: border-box;
+  }
+
+  .portfolio-featured__head {
     min-height: 0;
-    overflow-x: hidden;
-    overflow-y: hidden;
+    padding-top: 0;
+  }
+
+  #portfolioFeaturedTitle {
+    padding-top: 0 !important;
+    font-size: var(--mobile-section-title-size) !important;
+    line-height: 0.9 !important;
+  }
+
+  .portfolio-featured {
+    --featured-card-w: min(220px, 58vw);
+    --featured-gap: clamp(34px, 11vw, 62px);
+    min-height: 0;
+    height: auto;
+    overflow: visible;
     touch-action: pan-y pinch-zoom;
   }
 
   .portfolio-featured__stage {
-    overflow: hidden;
-    margin-top: var(--module-content-gap-sm);
+    overflow: visible;
+    height: clamp(320px, 82vw, 420px) !important;
+    margin-top: clamp(12px, 2.8vh, 22px);
   }
 
   .portfolio-featured__cell {
@@ -2843,9 +3051,9 @@ body.is-click-surprise-active *::selection {
 
   .section-five.works-swipe-section {
     margin-top: 0;
-    margin-bottom: var(--section-gap-y-sm);
-    padding-top: 0;
-    padding-bottom: 0;
+    margin-bottom: 0;
+    padding-top: var(--mobile-section-pad-y);
+    padding-bottom: var(--mobile-section-pad-y);
     padding-left: 0;
     padding-right: 0;
   }

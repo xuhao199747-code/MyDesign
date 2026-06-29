@@ -112,7 +112,7 @@
       const measuredLabelWidth =
         labelMeasureCache(data.label, style) +
         LETTER_SPACING * Math.max(0, data.label.length - 1);
-      const horizontalPadding = edgePadding * 2 + overscan;
+      const horizontalPadding = edgePadding * 2 + overscan * 2;
       const fallbackWidth = measuredLabelWidth + horizontalPadding;
       const fallbackHeight = Math.ceil(fallbackFontSize * 1.24) + 20;
       const rect = text.getBoundingClientRect();
@@ -309,7 +309,7 @@
       const drawHeight = Math.ceil(parseFloat(style.fontSize) * 1.12);
       const isRightAligned = text.classList.contains("hero-nav__text--right");
       const drawX = isRightAligned
-        ? Math.max(0, width - glyphWidth - edgePadding)
+        ? Math.max(edgePadding, width - glyphWidth - edgePadding)
         : edgePadding;
 
       const prepared = prepareOffscreenCanvas(data, style, glyphWidth, drawHeight);
@@ -432,7 +432,11 @@
           (Math.random() * 0.08 - 0.04) * disassembleStrength +
           ((bandPackage?.stretch || 1) - 1) * 0.45;
         const destWidth = Math.max(1, glyphWidth * stretch);
-        const destX = drawX + scatterX - (destWidth - glyphWidth) * 0.5;
+        const rawDestX = drawX + scatterX - (destWidth - glyphWidth) * 0.5;
+        const destX = Math.min(
+          width - destWidth - edgePadding * 0.35,
+          Math.max(edgePadding * 0.35, rawDestX)
+        );
         ctx.globalAlpha =
           (data.isHovered ? 0.72 : 0.62) +
           Math.random() * 0.1 +

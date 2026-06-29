@@ -221,8 +221,22 @@ if (bootConfig.logSummary === true) {
   trigger.setAttribute("aria-haspopup", "dialog");
   trigger.setAttribute("aria-expanded", "false");
   window.__toggleNavWechatCard = toggleCard;
+  window.__closeNavWechatCard = closeCard;
 
   trigger.addEventListener("click", toggleCard);
+
+  document.addEventListener(
+    "click",
+    (event) => {
+      if (!isOpen) return;
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      const navLink = target.closest(".navbar a");
+      if (!navLink || navLink === trigger || navLink.contains(trigger)) return;
+      closeCard();
+    },
+    true
+  );
 
   document.addEventListener(
     "click",
@@ -251,4 +265,53 @@ if (bootConfig.logSummary === true) {
     if (!isOpen || drop.contains(event.target) || trigger.contains(event.target)) return;
     closeCard();
   });
+})();
+
+(() => {
+  const hero = document.querySelector('[data-section-node="featured-jack-hero"]');
+  const avatar = hero?.querySelector("[data-avatar-parallax]");
+  if (!hero || !avatar || hero.dataset.avatarParallaxReady === "true") return;
+
+  hero.dataset.avatarParallaxReady = "true";
+  let frame = null;
+  let targetX = 0;
+  let targetY = 0;
+  let targetRotate = 0;
+
+  const applyAvatarMotion = () => {
+    frame = null;
+    hero.style.setProperty("--avatar-x", `${targetX.toFixed(2)}px`);
+    hero.style.setProperty("--avatar-y", `${targetY.toFixed(2)}px`);
+    hero.style.setProperty("--avatar-rotate", `${targetRotate.toFixed(3)}deg`);
+  };
+
+  const scheduleAvatarMotion = () => {
+    if (!frame) frame = window.requestAnimationFrame(applyAvatarMotion);
+  };
+
+  hero.addEventListener(
+    "pointermove",
+    (event) => {
+      const rect = hero.getBoundingClientRect();
+      const relX = (event.clientX - rect.left) / rect.width - 0.5;
+      const relY = (event.clientY - rect.top) / rect.height - 0.5;
+
+      targetX = relX * 26;
+      targetY = relY * 18;
+      targetRotate = relX * 1.4;
+      scheduleAvatarMotion();
+    },
+    { passive: true }
+  );
+
+  hero.addEventListener(
+    "pointerleave",
+    () => {
+      targetX = 0;
+      targetY = 0;
+      targetRotate = 0;
+      scheduleAvatarMotion();
+    },
+    { passive: true }
+  );
 })();

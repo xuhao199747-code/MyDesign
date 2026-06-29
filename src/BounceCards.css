@@ -54,10 +54,13 @@
 
 @media (max-width: 768px) {
   .bounceCardsContainer {
-    --bounce-card-size: var(--portfolio-bounce-card-size, clamp(142px, 43vw, 236px));
-    height: var(--portfolio-bounce-stage-height, calc(var(--bounce-card-size) * 1.12)) !important;
-    min-height: var(--portfolio-bounce-stage-height, calc(var(--bounce-card-size) * 1.12));
+    --bounce-card-size: var(--portfolio-bounce-card-size, clamp(130px, 36vw, 200px));
+    height: var(--portfolio-bounce-stage-height, calc(var(--bounce-card-size) * 1.62)) !important;
+    min-height: var(--portfolio-bounce-stage-height, calc(var(--bounce-card-size) * 1.62));
     position: relative;
+    margin-inline: auto;
+    max-width: calc(100% - 28px);
+    overflow: visible;
     touch-action: pan-y;
   }
   

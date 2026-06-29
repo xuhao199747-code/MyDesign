@@ -149,8 +149,13 @@
     };
 
     const updateContentByProgress = (progress) => {
-      const firstOut = clamp((progress - 0.18) / 0.28, 0, 1);
-      const secondIn = clamp((progress - 0.68) / 0.24, 0, 1);
+      const isMobileViewport = window.innerWidth <= 768;
+      const firstOutStart = isMobileViewport ? 0.06 : 0.18;
+      const firstOutDuration = isMobileViewport ? 0.16 : 0.28;
+      const secondInStart = isMobileViewport ? 0.22 : 0.68;
+      const secondInDuration = isMobileViewport ? 0.18 : 0.24;
+      const firstOut = clamp((progress - firstOutStart) / firstOutDuration, 0, 1);
+      const secondIn = clamp((progress - secondInStart) / secondInDuration, 0, 1);
 
       firstContent.style.opacity = `${1 - firstOut}`;
       firstContent.style.transform = `translate3d(0, ${firstOut * -48}px, 0)`;
@@ -176,8 +181,9 @@
       const scrollRange = Math.max(section.offsetHeight - viewportHeight, 1);
       const raw = clamp((-sectionRect.top) / scrollRange, 0, 1);
       const direction = raw >= lastRaw ? 1 : -1;
-      const morphStart = 0.32;
-      const morphEnd = 0.78;
+      const isMobileViewport = window.innerWidth <= 768;
+      const morphStart = isMobileViewport ? 0.1 : 0.32;
+      const morphEnd = isMobileViewport ? 0.42 : 0.78;
       const morphProgress = clamp((raw - morphStart) / (morphEnd - morphStart), 0, 1);
 
       if (raw <= morphStart) {
