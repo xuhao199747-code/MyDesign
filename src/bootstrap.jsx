@@ -7,6 +7,33 @@ import {
   wrapBootstrapTask,
 } from "./lib/bootstrap-page.js";
 
+function whenNavWechatLanyardRequested() {
+  return () => {
+    const trigger = document.querySelector('[data-shell-node="wechat-trigger"]');
+    const mount = document.getElementById("navWechatLanyardMount");
+    if (!trigger || !mount) return null;
+
+    let isLoading = false;
+    const loadLanyard = () => {
+      if (isLoading || mount.dataset.reactMounted === "true") return;
+      isLoading = true;
+      import("./nav-wechat-lanyard-entry.jsx")
+        .then(({ mountNavWechatLanyard }) => mountNavWechatLanyard())
+        .catch((error) => {
+          isLoading = false;
+          console.error("[nav-wechat-lanyard]", error);
+        });
+    };
+
+    trigger.addEventListener("pointerenter", loadLanyard, { once: true, passive: true });
+    trigger.addEventListener("focus", loadLanyard, { once: true });
+    trigger.addEventListener("touchstart", loadLanyard, { once: true, passive: true });
+    trigger.addEventListener("click", loadLanyard, { once: true });
+
+    return null;
+  };
+}
+
 runBootstrapTasks([
   wrapBootstrapTask(
     whenElementPresent("portfolioBounceCardsRootCopy", () =>
@@ -31,10 +58,6 @@ runBootstrapTasks([
     )
   ),
   wrapBootstrapTask(
-    whenElementPresent("navWechatLanyardMount", () =>
-      import("./nav-wechat-lanyard-entry.jsx").then(({ mountNavWechatLanyard }) =>
-        mountNavWechatLanyard()
-      )
-    )
+    whenNavWechatLanyardRequested()
   ),
 ]);

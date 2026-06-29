@@ -29,6 +29,12 @@ export default function CursorRing({
     let isPointerActive = false;
     let isLocked = false;
 
+    const stopAnimation = () => {
+      if (!frameId) return;
+      window.cancelAnimationFrame(frameId);
+      frameId = 0;
+    };
+
     const isInsideAssistant = (target) =>
       target instanceof Element && Boolean(target.closest(assistantBlockSelectors));
 
@@ -45,6 +51,7 @@ export default function CursorRing({
       lens.classList.add("is-visible");
       ring.classList.add("is-visible");
       dot.classList.add("is-visible");
+      ensureAnimation();
       const target = event.target;
       const isInteractive =
         target instanceof Element && Boolean(target.closest(interactiveSelectors));
@@ -56,10 +63,23 @@ export default function CursorRing({
     const animate = () => {
       const pointer = pointerRef.current;
       const ringPos = ringPosRef.current;
-      ringPos.x += (pointer.x - ringPos.x) * followEase;
-      ringPos.y += (pointer.y - ringPos.y) * followEase;
+      const dx = pointer.x - ringPos.x;
+      const dy = pointer.y - ringPos.y;
+      ringPos.x += dx * followEase;
+      ringPos.y += dy * followEase;
       lens.style.transform = `translate3d(${ringPos.x}px, ${ringPos.y}px, 0) translate(-50%, -50%)`;
       ring.style.transform = `translate3d(${ringPos.x}px, ${ringPos.y}px, 0) translate(-50%, -50%)`;
+
+      if (Math.abs(dx) < 0.35 && Math.abs(dy) < 0.35) {
+        frameId = 0;
+        return;
+      }
+
+      frameId = window.requestAnimationFrame(animate);
+    };
+
+    const ensureAnimation = () => {
+      if (frameId) return;
       frameId = window.requestAnimationFrame(animate);
     };
 
@@ -68,6 +88,7 @@ export default function CursorRing({
       lens.classList.remove("is-visible", "is-interactive");
       ring.classList.remove("is-visible", "is-interactive");
       dot.classList.remove("is-visible");
+      stopAnimation();
     };
 
     const handleCursorLock = (event) => {
@@ -89,7 +110,6 @@ export default function CursorRing({
     window.addEventListener("pointerleave", hide);
     window.addEventListener("blur", hide);
     window.addEventListener("focus", show);
-    animate();
 
     return () => {
       window.removeEventListener("pointermove", updatePointer);
@@ -97,7 +117,7 @@ export default function CursorRing({
       window.removeEventListener("pointerleave", hide);
       window.removeEventListener("blur", hide);
       window.removeEventListener("focus", show);
-      window.cancelAnimationFrame(frameId);
+      stopAnimation();
     };
   }, [assistantBlockSelectors, followEase, interactiveSelectors]);
 
