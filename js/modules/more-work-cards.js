@@ -19,6 +19,13 @@
       if (card.dataset.moreWorkReady === "true") return;
       card.dataset.moreWorkReady = "true";
       card.style.setProperty("--more-card-index", String(index));
+      const surface = card.querySelector(".more-work-card__surface");
+      const desc = surface?.dataset.cardDesc?.trim() || "";
+      const descUnits = Array.from(desc).reduce((total, char) => {
+        return total + (/[\u4e00-\u9fa5，。！？、；：]/.test(char) ? 1 : 0.55);
+      }, 0);
+      const descLines = Math.max(1, Math.min(4, Math.ceil(descUnits / 17)));
+      card.style.setProperty("--more-card-desc-height", `${descLines * 18}px`);
       if (reduceMotion) return;
       let pendingPointerEvent = null;
       let tiltFrame = 0;

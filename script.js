@@ -131,6 +131,7 @@ if (bootConfig.logSummary === true) {
 
 (() => {
   const trigger = document.querySelector('[data-shell-node="wechat-trigger"]');
+  const footerTrigger = document.querySelector('[data-shell-node="wechat-footer-trigger"]');
   const drop = document.getElementById("navWechatDrop");
   if (!trigger || !drop || drop.dataset.wechatDropControllerReady === "true") return;
 
@@ -139,6 +140,11 @@ if (bootConfig.logSummary === true) {
   let openScrollY = 0;
   let scrollWatchFrame = null;
   let closeTimer = null;
+
+  const syncTriggerState = (expanded) => {
+    trigger.setAttribute("aria-expanded", expanded);
+    footerTrigger?.setAttribute("aria-expanded", expanded);
+  };
 
   const updatePosition = () => {
     const rect = trigger.getBoundingClientRect();
@@ -158,7 +164,7 @@ if (bootConfig.logSummary === true) {
     }
     drop.classList.remove("is-opening");
     drop.classList.add("is-closing");
-    trigger.setAttribute("aria-expanded", "false");
+    syncTriggerState("false");
     closeTimer = window.setTimeout(() => {
       drop.classList.remove("is-open", "is-closing");
       drop.setAttribute("aria-hidden", "true");
@@ -185,7 +191,7 @@ if (bootConfig.logSummary === true) {
     openScrollY = window.scrollY;
     drop.classList.remove("is-closing", "is-opening");
     drop.setAttribute("aria-hidden", "false");
-    trigger.setAttribute("aria-expanded", "true");
+    syncTriggerState("true");
     void drop.offsetWidth;
     drop.classList.add("is-open", "is-opening");
     window.dispatchEvent(new CustomEvent("nav-wechat-card-open"));
@@ -220,11 +226,13 @@ if (bootConfig.logSummary === true) {
   };
 
   trigger.setAttribute("aria-haspopup", "dialog");
-  trigger.setAttribute("aria-expanded", "false");
+  footerTrigger?.setAttribute("aria-haspopup", "dialog");
+  syncTriggerState("false");
   window.__toggleNavWechatCard = toggleCard;
   window.__closeNavWechatCard = closeCard;
 
   trigger.addEventListener("click", toggleCard);
+  footerTrigger?.addEventListener("click", toggleCard);
 
   document.addEventListener(
     "click",
@@ -263,7 +271,13 @@ if (bootConfig.logSummary === true) {
   });
 
   document.addEventListener("click", (event) => {
-    if (!isOpen || drop.contains(event.target) || trigger.contains(event.target)) return;
+    if (
+      !isOpen ||
+      trigger.contains(event.target) ||
+      footerTrigger?.contains(event.target)
+    ) {
+      return;
+    }
     closeCard();
   });
 })();

@@ -10,6 +10,7 @@ import {
 function whenNavWechatLanyardRequested() {
   return () => {
     const trigger = document.querySelector('[data-shell-node="wechat-trigger"]');
+    const footerTrigger = document.querySelector('[data-shell-node="wechat-footer-trigger"]');
     const mount = document.getElementById("navWechatLanyardMount");
     if (!trigger || !mount) return null;
 
@@ -29,6 +30,10 @@ function whenNavWechatLanyardRequested() {
     trigger.addEventListener("focus", loadLanyard, { once: true });
     trigger.addEventListener("touchstart", loadLanyard, { once: true, passive: true });
     trigger.addEventListener("click", loadLanyard, { once: true });
+    footerTrigger?.addEventListener("pointerenter", loadLanyard, { once: true, passive: true });
+    footerTrigger?.addEventListener("focus", loadLanyard, { once: true });
+    footerTrigger?.addEventListener("touchstart", loadLanyard, { once: true, passive: true });
+    footerTrigger?.addEventListener("click", loadLanyard, { once: true });
 
     return null;
   };
