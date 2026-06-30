@@ -98,6 +98,14 @@ export default function CursorRing({
       }
     };
 
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        hide();
+      } else {
+        show();
+      }
+    };
+
     const show = () => {
       if (!isPointerActive) return;
       lens.classList.add("is-visible");
@@ -110,6 +118,7 @@ export default function CursorRing({
     window.addEventListener("pointerleave", hide);
     window.addEventListener("blur", hide);
     window.addEventListener("focus", show);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
       window.removeEventListener("pointermove", updatePointer);
@@ -117,6 +126,7 @@ export default function CursorRing({
       window.removeEventListener("pointerleave", hide);
       window.removeEventListener("blur", hide);
       window.removeEventListener("focus", show);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
       stopAnimation();
     };
   }, [assistantBlockSelectors, followEase, interactiveSelectors]);

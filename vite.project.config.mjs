@@ -18,8 +18,9 @@ export default defineConfig({
     extensions: ['.js', '.jsx', '.json'],
   },
   publicDir: 'public',
-  build: {
-    cssMinify: false,
+	  build: {
+	    modulePreload: false,
+	    cssMinify: false,
     outDir: 'dist',
     emptyOutDir: false,
     manifest: 'project-manifest.json',
@@ -27,11 +28,29 @@ export default defineConfig({
       input: {
         projectPage: path.resolve(__dirname, 'src/project-page-entry.jsx'),
       },
-      output: {
-        manualChunks(id) {
-          if (!id.includes('node_modules')) return undefined;
-          if (id.includes('@animateicons/react')) return 'vendor-animateicons';
-          if (id.includes('react-dom')) return 'vendor-react-dom';
+	      output: {
+	        manualChunks(id) {
+	          if (
+	            id.includes('\0vite') ||
+	            id.includes('vite/preload') ||
+	            id.includes('modulepreload') ||
+	            id.includes('preload-helper')
+	          ) {
+	            return 'vite-preload';
+	          }
+	          if (!id.includes('node_modules')) return undefined;
+	          if (
+	            id.includes('@react-three') ||
+	            id.includes('@dimforge') ||
+	            id.includes('@monogrid/gainmap') ||
+	            id.includes('meshline') ||
+	            id.includes('/three/') ||
+	            id.includes('\\three\\') ||
+	            id.includes('three-stdlib')
+	          ) {
+	            return 'vendor-three';
+	          }
+	          if (id.includes('react-dom')) return 'vendor-react-dom';
           if (
             id.includes('react/jsx-runtime') ||
             id.includes('\\react\\') ||

@@ -68,7 +68,7 @@
             sticker.className =
               "play-title__sticker play-title__sticker--resume-eyes";
             sticker.setAttribute("aria-hidden", "true");
-            stickerImage.src = assets.resumeEyes || "./imag/Group 1940699211.png";
+            stickerImage.src = assets.resumeEyes || "./imag/Group 1940699211.webp";
             stickerImage.alt = "";
             stickerImage.decoding = "async";
             sticker.appendChild(stickerImage);
@@ -86,7 +86,7 @@
               "play-title__sticker play-title__sticker--work-face";
             sticker.setAttribute("aria-hidden", "true");
             applyTitleMotionVars(sticker, charIndex);
-            stickerImage.src = assets.workFace || "./imag/Group 1940699207.png";
+            stickerImage.src = assets.workFace || "./imag/Group 1940699207.webp";
             stickerImage.alt = "";
             stickerImage.decoding = "async";
             sticker.appendChild(stickerImage);
@@ -113,7 +113,7 @@
               sticker.className =
                 "play-title__sticker play-title__sticker--light-bulb";
               sticker.setAttribute("aria-hidden", "true");
-              stickerImage.src = assets.lightBulb || "./imag/灯泡 1.png";
+              stickerImage.src = assets.lightBulb || "./imag/灯泡 1.webp";
               stickerImage.alt = "";
               stickerImage.decoding = "async";
               sticker.appendChild(stickerImage);
@@ -140,7 +140,7 @@
             sticker.className =
               "play-title__sticker play-title__sticker--design-fire";
             sticker.setAttribute("aria-hidden", "true");
-            stickerImage.src = assets.designFire || "./imag/Group 1940699208.png";
+            stickerImage.src = assets.designFire || "./imag/Group 1940699208.webp";
             stickerImage.alt = "";
             stickerImage.decoding = "async";
             sticker.appendChild(stickerImage);

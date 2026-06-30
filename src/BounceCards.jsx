@@ -30,9 +30,6 @@ export default function BounceCards({
   const resetTimerRef = useRef(null);
   const navigationTimerRef = useRef(null);
   const lastPointerTypeRef = useRef("mouse");
-  const tiltFrameRef = useRef(0);
-  const tiltPointRef = useRef(null);
-  const activeTiltRectRef = useRef(null);
   const [isMobileLayout, setIsMobileLayout] = useState(false);
   const [currentTransformStyles, setCurrentTransformStyles] = useState(transformStyles);
   const [raisedCardIndex, setRaisedCardIndex] = useState(null);
@@ -223,7 +220,6 @@ export default function BounceCards({
       window.clearTimeout(resetTimerRef.current);
     }
     resetTimerRef.current = window.setTimeout(() => {
-      resetCardTilt(idx);
       resetSiblings();
       setRaisedCardIndex(null);
       resetTimerRef.current = null;
@@ -236,58 +232,6 @@ export default function BounceCards({
   const openCardLink = (href) => {
     if (!href) return;
     window.location.assign(href);
-  };
-
-  const applyCardTilt = (idx, clientX, clientY) => {
-    if (!enableHover) return;
-    const target = getCardNode(idx);
-    if (!target) return;
-    const rect = activeTiltRectRef.current || target.getBoundingClientRect();
-    activeTiltRectRef.current = rect;
-    const edgeInset = 10;
-    const isInsideStableHoverZone =
-      clientX >= rect.left + edgeInset &&
-      clientX <= rect.right - edgeInset &&
-      clientY >= rect.top + edgeInset &&
-      clientY <= rect.bottom - edgeInset;
-
-    if (!isInsideStableHoverZone) {
-      resetCardTilt(idx);
-      return;
-    }
-
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    const rotateX = Math.max(
-      -10,
-      Math.min(10, ((clientY - centerY) / (rect.height / 2)) * -10)
-    );
-    const rotateY = Math.max(
-      -10,
-      Math.min(10, ((clientX - centerX) / (rect.width / 2)) * 10)
-    );
-    target.style.setProperty("--card-tilt-x", `${rotateX.toFixed(3)}deg`);
-    target.style.setProperty("--card-tilt-y", `${rotateY.toFixed(3)}deg`);
-    target.style.setProperty("--card-tilt-scale", "1.025");
-  };
-
-  const queueCardTilt = (idx, clientX, clientY) => {
-    tiltPointRef.current = { idx, clientX, clientY };
-    if (tiltFrameRef.current) return;
-    tiltFrameRef.current = window.requestAnimationFrame(() => {
-      tiltFrameRef.current = 0;
-      const point = tiltPointRef.current;
-      if (!point) return;
-      applyCardTilt(point.idx, point.clientX, point.clientY);
-    });
-  };
-
-  const resetCardTilt = (idx) => {
-    const target = getCardNode(idx);
-    if (!target) return;
-    target.style.setProperty("--card-tilt-x", "0deg");
-    target.style.setProperty("--card-tilt-y", "0deg");
-    target.style.setProperty("--card-tilt-scale", "1");
   };
 
   useEffect(() => {
@@ -312,9 +256,6 @@ export default function BounceCards({
       if (navigationTimerRef.current) {
         window.clearTimeout(navigationTimerRef.current);
       }
-      if (tiltFrameRef.current) {
-        window.cancelAnimationFrame(tiltFrameRef.current);
-      }
     };
   }, []);
 
@@ -338,14 +279,10 @@ export default function BounceCards({
             zIndex: raisedCardIndex === idx ? 8 : undefined,
           }}
           onMouseEnter={() => {
-            activeTiltRectRef.current = getCardNode(idx)?.getBoundingClientRect() || null;
             setRaisedCardIndex(idx);
             pushSiblings(idx);
           }}
-          onMouseMove={(event) => queueCardTilt(idx, event.clientX, event.clientY)}
           onMouseLeave={() => {
-            activeTiltRectRef.current = null;
-            resetCardTilt(idx);
             resetSiblings();
             setRaisedCardIndex(null);
           }}

@@ -44,6 +44,60 @@
       true
     );
 
+    const navLinks = wrap
+      ? Array.from(wrap.querySelectorAll('a[href^="#"]')).filter((link) => {
+          const href = link.getAttribute("href");
+          return href && href !== "#";
+        })
+      : [];
+    let activeNavTarget = null;
+    let activeNavTargetWasVisible = false;
+
+    const setActiveNavLink = (activeLink) => {
+      navLinks.forEach((link) => {
+        const isActive = link === activeLink;
+        if (isActive) link.setAttribute("aria-current", "page");
+        else link.removeAttribute("aria-current");
+      });
+    };
+
+    const clearActiveNavLink = () => {
+      activeNavTarget = null;
+      activeNavTargetWasVisible = false;
+      setActiveNavLink(null);
+    };
+
+    const isSectionInActiveView = (section) => {
+      if (!(section instanceof Element)) return false;
+      const rect = section.getBoundingClientRect();
+      const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+      return rect.top < viewportHeight * 0.72 && rect.bottom > viewportHeight * 0.28;
+    };
+
+    const syncActiveNavVisibility = () => {
+      if (!activeNavTarget) return;
+      const isVisible = isSectionInActiveView(activeNavTarget);
+      if (isVisible) {
+        activeNavTargetWasVisible = true;
+        return;
+      }
+      if (activeNavTargetWasVisible) {
+        clearActiveNavLink();
+      }
+    };
+
+    const syncActiveNavFromHash = () => {
+      if (!window.location.hash) return;
+      const activeLink = navLinks.find(
+        (link) => link.getAttribute("href") === window.location.hash
+      );
+      if (activeLink) {
+        activeNavTarget = queryElement(window.location.hash);
+        activeNavTargetWasVisible = activeNavTarget ? isSectionInActiveView(activeNavTarget) : false;
+        setActiveNavLink(activeLink);
+      }
+    };
+
     if (nav && toggle && wrap && nav.dataset.siteShellReady !== "true") {
       nav.dataset.siteShellReady = "true";
       let scrollFrame = null;
@@ -51,6 +105,7 @@
       const syncNavbarState = () => {
         const y = window.scrollY || window.pageYOffset;
         nav.classList.toggle("navbar--scrolled", y > navbarScrollThreshold);
+        syncActiveNavVisibility();
         scrollFrame = null;
       };
 
@@ -103,6 +158,7 @@
 
     if (document.body.dataset.anchorScrollReady === "true") return;
     document.body.dataset.anchorScrollReady = "true";
+    syncActiveNavFromHash();
 
     document.addEventListener("click", (event) => {
       if (!(event.target instanceof Element)) return;
@@ -125,6 +181,9 @@
       if (window.location.hash !== href) {
         window.history.replaceState(null, "", href);
       }
+      activeNavTarget = target;
+      activeNavTargetWasVisible = false;
+      setActiveNavLink(link);
     });
   }
 

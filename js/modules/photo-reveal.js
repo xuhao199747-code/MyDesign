@@ -36,19 +36,10 @@
 
       let revealRafId = null;
       let resizeTimer = null;
-      let hoverRect = null;
       let isRevealActive = true;
-      let tiltRafId = null;
-      let targetRotateX = 0;
-      let targetRotateY = 0;
       let cells = [];
 
       const gridSize = siteUtils.getNumberOption(photoRevealConfig, "gridSize", 25);
-      const mobileBreakpoint = siteUtils.getNumberOption(photoRevealConfig, "mobileBreakpoint", 768);
-      const tiltMax = siteUtils.getNumberOption(photoRevealConfig, "tiltMax", 12);
-      const perspective = siteUtils.getNumberOption(photoRevealConfig, "perspective", 1000);
-      const hoverScale = siteUtils.getNumberOption(photoRevealConfig, "hoverScale", 1.02);
-      const idleScale = siteUtils.getNumberOption(photoRevealConfig, "idleScale", 1);
       const hiddenCellScale = siteUtils.getNumberOption(photoRevealConfig, "hiddenCellScale", 0.6);
       const hiddenCellTranslateY = siteUtils.getNumberOption(
         photoRevealConfig,
@@ -153,55 +144,6 @@
         revealRafId = requestAnimationFrame(renderPhotoReveal);
       };
 
-      const updateTransform = () => {
-        const isIdle = targetRotateX === 0 && targetRotateY === 0;
-        const scale = isIdle ? idleScale : hoverScale;
-        photoImagesWrap.style.transform =
-          `perspective(${perspective}px) rotateX(${targetRotateX}deg) rotateY(${targetRotateY}deg) scale3d(${scale}, ${scale}, 1)`;
-        tiltRafId = null;
-      };
-
-      const resetPhotoTilt = () => {
-        targetRotateX = 0;
-        targetRotateY = 0;
-        if (!tiltRafId) {
-          tiltRafId = requestAnimationFrame(updateTransform);
-        }
-      };
-
-      const handleMouseMove = (event) => {
-        const rect = hoverRect || hoverHitbox.getBoundingClientRect();
-        const edgeInset =
-          window.innerWidth <= mobileBreakpoint
-            ? siteUtils.getNumberOption(photoRevealConfig, "mobileEdgeInset", 14)
-            : siteUtils.getNumberOption(photoRevealConfig, "desktopEdgeInset", 14);
-        const isInsideStableHoverZone =
-          event.clientX >= rect.left + edgeInset &&
-          event.clientX <= rect.right - edgeInset &&
-          event.clientY >= rect.top + edgeInset &&
-          event.clientY <= rect.bottom - edgeInset;
-
-        if (!isInsideStableHoverZone) {
-          resetPhotoTilt();
-          return;
-        }
-
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2;
-        targetRotateX = Math.max(
-          -tiltMax,
-          Math.min(tiltMax, ((event.clientY - centerY) / (rect.height / 2)) * -tiltMax)
-        );
-        targetRotateY = Math.max(
-          -tiltMax,
-          Math.min(tiltMax, ((event.clientX - centerX) / (rect.width / 2)) * tiltMax)
-        );
-
-        if (!tiltRafId) {
-          tiltRafId = requestAnimationFrame(updateTransform);
-        }
-      };
-
       buildRevealGrid();
       requestPhotoReveal();
 
@@ -234,15 +176,6 @@
         );
         revealObserver.observe(photoSection);
       }
-
-      hoverHitbox.addEventListener("pointerenter", () => {
-        hoverRect = hoverHitbox.getBoundingClientRect();
-      });
-      hoverHitbox.addEventListener("mousemove", handleMouseMove);
-      hoverHitbox.addEventListener("mouseleave", () => {
-        hoverRect = null;
-        resetPhotoTilt();
-      });
 
       if (photoLinkHref) {
         const openPhotoLink = () => {

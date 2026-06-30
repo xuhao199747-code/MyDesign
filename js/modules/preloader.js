@@ -54,8 +54,13 @@
 
     const waitForAllResources = preloaderConfig.waitForAllResources !== false;
     const allResources = [...new Set([...criticalResources, ...nonCriticalResources])];
+    const criticalResourceSet = new Set(criticalResources);
+    const blockingResources = waitForAllResources ? allResources : [...new Set(criticalResources)];
+    const backgroundResources = waitForAllResources
+      ? []
+      : allResources.filter((url) => !criticalResourceSet.has(url));
     let loadedCount = 0;
-    const totalCount = allResources.length;
+    const totalCount = blockingResources.length;
     let hasHidden = false;
     let resourcesReady = false;
     let bootReady = Boolean(window.__siteBootStatus?.completedAt);
@@ -94,6 +99,7 @@
     };
 
     const updateProgressTarget = (nextProgress) => {
+      if (hasHidden) return;
       targetProgress = Math.max(targetProgress, Math.min(100, nextProgress));
       if (!progressFrame) {
         progressFrame = requestAnimationFrame(animateProgress);
@@ -123,8 +129,11 @@
 
     const hidePreloader = () => {
       if (!preloader || hasHidden) return;
-      hasHidden = true;
       updateProgressTarget(100);
+      displayedProgress = 100;
+      targetProgress = 100;
+      renderProgress(100);
+      hasHidden = true;
       preloader.classList.add("preloader--hidden");
       setTimeout(() => {
         preloader.remove();
@@ -293,8 +302,7 @@
         { once: true }
       );
 
-      // 并行加载所有资源；默认必须全量结算后才允许进入页面。
-      const loadPromises = allResources.map((url) =>
+      const loadBlockingResources = blockingResources.map((url) =>
         loadResource(url).then(() => {
           loadedCount++;
           updateProgress();
@@ -302,7 +310,7 @@
       );
 
       if (waitForAllResources) {
-        await Promise.all(loadPromises);
+        await Promise.all(loadBlockingResources);
         loadedCount = totalCount;
         if (failedResources.length) {
           console.warn("[preloader] some resources failed to load", failedResources);
@@ -313,18 +321,27 @@
         return;
       }
 
-      // 兼容模式：关键资源到位后即可进入页面；非关键资源继续后台加载。
-      await Promise.all(criticalResources.map((url) => loadResource(url)));
+      // 优化模式：只等待首屏关键资源；其他素材在页面可进入后空闲加载。
+      await Promise.all(loadBlockingResources);
       resourcesReady = true;
       updateProgress();
       tryHidePreloader();
-      Promise.all(loadPromises).then(() => {
-        loadedCount = totalCount;
-        updateProgress();
-        if (failedResources.length) {
-          console.warn("[preloader] some resources failed to load", failedResources);
-        }
-      });
+
+      if (!backgroundResources.length) return;
+
+      const loadBackgroundResources = () => {
+        Promise.all(backgroundResources.map((url) => loadResource(url))).then(() => {
+          if (failedResources.length) {
+            console.warn("[preloader] some resources failed to load", failedResources);
+          }
+        });
+      };
+
+      if ("requestIdleCallback" in window) {
+        window.requestIdleCallback(loadBackgroundResources, { timeout: 2200 });
+        return;
+      }
+      window.setTimeout(loadBackgroundResources, 450);
     };
 
     if (document.readyState === "loading") {

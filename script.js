@@ -57,6 +57,15 @@ const moduleOptionFactories = {
 };
 
 const moduleBootOrder = Object.keys(moduleOptionFactories);
+const deferredModuleTargets = {
+  initPhotoRevealModule: "#photo",
+  initWorksSwipePreviewModule: ".works-swipe-section",
+  initPortfolioInfiniteCardsModule: "#portfolio-copy",
+  initMoreWorkCardsModule: "#portfolio-copy",
+  initPortfolioFeaturedModule: "#portfolio-featured",
+  initLogoPhysicsModule: "#about",
+};
+const initializedModules = new Set();
 
 const bootStatus = {
   startedAt: Date.now(),
@@ -93,7 +102,8 @@ const recordBootStatus = (moduleName, status, detail = "") => {
   }
 };
 
-moduleBootOrder.forEach((moduleName) => {
+const initSiteModule = (moduleName) => {
+  if (initializedModules.has(moduleName)) return;
   const initModule = siteModules[moduleName];
   const options = moduleOptionFactories[moduleName]?.() || {};
   if (typeof initModule !== "function") {
@@ -103,6 +113,7 @@ moduleBootOrder.forEach((moduleName) => {
 
   try {
     initModule(options);
+    initializedModules.add(moduleName);
     recordBootStatus(moduleName, "initialized");
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
@@ -112,6 +123,41 @@ moduleBootOrder.forEach((moduleName) => {
       throw error;
     }
   }
+};
+
+const initModuleWhenNear = (moduleName, targetSelector) => {
+  const target = document.querySelector(targetSelector);
+  if (!target || !("IntersectionObserver" in window)) {
+    initSiteModule(moduleName);
+    return;
+  }
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      const [entry] = entries;
+      if (!entry?.isIntersecting) return;
+      observer.disconnect();
+      initSiteModule(moduleName);
+    },
+    {
+      root: null,
+      rootMargin: "55% 0px 55% 0px",
+      threshold: 0,
+    }
+  );
+
+  observer.observe(target);
+  recordBootStatus(moduleName, "deferred", targetSelector);
+};
+
+moduleBootOrder.forEach((moduleName) => {
+  const targetSelector = deferredModuleTargets[moduleName];
+  if (targetSelector) {
+    initModuleWhenNear(moduleName, targetSelector);
+    return;
+  }
+
+  initSiteModule(moduleName);
 });
 
 bootStatus.completedAt = Date.now();
@@ -130,8 +176,11 @@ if (bootConfig.logSummary === true) {
 }
 
 (() => {
-  const trigger = document.querySelector('[data-shell-node="wechat-trigger"]');
-  const footerTrigger = document.querySelector('[data-shell-node="wechat-footer-trigger"]');
+  const triggerSelector =
+    '[data-shell-node="wechat-trigger"], [data-shell-node="wechat-footer-trigger"]';
+  const getTrigger = () => document.querySelector('[data-shell-node="wechat-trigger"]');
+  const getFooterTrigger = () => document.querySelector('[data-shell-node="wechat-footer-trigger"]');
+  const trigger = getTrigger();
   const drop = document.getElementById("navWechatDrop");
   if (!trigger || !drop || drop.dataset.wechatDropControllerReady === "true") return;
 
@@ -142,12 +191,13 @@ if (bootConfig.logSummary === true) {
   let closeTimer = null;
 
   const syncTriggerState = (expanded) => {
-    trigger.setAttribute("aria-expanded", expanded);
-    footerTrigger?.setAttribute("aria-expanded", expanded);
+    getTrigger()?.setAttribute("aria-expanded", expanded);
+    getFooterTrigger()?.setAttribute("aria-expanded", expanded);
   };
 
   const updatePosition = () => {
-    const rect = trigger.getBoundingClientRect();
+    const currentTrigger = getTrigger() || trigger;
+    const rect = currentTrigger.getBoundingClientRect();
     drop.style.setProperty("--wechat-drop-x", `${rect.left + rect.width / 2}px`);
     drop.style.setProperty("--wechat-drop-y", `${rect.bottom}px`);
   };
@@ -216,7 +266,8 @@ if (bootConfig.logSummary === true) {
       return false;
     }
 
-    const rect = trigger.getBoundingClientRect();
+    const currentTrigger = getTrigger() || trigger;
+    const rect = currentTrigger.getBoundingClientRect();
     return (
       event.clientX >= rect.left &&
       event.clientX <= rect.right &&
@@ -225,14 +276,19 @@ if (bootConfig.logSummary === true) {
     );
   };
 
-  trigger.setAttribute("aria-haspopup", "dialog");
-  footerTrigger?.setAttribute("aria-haspopup", "dialog");
+  getTrigger()?.setAttribute("aria-haspopup", "dialog");
+  getFooterTrigger()?.setAttribute("aria-haspopup", "dialog");
   syncTriggerState("false");
   window.__toggleNavWechatCard = toggleCard;
   window.__closeNavWechatCard = closeCard;
 
-  trigger.addEventListener("click", toggleCard);
-  footerTrigger?.addEventListener("click", toggleCard);
+  document.addEventListener("click", (event) => {
+    if (!(event.target instanceof Element)) return;
+    const clickedTrigger = event.target.closest(triggerSelector);
+    if (!clickedTrigger) return;
+    event.stopImmediatePropagation?.();
+    toggleCard(event);
+  }, true);
 
   document.addEventListener(
     "click",
@@ -241,7 +297,8 @@ if (bootConfig.logSummary === true) {
       const target = event.target;
       if (!(target instanceof Element)) return;
       const navLink = target.closest(".navbar a");
-      if (!navLink || navLink === trigger || navLink.contains(trigger)) return;
+      const currentTrigger = getTrigger() || trigger;
+      if (!navLink || navLink === currentTrigger || navLink.contains(currentTrigger)) return;
       closeCard();
     },
     true
@@ -271,9 +328,11 @@ if (bootConfig.logSummary === true) {
   });
 
   document.addEventListener("click", (event) => {
+    const currentTrigger = getTrigger() || trigger;
+    const footerTrigger = getFooterTrigger();
     if (
       !isOpen ||
-      trigger.contains(event.target) ||
+      currentTrigger.contains(event.target) ||
       footerTrigger?.contains(event.target)
     ) {
       return;
@@ -292,6 +351,7 @@ if (bootConfig.logSummary === true) {
   let targetX = 0;
   let targetY = 0;
   let targetRotate = 0;
+  let isHeroVisible = true;
 
   const applyAvatarMotion = () => {
     frame = null;
@@ -304,9 +364,29 @@ if (bootConfig.logSummary === true) {
     if (!frame) frame = window.requestAnimationFrame(applyAvatarMotion);
   };
 
+  const resetAvatarMotion = () => {
+    targetX = 0;
+    targetY = 0;
+    targetRotate = 0;
+    scheduleAvatarMotion();
+  };
+
+  if ("IntersectionObserver" in window) {
+    const heroObserver = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        isHeroVisible = Boolean(entry?.isIntersecting);
+        if (!isHeroVisible) resetAvatarMotion();
+      },
+      { root: null, rootMargin: "0px", threshold: 0 }
+    );
+    heroObserver.observe(hero);
+  }
+
   hero.addEventListener(
     "pointermove",
     (event) => {
+      if (!isHeroVisible) return;
       const rect = hero.getBoundingClientRect();
       const relX = (event.clientX - rect.left) / rect.width - 0.5;
       const relY = (event.clientY - rect.top) / rect.height - 0.5;
@@ -321,12 +401,7 @@ if (bootConfig.logSummary === true) {
 
   hero.addEventListener(
     "pointerleave",
-    () => {
-      targetX = 0;
-      targetY = 0;
-      targetRotate = 0;
-      scheduleAvatarMotion();
-    },
+    resetAvatarMotion,
     { passive: true }
   );
 })();

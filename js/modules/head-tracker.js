@@ -100,12 +100,12 @@
       }
       const image = new Image();
       image.decoding = "async";
-      image.src = src;
       return image;
     });
 
     const spriteReady = new Set();
     const spriteBitmaps = new Map();
+    const spriteRequested = new Set();
     const headTrackerMath = siteHelpers.createHeadTrackerMath({
       frameCount,
       angleKeys,
@@ -128,8 +128,9 @@
     };
 
     const prewarmFrame = (frame) => {
-      if (!prewarmContext) return;
       const sheetIndex = Math.floor(frame / framesPerSheet);
+      loadSpriteImage(sheetIndex);
+      if (!prewarmContext) return;
       const sheetFrame = frame % framesPerSheet;
       const spriteSource = spriteBitmaps.get(sheetIndex) || spriteImages[sheetIndex];
       if (!spriteSource || !spriteReady.has(sheetIndex)) return;
@@ -151,6 +152,7 @@
 
     const drawFrame = (frame) => {
       const sheetIndex = Math.floor(frame / framesPerSheet);
+      loadSpriteImage(sheetIndex);
       const sheetFrame = frame % framesPerSheet;
       const spriteSource = spriteBitmaps.get(sheetIndex) || spriteImages[sheetIndex];
       if (!spriteSource || !spriteReady.has(sheetIndex)) return false;
@@ -266,8 +268,23 @@
       }),
     };
 
+    const loadSpriteImage = (index) => {
+      if (index < 0 || index >= spriteImages.length || spriteRequested.has(index)) return;
+      spriteRequested.add(index);
+      const image = spriteImages[index];
+      if (!image || image.src) return;
+      image.src = spriteSrcs[index];
+    };
+
+    const loadRemainingSprites = () => {
+      spriteImages.forEach((_image, index) => {
+        if (index > 0) loadSpriteImage(index);
+      });
+    };
+
     spriteImages.forEach((image, index) => {
       const isFromCache = preloadedCache.has(spriteSrcs[index]);
+      if (isFromCache) spriteRequested.add(index);
       const markReady = async () => {
         if (!isFromCache) {
           try {
@@ -299,6 +316,9 @@
         }
 
         spriteReady.add(index);
+        if (index === 0) {
+          runWhenIdle(loadRemainingSprites);
+        }
         runWhenIdle(() => {
           const start = index * framesPerSheet;
           [0, 15, 30, 45, 59].forEach((offset) => {
@@ -310,9 +330,10 @@
       };
 
       image.addEventListener("load", markReady, { once: true });
-      if (image.complete) markReady();
+      if (isFromCache || (image.src && image.complete)) markReady();
     });
 
+    loadSpriteImage(Math.floor(frontFrame / framesPerSheet));
     setFrame(frontFrame, "center");
 
     if ("IntersectionObserver" in window) {
@@ -336,7 +357,10 @@
 
     homeSection.addEventListener(
       "pointermove",
-      (event) => queueUpdateFromPoint(event.clientX, event.clientY),
+      (event) => {
+        loadRemainingSprites();
+        queueUpdateFromPoint(event.clientX, event.clientY);
+      },
       { passive: true }
     );
     homeSection.addEventListener(

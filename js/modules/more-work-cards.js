@@ -13,69 +13,58 @@
   function initMoreWorkCardsModule() {
     const cards = queryElements(".more-work-card");
     if (!cards.length) return;
-    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const visibleCards = new Set();
+
+    const syncCardTextMetrics = (card) => {
+      const surface = card.querySelector(".more-work-card__surface");
+      if (!surface) return;
+      const pseudoBefore = getComputedStyle(surface, "::before");
+      const surfaceWidth = surface.getBoundingClientRect().width || card.getBoundingClientRect().width || 280;
+      const titleHeight = parseFloat(pseudoBefore.fontSize) || 24;
+      const desc = surface.dataset.cardDesc?.trim() || "";
+      const descFontSize = 14;
+      const descLineHeight = Math.ceil(descFontSize * 1.32);
+      const descMeasure = document.createElement("canvas").getContext("2d");
+      if (descMeasure) {
+        descMeasure.font =
+          '400 14px -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif';
+      }
+      const measuredDescWidth = descMeasure
+        ? descMeasure.measureText(desc).width
+        : Array.from(desc).reduce((total, char) => total + (/[\u4e00-\u9fa5]/.test(char) ? 14 : 7), 0);
+      const descMaxWidth = Math.max(1, surfaceWidth - 32);
+      const descLines = Math.max(1, Math.min(4, Math.ceil(measuredDescWidth / descMaxWidth)));
+      const descHeight = descLines * descLineHeight;
+      card.style.setProperty("--more-card-title-height", `${Math.ceil(titleHeight)}px`);
+      card.style.setProperty("--more-card-desc-height", `${descHeight}px`);
+    };
 
     cards.forEach((card, index) => {
       if (card.dataset.moreWorkReady === "true") return;
       card.dataset.moreWorkReady = "true";
       card.style.setProperty("--more-card-index", String(index));
-      const surface = card.querySelector(".more-work-card__surface");
-      const desc = surface?.dataset.cardDesc?.trim() || "";
-      const descUnits = Array.from(desc).reduce((total, char) => {
-        return total + (/[\u4e00-\u9fa5，。！？、；：]/.test(char) ? 1 : 0.55);
-      }, 0);
-      const descLines = Math.max(1, Math.min(4, Math.ceil(descUnits / 17)));
-      card.style.setProperty("--more-card-desc-height", `${descLines * 18}px`);
-      if (reduceMotion) return;
-      let pendingPointerEvent = null;
-      let tiltFrame = 0;
-
-      const applyTiltFromPointer = (event) => {
-        const rect = card.getBoundingClientRect();
-        const x = (event.clientX - rect.left) / rect.width - 0.5;
-        const y = (event.clientY - rect.top) / rect.height - 0.5;
-        card.style.setProperty("--more-card-ry", `${x * 7}deg`);
-        card.style.setProperty("--more-card-rx", `${y * -6}deg`);
-      };
-
-      const setTiltFromPointer = (event) => {
-        pendingPointerEvent = event;
-        if (tiltFrame) return;
-        tiltFrame = requestAnimationFrame(() => {
-          tiltFrame = 0;
-          if (pendingPointerEvent) applyTiltFromPointer(pendingPointerEvent);
-        });
-      };
-
-      const resetTilt = () => {
-        if (tiltFrame) {
-          cancelAnimationFrame(tiltFrame);
-          tiltFrame = 0;
-        }
-        pendingPointerEvent = null;
-        card.classList.remove("is-pointer-active");
-        card.style.setProperty("--more-card-rx", "0deg");
-        card.style.setProperty("--more-card-ry", "0deg");
-      };
-
-      card.addEventListener("pointerenter", (event) => {
-        card.classList.add("is-pointer-active");
-        setTiltFromPointer(event);
-      });
-      card.addEventListener("pointermove", setTiltFromPointer);
-      card.addEventListener("pointerleave", resetTilt);
-      card.addEventListener("pointercancel", resetTilt);
+      syncCardTextMetrics(card);
     });
+
+    window.addEventListener(
+      "resize",
+      () => cards.forEach(syncCardTextMetrics),
+      { passive: true }
+    );
 
     const revealObserver = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             entry.target.classList.add("is-visible");
+            visibleCards.add(entry.target);
+            requestScrollDrift();
+          } else {
+            visibleCards.delete(entry.target);
           }
         });
       },
-      { threshold: 0.18, rootMargin: "0px 0px -8% 0px" }
+      { threshold: 0.08, rootMargin: "24% 0px 24% 0px" }
     );
 
     cards.forEach((card) => revealObserver.observe(card));
@@ -83,7 +72,9 @@
     let ticking = false;
     const updateScrollDrift = () => {
       ticking = false;
-      cards.forEach((card, index) => {
+      const cardsToUpdate = visibleCards.size ? Array.from(visibleCards) : [];
+      cardsToUpdate.forEach((card) => {
+        const index = cards.indexOf(card);
         const rect = card.getBoundingClientRect();
         const viewportCenter = window.innerHeight * 0.5;
         const cardCenter = rect.top + rect.height * 0.5;
@@ -95,12 +86,12 @@
     };
 
     const requestScrollDrift = () => {
+      if (!visibleCards.size) return;
       if (ticking) return;
       ticking = true;
       requestAnimationFrame(updateScrollDrift);
     };
 
-    updateScrollDrift();
     window.addEventListener("scroll", requestScrollDrift, { passive: true });
     window.addEventListener("resize", requestScrollDrift, { passive: true });
   }

@@ -70,10 +70,9 @@
     let stepFallbackTimer = null;
     let gestureActiveTimer = null;
     let resizeTimer = null;
-    let activeTiltCell = null;
-    let activeTiltRect = null;
     let isPointerInsideRoot = false;
     let isTouchGestureActive = false;
+    let isFeaturedVisible = true;
     let pressedCell = null;
     let pressedCellHref = "";
     let shouldNavigateOnPointerUp = false;
@@ -183,6 +182,11 @@
       if (motionFrame) {
         window.cancelAnimationFrame(motionFrame);
       }
+      if (!isFeaturedVisible) {
+        motionFrame = null;
+        updateCellMotion();
+        return;
+      }
       const endAt = performance.now() + duration;
       const tick = () => {
         updateCellMotion();
@@ -284,13 +288,6 @@
       }, siteUtils.getNumberOption(featuredConfig, "stepFallbackMs", 1240));
     }
 
-    const resetTilt = (cell) => {
-      if (!cell) return;
-      cell.style.setProperty("--featured-tilt-x", "0deg");
-      cell.style.setProperty("--featured-tilt-y", "0deg");
-      cell.style.setProperty("--featured-tilt-scale", "1");
-    };
-
     const getRoundedRectRadius = (element, propertyName, fallback = 0) => {
       if (!(element instanceof HTMLElement)) return fallback;
       const value = Number.parseFloat(window.getComputedStyle(element)[propertyName]);
@@ -391,72 +388,6 @@
       if (dragMoved || !isSafeClick) {
         event.preventDefault();
       }
-    });
-
-    track.addEventListener("pointermove", (event) => {
-      if (isPointerDown || dragMoved) return;
-      if (!(event.target instanceof Element)) return;
-
-      const cell = event.target.closest(".portfolio-featured__cell");
-      if (!(cell instanceof HTMLElement)) {
-        if (activeTiltCell) {
-          resetTilt(activeTiltCell);
-          activeTiltCell = null;
-          activeTiltRect = null;
-        }
-        return;
-      }
-
-      if (activeTiltCell !== cell) {
-        resetTilt(activeTiltCell);
-        activeTiltCell = cell;
-        activeTiltRect = cell.getBoundingClientRect();
-      } else if (!activeTiltRect) {
-        activeTiltRect = cell.getBoundingClientRect();
-      }
-
-      const edgeInset = siteUtils.getNumberOption(featuredConfig, "edgeInset", 14);
-      const isInsideStableHoverZone = isPointInsideInteractiveZone(
-        cell,
-        event.clientX,
-        event.clientY,
-        edgeInset
-      );
-
-      if (!isInsideStableHoverZone) {
-        resetTilt(cell);
-        return;
-      }
-
-      const centerX = activeTiltRect.left + activeTiltRect.width / 2;
-      const centerY = activeTiltRect.top + activeTiltRect.height / 2;
-      const tiltMax = siteUtils.getNumberOption(featuredConfig, "tiltMax", 10);
-      const rotateX = Math.max(
-        -tiltMax,
-        Math.min(
-          tiltMax,
-          ((event.clientY - centerY) / (activeTiltRect.height / 2)) * -tiltMax
-        )
-      );
-      const rotateY = Math.max(
-        -tiltMax,
-        Math.min(
-          tiltMax,
-          ((event.clientX - centerX) / (activeTiltRect.width / 2)) * tiltMax
-        )
-      );
-      cell.style.setProperty("--featured-tilt-x", `${rotateX.toFixed(3)}deg`);
-      cell.style.setProperty("--featured-tilt-y", `${rotateY.toFixed(3)}deg`);
-      cell.style.setProperty(
-        "--featured-tilt-scale",
-        String(siteUtils.getNumberOption(featuredConfig, "tiltScale", 1.02))
-      );
-    });
-
-    track.addEventListener("pointerleave", () => {
-      resetTilt(activeTiltCell);
-      activeTiltCell = null;
-      activeTiltRect = null;
     });
 
     prevButton?.addEventListener("click", () => stepFeaturedShowcase(-1));
@@ -620,7 +551,6 @@
         targetCell instanceof HTMLElement &&
         !isPointInsideInteractiveZone(targetCell, event.clientX, event.clientY, pressInset)
       ) {
-        resetTilt(targetCell);
         return;
       }
       isPointerDown = true;
@@ -833,6 +763,27 @@
       window.setTimeout(recenter, 120);
       window.setTimeout(recenter, 320);
     };
+
+    if ("IntersectionObserver" in window) {
+      const featuredVisibilityObserver = new IntersectionObserver(
+        (entries) => {
+          const [entry] = entries;
+          isFeaturedVisible = Boolean(entry?.isIntersecting);
+          if (isFeaturedVisible) {
+            updateCellMotion();
+          } else if (motionFrame) {
+            window.cancelAnimationFrame(motionFrame);
+            motionFrame = null;
+          }
+        },
+        {
+          root: null,
+          rootMargin: "24% 0px 24% 0px",
+          threshold: 0,
+        }
+      );
+      featuredVisibilityObserver.observe(root);
+    }
 
     const initWithDelay = () => {
       let remainingFrames = Math.max(

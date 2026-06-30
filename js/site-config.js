@@ -16,7 +16,7 @@
       slug: "profile",
       title: "Profile",
       category: "VIBE CODING",
-      image: "./imag/photo1.png",
+      image: "./imag/photo1.webp",
       summary: "个人展示页与信息架构整理，聚焦视觉表达、身份识别和内容层级。",
       description:
         "这个项目围绕个人主页的视觉呈现展开，重点优化了首屏识别、内容编排和品牌语气，让用户在短时间内理解角色定位与作品方向。",
@@ -46,7 +46,7 @@
       slug: "portrait",
       title: "Portrait",
       category: "VIBE CODING",
-      image: "./imag/photo2.png",
+      image: "./imag/photo2.webp",
       summary: "视觉实验型人物展示页，强调图像裁切、氛围塑造和轻交互反馈。",
       description:
         "Portrait 项目通过人物影像和轻量动效的组合强化氛围表达，在不打断阅读的前提下增加页面记忆点，适合用于品牌或设计展示场景。",
@@ -72,32 +72,28 @@
     "./imag/logo/logo15.webp",
     "./imag/logo/logo16.webp",
     "./imag/logo/logo17.webp",
-    "./imag/logo/logo18.png",
-    "./imag/logo/logo19.png",
+    "./imag/logo/logo18.webp",
+    "./imag/logo/logo19.webp",
   ];
 
   const heroCriticalResources = [
     "./imag/frame_front.webp",
-    "./imag/sprite.webp",
-    "./imag/sprite_2.webp",
-    "./imag/sprite_3.webp",
-    "./imag/sprite_4.webp",
   ];
 
   const sharedImageResources = [
     ...new Set([
       ...projectCatalog.map((item) => item.image).filter(Boolean),
-      "./imag/Frame 2085668692.png",
-      "./imag/Group 1940698323.png",
-      "./imag/Group 1940699207.png",
-      "./imag/Group 1940699208.png",
-      "./imag/Group 1940699211.png",
-      "./imag/Bottom information.png",
-      "./imag/photo Top.png",
-      "./imag/design top.png",
-      "./imag/xuhao-main-avatar.png",
+      "./imag/Frame 2085668692.webp",
+      "./imag/Group 1940698323.webp",
+      "./imag/Group 1940699207.webp",
+      "./imag/Group 1940699208.webp",
+      "./imag/Group 1940699211.webp",
+      "./imag/Bottom information.webp",
+      "./imag/photo Top.webp",
+      "./imag/design top.webp",
+      "./imag/xuhao-main-avatar.webp",
       "./imag/wechat-qr-placeholder.svg",
-      "./imag/灯泡 1.png",
+      "./imag/灯泡 1.webp",
       ...logoItems,
     ]),
   ];
@@ -201,7 +197,7 @@
     preloader: {
       criticalResources: heroCriticalResources,
       nonCriticalResources: [...sharedImageResources, ...sharedFontResources],
-      waitForAllResources: true,
+      waitForAllResources: false,
       phrases: [
         "Please wait a moment.",
         "Loading the full experience.",
@@ -215,19 +211,12 @@
       typeBackwardMs: 24,
     },
 
-    // Photo card reveal and tilt interaction.
+    // Photo card reveal interaction.
     photoReveal: {
       gridSize: 25,
       revealStartViewportRatio: 0.72,
       revealEndViewportRatio: -0.18,
       revealEasePower: 2.6,
-      mobileBreakpoint: 768,
-      mobileEdgeInset: 14,
-      desktopEdgeInset: 14,
-      tiltMax: 12,
-      perspective: 1000,
-      hoverScale: 1.02,
-      idleScale: 1,
       hiddenCellScale: 0.6,
       hiddenCellTranslateY: 10,
     },
@@ -243,8 +232,8 @@
         introFocusPrefix: "专注于设计和构建",
         introFocusProducts: "数字产品🌐、",
         introFocusBrand: "品牌和体验❤️。",
-        introAvatarSrc: "./imag/Frame 2085668692.png",
-        introEmojiSrc: "./imag/Group 1940698323.png",
+        introAvatarSrc: "./imag/Frame 2085668692.webp",
+        introEmojiSrc: "./imag/Group 1940698323.webp",
       },
       photo: {
         metaLeftLabel: "BASED",
@@ -378,8 +367,6 @@
       desktopDragSensitivity: 1,
       wheelDeltaThreshold: 4,
       edgeInset: 14,
-      tiltMax: 10,
-      tiltScale: 1.02,
       mobileRotationStrength: 0.056,
       desktopRotationStrength: 0.042,
       mobileRotationLimit: 32,
@@ -427,10 +414,10 @@
       ],
       rotatePattern: [-5, 4, -2, 5, -4, 3],
       assets: {
-        workFace: "./imag/Group 1940699207.png",
-        resumeEyes: "./imag/Group 1940699211.png",
-        lightBulb: "./imag/灯泡 1.png",
-        designFire: "./imag/Group 1940699208.png",
+        workFace: "./imag/Group 1940699207.webp",
+        resumeEyes: "./imag/Group 1940699211.webp",
+        lightBulb: "./imag/灯泡 1.webp",
+        designFire: "./imag/Group 1940699208.webp",
       },
     },
 

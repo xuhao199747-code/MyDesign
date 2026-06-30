@@ -1,7 +1,7 @@
 import { createRoot } from "react-dom/client";
 import Lanyard from "./components/Lanyard/Lanyard.jsx";
 
-import backPhoto from "../imag/photo1.png?url";
+import backPhoto from "../imag/photo1.webp?url";
 import wechatCard from "../imag/wechat-qr-placeholder.svg?url";
 
 export function mountNavWechatLanyard() {

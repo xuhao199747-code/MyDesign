@@ -57,6 +57,7 @@
     let frameId = null;
     let renderFrameId = null;
     let lastRenderTime = 0;
+    let isHomeActive = true;
     const textData = new Map();
 
     heroTexts.forEach((text) => {
@@ -538,6 +539,10 @@
     };
 
     const renderTexts = (time) => {
+      if (!isHomeActive) {
+        renderFrameId = null;
+        return;
+      }
       const frameInterval = 1000 / FPS;
       if (!lastRenderTime || time - lastRenderTime >= frameInterval) {
         heroTexts.forEach((text) => {
@@ -550,7 +555,20 @@
       renderFrameId = requestAnimationFrame(renderTexts);
     };
 
+    const startRenderLoop = () => {
+      if (renderFrameId) return;
+      lastRenderTime = 0;
+      renderFrameId = requestAnimationFrame(renderTexts);
+    };
+
+    const stopRenderLoop = () => {
+      if (!renderFrameId) return;
+      cancelAnimationFrame(renderFrameId);
+      renderFrameId = null;
+    };
+
     const handleMouseMove = (e) => {
+      if (!isHomeActive) return;
       heroTexts.forEach((text) => {
         const rect = text.getBoundingClientRect();
         const centerX = rect.left + rect.width / 2;
@@ -566,7 +584,7 @@
       }
     };
 
-    const resetMouseTargets = () => {
+    const resetMouseTargets = (shouldAnimate = true) => {
       heroTexts.forEach((text) => {
         const data = textData.get(text);
         if (!data) return;
@@ -574,7 +592,7 @@
         data.targetY = 0;
       });
 
-      if (!frameId) {
+      if (shouldAnimate && !frameId) {
         frameId = requestAnimationFrame(animate);
       }
     };
@@ -635,7 +653,25 @@
       });
     });
 
-    renderFrameId = requestAnimationFrame(renderTexts);
+    if ("IntersectionObserver" in window) {
+      const homeObserver = new IntersectionObserver(
+        (entries) => {
+          const [entry] = entries;
+          isHomeActive = Boolean(entry?.isIntersecting);
+          if (isHomeActive) {
+            startRenderLoop();
+            return;
+          }
+          resetMouseTargets(false);
+          stopRenderLoop();
+        },
+        { root: null, rootMargin: "0px", threshold: 0 }
+      );
+      homeObserver.observe(homeSection);
+    } else {
+      startRenderLoop();
+    }
+
     homeSection.addEventListener("mousemove", handleMouseMove, { passive: true });
     homeSection.addEventListener("mouseleave", resetMouseTargets, { passive: true });
   }

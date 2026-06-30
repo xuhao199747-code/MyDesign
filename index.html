@@ -13,12 +13,8 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="./styles.css" />
-    <!-- 关键首屏资源预加载：让浏览器尽早下载 sprite 精灵图 -->
+    <!-- 关键首屏资源预加载：只提前下载首屏静态兜底图，重型 sprite 交给模块按需加载 -->
     <link rel="preload" as="image" href="./imag/frame_front.webp" />
-    <link rel="preload" as="image" href="./imag/sprite.webp" />
-    <link rel="preload" as="image" href="./imag/sprite_2.webp" />
-    <link rel="preload" as="image" href="./imag/sprite_3.webp" />
-    <link rel="preload" as="image" href="./imag/sprite_4.webp" />
     <link rel="preload" as="font" href="./font/ArchivoBlack-Regular.ttf" crossorigin />
     <link rel="preload" as="font" href="./font/LuckiestGuy-Regular.ttf" crossorigin />
   </head>
@@ -177,7 +173,7 @@
             <img
               data-section-node="about-intro-avatar"
               class="section-two-intro__sticker section-two-intro__sticker--avatar inline-block h-[1.46em] w-[1.46em] object-contain align-[-0.14em]"
-              src="./imag/Frame 2085668692.png"
+              src="./imag/Frame 2085668692.webp"
               alt=""
               loading="lazy"
               decoding="async"
@@ -186,7 +182,7 @@
             <img
               data-section-node="about-intro-emoji"
               class="section-two-intro__sticker section-two-intro__sticker--emoji inline-block h-[1.1em] w-[1.1em] object-contain align-[-0.1em]"
-              src="./imag/Group 1940698323.png"
+              src="./imag/Group 1940698323.webp"
               alt=""
               loading="lazy"
               decoding="async"
@@ -214,8 +210,8 @@
           <img class="absolute left-0 top-0 block h-16 w-16 object-contain opacity-0 [transform:translate3d(0,-260px,0)_rotate(-8deg)] [will-change:transform,opacity]" src="./imag/logo/logo15.webp" alt="工具图标 15" loading="lazy" decoding="async" />
           <img class="absolute left-0 top-0 block h-16 w-16 object-contain opacity-0 [transform:translate3d(0,-260px,0)_rotate(-8deg)] [will-change:transform,opacity]" src="./imag/logo/logo16.webp" alt="工具图标 16" loading="lazy" decoding="async" />
           <img class="absolute left-0 top-0 block h-16 w-16 object-contain opacity-0 [transform:translate3d(0,-260px,0)_rotate(-8deg)] [will-change:transform,opacity]" src="./imag/logo/logo17.webp" alt="工具图标 17" loading="lazy" decoding="async" />
-          <img class="absolute left-0 top-0 block h-16 w-16 object-contain opacity-0 [transform:translate3d(0,-260px,0)_rotate(-8deg)] [will-change:transform,opacity]" src="./imag/logo/logo18.png" alt="工具图标 18" loading="lazy" decoding="async" />
-          <img class="absolute left-0 top-0 block h-16 w-16 object-contain opacity-0 [transform:translate3d(0,-260px,0)_rotate(-8deg)] [will-change:transform,opacity]" src="./imag/logo/logo19.png" alt="工具图标 19" loading="lazy" decoding="async" />
+          <img class="absolute left-0 top-0 block h-16 w-16 object-contain opacity-0 [transform:translate3d(0,-260px,0)_rotate(-8deg)] [will-change:transform,opacity]" src="./imag/logo/logo18.webp" alt="工具图标 18" loading="lazy" decoding="async" />
+          <img class="absolute left-0 top-0 block h-16 w-16 object-contain opacity-0 [transform:translate3d(0,-260px,0)_rotate(-8deg)] [will-change:transform,opacity]" src="./imag/logo/logo19.webp" alt="工具图标 19" loading="lazy" decoding="async" />
         </div>
       </section>
 
@@ -227,17 +223,17 @@
             <dt data-section-node="photo-meta-left-label" class="m-0 w-full text-left text-[12px] font-normal leading-[1.33] text-[var(--color-muted)]">BASED</dt>
             <dd data-section-node="photo-meta-left-value" class="m-0 w-full text-left text-[14px] font-medium leading-[1.43] text-[var(--color-text)]">杭州</dd>
           </dl>
-          <div data-section-node="photo-images" class="photo-images relative z-[1] m-0 block h-[var(--photo-card-height)] w-[var(--photo-card-width)] overflow-hidden rounded-[var(--radius-card)] [transform-origin:center] [transform-style:preserve-3d] [will-change:transform]" data-href="./project.html?slug=profile" data-link-label="查看 Profile">
+          <div data-section-node="photo-images" class="photo-images relative z-[1] m-0 block h-[var(--photo-card-height)] w-[var(--photo-card-width)] overflow-hidden rounded-[var(--radius-card)] [transform-origin:center]" data-href="./project.html?slug=profile" data-link-label="查看 Profile">
             <img
               class="photo-image photo-image-front absolute inset-0 h-full w-full object-cover"
-              src="./imag/photo1.png"
+              src="./imag/photo1.webp"
               alt=""
               loading="lazy"
               decoding="async"
             />
             <img
               class="photo-image photo-image-back absolute inset-0 h-full w-full object-cover"
-              src="./imag/photo2.png"
+              src="./imag/photo2.webp"
               alt=""
               loading="lazy"
               decoding="async"
@@ -279,22 +275,22 @@
           <div class="more-work-grid" data-more-work-grid>
             <a class="more-work-card more-work-card--large more-work-card--lime" href="https://shadcn-docs-six.vercel.app/" aria-label="打开 shadcn docs 应用" target="_blank" rel="noopener noreferrer">
               <span class="more-work-card__surface" data-card-title="组件库" data-card-desc="组件规范与文档系统，用更清晰的结构组织设计语言。">
-                <img src="./imag/loding-app-card.png" alt="" loading="lazy" decoding="async" />
+                <img src="./imag/loding-app-card.webp" alt="" loading="lazy" decoding="async" />
               </span>
             </a>
             <a class="more-work-card more-work-card--cream" href="https://pigpig.vercel.app/" aria-label="打开 PigPig 应用" target="_blank" rel="noopener noreferrer">
               <span class="more-work-card__surface" data-card-title="猪猪黄昏" data-card-desc="轻松有趣的小应用，用角色和反馈制造记忆点。">
-                <img src="./imag/pigpig-card.png" alt="" loading="lazy" decoding="async" />
+                <img src="./imag/pigpig-card.webp" alt="" loading="lazy" decoding="async" />
               </span>
             </a>
             <a class="more-work-card more-work-card--coral" href="https://loding-five.vercel.app/" aria-label="打开 Loding 应用" target="_blank" rel="noopener noreferrer">
               <span class="more-work-card__surface" data-card-title="LODING" data-card-desc="加载动效实验，把等待过程变成更有节奏的体验。">
-                <img src="./imag/loding-five-card.png" alt="" loading="lazy" decoding="async" />
+                <img src="./imag/loding-five-card.webp" alt="" loading="lazy" decoding="async" />
               </span>
             </a>
             <a class="more-work-card more-work-card--blue" href="./project.html?slug=portrait" aria-label="查看 Portrait 项目">
               <span class="more-work-card__surface" data-card-title="PORTRAIT" data-card-desc="人物视觉实验，突出氛围、裁切和轻交互反馈。">
-                <img src="./imag/photo2.png" alt="" loading="lazy" decoding="async" />
+                <img src="./imag/photo2.webp" alt="" loading="lazy" decoding="async" />
               </span>
             </a>
             <a class="more-work-card more-work-card--mint" href="./project.html?slug=about" aria-label="查看 内容版式项目">
@@ -304,7 +300,7 @@
             </a>
             <a class="more-work-card more-work-card--sand" href="./project.html?slug=sneakers" aria-label="查看 视觉实验项目">
               <span class="more-work-card__surface" data-card-title="SNEAKERS" data-card-desc="电商活动视觉概念，强调产品节奏和转化路径。">
-                <img src="./imag/design top.png" alt="" loading="lazy" decoding="async" />
+                <img src="./imag/design top.webp" alt="" loading="lazy" decoding="async" />
               </span>
             </a>
           </div>
@@ -350,7 +346,7 @@
                     data-href="./project.html?slug=profile"
                     aria-label="查看 Profile"
                   >
-                    <img class="pointer-events-none block h-full w-full object-cover" src="./imag/photo1.png" alt="Profile 项目" loading="lazy" decoding="async" />
+                    <img class="pointer-events-none block h-full w-full object-cover" src="./imag/photo1.webp" alt="Profile 项目" loading="lazy" decoding="async" />
                   </button>
                   <button
                     type="button"
@@ -419,7 +415,7 @@
                   <img
                     class="mydesign-jack-hero__portrait"
                     data-avatar-parallax
-                    src="./imag/xuhao-main-avatar.png"
+                    src="./imag/xuhao-main-avatar.webp"
                     alt="Xuhao 主视觉头像"
                     loading="lazy"
                     decoding="async"
