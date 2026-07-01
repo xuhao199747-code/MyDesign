@@ -479,6 +479,79 @@ body.is-click-surprise-active *::selection {
   filter: blur(0);
 }
 
+.nav-wechat-drop__fallback {
+  position: absolute;
+  left: var(--wechat-drop-x);
+  top: var(--wechat-drop-y);
+  z-index: 2;
+  width: min(34vw, 220px);
+  min-width: 148px;
+  transform: translate(-50%, 0);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease;
+}
+
+.nav-wechat-drop.is-open:not(.is-ready) .nav-wechat-drop__fallback {
+  opacity: 1;
+}
+
+.nav-wechat-drop__fallback-line {
+  width: 6px;
+  height: clamp(120px, 24vh, 220px);
+  margin: 0 auto -2px;
+  border-radius: 999px;
+  background: #050505;
+  transform-origin: 50% 0;
+  animation: navWechatFallbackDrop 0.7s cubic-bezier(0.2, 0.9, 0.2, 1.1) both;
+}
+
+.nav-wechat-drop__fallback-card {
+  display: grid;
+  place-items: center;
+  gap: 8px;
+  padding: 18px 16px 16px;
+  border-radius: 18px;
+  background: #f8fafc;
+  box-shadow: 0 20px 44px rgba(15, 23, 42, 0.18);
+  transform-origin: 50% 0;
+  animation: navWechatFallbackCard 0.76s cubic-bezier(0.2, 0.9, 0.2, 1.1) both;
+}
+
+.nav-wechat-drop__fallback-qr {
+  display: grid;
+  grid-template-columns: repeat(2, 24px);
+  grid-auto-rows: 24px;
+  gap: 10px;
+  padding: 12px;
+}
+
+.nav-wechat-drop__fallback-qr span {
+  display: block;
+  border: 7px solid #0f172a;
+  border-radius: 2px;
+}
+
+.nav-wechat-drop__fallback-card p,
+.nav-wechat-drop__fallback-card small {
+  margin: 0;
+  color: #0f172a;
+  line-height: 1;
+}
+
+.nav-wechat-drop__fallback-card p {
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.nav-wechat-drop__fallback-card small {
+  color: #64748b;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
 .nav-wechat-drop.is-opening {
   animation: navWechatFadeIn 0.18s ease both;
 }
@@ -510,6 +583,34 @@ body.is-click-surprise-active *::selection {
   100% {
     opacity: 0;
     filter: blur(5px);
+  }
+}
+
+@keyframes navWechatFallbackDrop {
+  0% {
+    transform: scaleY(0.08);
+  }
+
+  68% {
+    transform: scaleY(1.08);
+  }
+
+  100% {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes navWechatFallbackCard {
+  0% {
+    transform: translateY(-42px) scaleY(0.92);
+  }
+
+  68% {
+    transform: translateY(6px) scaleY(1.04);
+  }
+
+  100% {
+    transform: translateY(0) scaleY(1);
   }
 }
 
@@ -639,7 +740,8 @@ body.is-click-surprise-active *::selection {
 }
 
 .menu a:active,
-.menu a[aria-current="page"] {
+.menu a[aria-current="page"],
+.menu a[aria-expanded="true"] {
   color: #ffffff;
   background: var(--nav-theme-color);
   box-shadow:
@@ -648,7 +750,8 @@ body.is-click-surprise-active *::selection {
 }
 
 .menu a:active svg path,
-.menu a[aria-current="page"] svg path {
+.menu a[aria-current="page"] svg path,
+.menu a[aria-expanded="true"] svg path {
   fill: #ffffff;
 }
 

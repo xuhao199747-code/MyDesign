@@ -52,6 +52,7 @@
       : [];
     let activeNavTarget = null;
     let activeNavTargetWasVisible = false;
+    let activeNavProtectedUntil = 0;
 
     const setActiveNavLink = (activeLink) => {
       navLinks.forEach((link) => {
@@ -67,6 +68,8 @@
       setActiveNavLink(null);
     };
 
+    window.__clearActiveNavLink = clearActiveNavLink;
+
     const isSectionInActiveView = (section) => {
       if (!(section instanceof Element)) return false;
       const rect = section.getBoundingClientRect();
@@ -76,6 +79,17 @@
 
     const syncActiveNavVisibility = () => {
       if (!activeNavTarget) return;
+      if (performance.now() < activeNavProtectedUntil) return;
+      if (activeNavTarget.id === "contact") {
+        const maxScroll = Math.max(
+          document.documentElement.scrollHeight - window.innerHeight,
+          0
+        );
+        if (Math.abs(window.scrollY - maxScroll) <= 4) {
+          activeNavTargetWasVisible = true;
+          return;
+        }
+      }
       const isVisible = isSectionInActiveView(activeNavTarget);
       if (isVisible) {
         activeNavTargetWasVisible = true;
@@ -84,6 +98,29 @@
       if (activeNavTargetWasVisible) {
         clearActiveNavLink();
       }
+    };
+
+    window.__preserveActiveNavFor = (durationMs = 900) => {
+      activeNavProtectedUntil = Math.max(
+        activeNavProtectedUntil,
+        performance.now() + durationMs
+      );
+    };
+
+    window.__restoreContactNavActive = (durationMs = 2400) => {
+      if (window.location.hash !== "#contact") return;
+      const contactLink = navLinks.find(
+        (link) => link.getAttribute("href") === "#contact"
+      );
+      const contactTarget = queryElement("#contact");
+      if (!contactLink || !contactTarget) return;
+      activeNavTarget = contactTarget;
+      activeNavTargetWasVisible = true;
+      activeNavProtectedUntil = Math.max(
+        activeNavProtectedUntil,
+        performance.now() + durationMs
+      );
+      setActiveNavLink(contactLink);
     };
 
     const syncActiveNavFromHash = () => {
@@ -160,7 +197,48 @@
     document.body.dataset.anchorScrollReady = "true";
     syncActiveNavFromHash();
 
+    const scrollToContactBottom = (link, target) => {
+      if (typeof window.__forceCloseNavWechatCard === "function") {
+        window.__forceCloseNavWechatCard();
+      } else {
+        window.__closeNavWechatCard?.();
+      }
+      const maxScroll = Math.max(
+        document.documentElement.scrollHeight - window.innerHeight,
+        0
+      );
+      window.scrollTo({ top: maxScroll, behavior: "auto" });
+
+      if (window.location.hash !== "#contact") {
+        window.history.replaceState(null, "", "#contact");
+      }
+      activeNavTarget = target;
+      activeNavTargetWasVisible = true;
+      activeNavProtectedUntil = performance.now() + 900;
+      setActiveNavLink(link);
+    };
+
+    document.addEventListener(
+      "click",
+      (event) => {
+        if (!(event.target instanceof Element)) return;
+        const link = event.target.closest('[data-shell-node="contact-trigger"][href="#contact"]');
+        if (!(link instanceof HTMLAnchorElement)) return;
+
+        const target = queryElement("#contact");
+        if (!target) return;
+
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation?.();
+        event.__contactScrollHandled = true;
+        scrollToContactBottom(link, target);
+      },
+      true
+    );
+
     document.addEventListener("click", (event) => {
+      if (event.__contactScrollHandled) return;
       if (!(event.target instanceof Element)) return;
       const link = event.target.closest('a[href^="#"]');
       if (!(link instanceof HTMLAnchorElement)) return;
@@ -173,6 +251,11 @@
 
       event.preventDefault();
       const isBrandLink = link.classList.contains("brand");
+      const isContactLink = href === "#contact";
+      if (isContactLink) {
+        scrollToContactBottom(link, target);
+        return;
+      }
       const y = isBrandLink
         ? 0
         : target.getBoundingClientRect().top + window.scrollY - anchorOffset;
