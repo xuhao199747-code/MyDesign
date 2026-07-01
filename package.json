@@ -2,17 +2,14 @@
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "dev:vercel": "vercel dev",
-    "build": "vite build && vite build --config vite.project.config.mjs && node build-post.js"
+    "build": "vite build && vite build --config vite.project.config.mjs && node build-post.js",
+    "verify:assistant": "node --no-warnings scripts/verify-assistant-admin.mjs"
   },
   "dependencies": {
     "@animateicons/react": "^0.3.3",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.6.1",
     "@react-three/rapier": "^2.2.0",
-    "@streamdown/cjk": "^1.0.3",
-    "@streamdown/code": "^1.1.1",
-    "@streamdown/math": "^1.0.2",
-    "@streamdown/mermaid": "^1.0.2",
     "@supabase/supabase-js": "^2.110.0",
     "ai": "^6.0.208",
     "ai-elements": "^1.9.0",
@@ -28,7 +25,6 @@
     "react": "19.2.7",
     "react-dom": "19.2.7",
     "sonner": "^2.0.7",
-    "streamdown": "^2.5.0",
     "tailwind-merge": "^3.6.0",
     "three": "^0.184.0",
     "use-stick-to-bottom": "^1.1.6",
