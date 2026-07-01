@@ -50,6 +50,9 @@
           return href && href !== "#";
         })
       : [];
+    if ("scrollRestoration" in window.history) {
+      window.history.scrollRestoration = "manual";
+    }
     let activeNavTarget = null;
     let activeNavTargetWasVisible = false;
     let activeNavProtectedUntil = 0;
@@ -125,6 +128,7 @@
 
     const syncActiveNavFromHash = () => {
       if (!window.location.hash) return;
+      if (performance.getEntriesByType?.("navigation")?.[0]?.type !== "navigate") return;
       const activeLink = navLinks.find(
         (link) => link.getAttribute("href") === window.location.hash
       );
@@ -195,7 +199,24 @@
 
     if (document.body.dataset.anchorScrollReady === "true") return;
     document.body.dataset.anchorScrollReady = "true";
-    syncActiveNavFromHash();
+    if (!window.location.hash || window.location.hash === "#home") {
+      window.requestAnimationFrame(() => {
+        window.scrollTo({ top: 0, behavior: "auto" });
+        clearActiveNavLink();
+      });
+    } else {
+      clearActiveNavLink();
+      syncActiveNavFromHash();
+    }
+
+    window.addEventListener("pageshow", () => {
+      if (window.location.hash && window.location.hash !== "#home") {
+        clearActiveNavLink();
+        return;
+      }
+      window.scrollTo({ top: 0, behavior: "auto" });
+      clearActiveNavLink();
+    });
 
     const scrollToContactBottom = (link, target) => {
       if (typeof window.__forceCloseNavWechatCard === "function") {

@@ -57,6 +57,7 @@ function whenNavWechatLanyardRequested() {
       loadLanyard();
     };
 
+    whenBrowserIdle(loadLanyard, 700);
     document.addEventListener("pointerover", loadFromEvent, { passive: true });
     document.addEventListener("focusin", loadFromEvent);
     document.addEventListener("touchstart", loadFromEvent, { passive: true });
@@ -84,7 +85,7 @@ runBootstrapTasks([
   wrapBootstrapTask(
     whenBrowserIdle(
       whenElementPresent("chatWidgetRoot", () =>
-        loadRuntimeEntry("chatWidget.js", "./chat-widget-entry.jsx")
+        loadRuntimeEntry("chatWidget.js", "./chat/chat-entry.jsx")
           .then(({ mountChatWidget }) => mountChatWidget())
       ),
       260
