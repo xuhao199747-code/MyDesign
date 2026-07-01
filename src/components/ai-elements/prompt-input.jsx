@@ -388,6 +388,7 @@ export const PromptInputActionAddScreenshot = ({
 
 export const PromptInput = ({
   className,
+  inputGroupClassName,
   accept,
   multiple,
   globalDrop,
@@ -757,7 +758,9 @@ export const PromptInput = ({
         onSubmit={handleSubmit}
         ref={formRef}
         {...props}>
-        <InputGroup className="overflow-hidden">{children}</InputGroup>
+        <InputGroup className={cn("overflow-hidden", inputGroupClassName)}>
+          {children}
+        </InputGroup>
       </form>
     </>
   );

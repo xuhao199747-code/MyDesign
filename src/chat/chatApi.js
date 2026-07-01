@@ -1,7 +1,7 @@
 export const fallbackPublicConfig = {
   assistant: {
     welcomeMessage:
-      "Hi, I can answer questions about my work, projects, and resume.",
+      "你好，我可以回答关于工作经历、项目过程和简历的问题。",
     apiLimitPerVisitor: 20,
   },
   resume: {

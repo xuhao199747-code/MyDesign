@@ -15,42 +15,11 @@
     if (!cards.length) return;
     const visibleCards = new Set();
 
-    const syncCardTextMetrics = (card) => {
-      const surface = card.querySelector(".more-work-card__surface");
-      if (!surface) return;
-      const pseudoBefore = getComputedStyle(surface, "::before");
-      const surfaceWidth = surface.getBoundingClientRect().width || card.getBoundingClientRect().width || 280;
-      const titleHeight = parseFloat(pseudoBefore.fontSize) || 24;
-      const desc = surface.dataset.cardDesc?.trim() || "";
-      const descFontSize = 14;
-      const descLineHeight = Math.ceil(descFontSize * 1.32);
-      const descMeasure = document.createElement("canvas").getContext("2d");
-      if (descMeasure) {
-        descMeasure.font =
-          '400 14px -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif';
-      }
-      const measuredDescWidth = descMeasure
-        ? descMeasure.measureText(desc).width
-        : Array.from(desc).reduce((total, char) => total + (/[\u4e00-\u9fa5]/.test(char) ? 14 : 7), 0);
-      const descMaxWidth = Math.max(1, surfaceWidth - 32);
-      const descLines = Math.max(1, Math.min(4, Math.ceil(measuredDescWidth / descMaxWidth)));
-      const descHeight = descLines * descLineHeight;
-      card.style.setProperty("--more-card-title-height", `${Math.ceil(titleHeight)}px`);
-      card.style.setProperty("--more-card-desc-height", `${descHeight}px`);
-    };
-
     cards.forEach((card, index) => {
       if (card.dataset.moreWorkReady === "true") return;
       card.dataset.moreWorkReady = "true";
       card.style.setProperty("--more-card-index", String(index));
-      syncCardTextMetrics(card);
     });
-
-    window.addEventListener(
-      "resize",
-      () => cards.forEach(syncCardTextMetrics),
-      { passive: true }
-    );
 
     const revealObserver = new IntersectionObserver(
       (entries) => {

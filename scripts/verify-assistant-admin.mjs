@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readdirSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import {
   detectResumeIntent,
@@ -7,6 +8,22 @@ import {
 import { fallbackPublicConfig } from "../src/chat/chatApi.js";
 
 const require = createRequire(import.meta.url);
+const loginViewSource = readFileSync(
+  new URL("../src/admin/LoginView.jsx", import.meta.url),
+  "utf8"
+);
+const loginFormSource = readFileSync(
+  new URL("../src/components/login-form.jsx", import.meta.url),
+  "utf8"
+);
+const adminDir = new URL("../src/admin/", import.meta.url);
+const adminSources = readdirSync(adminDir, { withFileTypes: true })
+  .filter((entry) => entry.isFile() && entry.name.endsWith(".jsx"))
+  .map((entry) => [
+    entry.name,
+    readFileSync(new URL(entry.name, adminDir), "utf8"),
+  ]);
+const adminSourceText = adminSources.map(([, source]) => source).join("\n");
 
 function invoke(handler, req) {
   return new Promise((resolve) => {
@@ -97,6 +114,91 @@ assert.equal(detectResumeIntent("tell me about projects"), false);
 const workMatch = findKnowledgeMatch("你做过什么工作", fallbackPublicConfig);
 assert.equal(workMatch?.id, "work");
 assert.equal(findKnowledgeMatch("完全不匹配的问题", fallbackPublicConfig), null);
+assert.equal(
+  loginViewSource.includes("disabled={Boolean(envError) || loading}"),
+  false,
+  "login inputs must remain editable when Supabase env is missing"
+);
+assert.equal(
+  loginViewSource.includes("ADMIN_USERNAME") &&
+    loginViewSource.includes("admin") &&
+    loginViewSource.includes("ADMIN_PASSWORD") &&
+    loginViewSource.includes("123456"),
+  true,
+  "admin login should use fixed username admin and password 123456"
+);
+assert.equal(
+  loginViewSource.includes("signInWithPassword") ||
+    loginViewSource.includes("getSupabaseClient"),
+  false,
+  "admin login view should not call Supabase auth"
+);
+assert.equal(
+  adminSourceText.includes("assistantAdminConfig") &&
+    adminSourceText.includes("localStorage.setItem"),
+  true,
+  "local admin mode should save config to localStorage"
+);
+assert.equal(
+  adminSourceText.includes("setError(\"\")") &&
+    adminSourceText.includes("onSignOut"),
+  true,
+  "admin sign out should clear stale errors before returning to login"
+);
+assert.equal(
+  adminSources.some(
+    ([name, source]) => name === "ResumeEditor.jsx" && source.includes("@/components/ui/alert")
+  ),
+  false,
+  "resume editor should avoid Alert border surface in local admin UI"
+);
+assert.equal(
+  adminSources.some(([, source]) => source.includes("ai-elements")),
+  false,
+  "admin module must not import ai-elements; reserve ai-elements for chat UI only"
+);
+assert.equal(
+  adminSources.some(([, source]) => source.includes("@/components/ui/card")),
+  true,
+  "admin module should use shadcn Card primitives for panels"
+);
+assert.equal(
+  adminSources.some(([, source]) => source.includes("@/components/ui/sidebar")),
+  true,
+  "admin module should use shadcn Sidebar primitives for section navigation"
+);
+assert.equal(
+  adminSources.some(([, source]) => source.includes("@/components/ui/badge")),
+  true,
+  "admin module should use shadcn Badge primitives for statuses"
+);
+assert.equal(
+  loginViewSource.includes("@/components/login-form"),
+  true,
+  "admin login view should render the shadcn login form block"
+);
+assert.equal(
+  loginFormSource.includes("@/components/ui/field"),
+  true,
+  "admin login form should use shadcn Field primitives"
+);
+assert.equal(
+  /admin-|(?:bg|text|border)-\[#|border-white|bg-white\/|text-white|neutral-\d/.test(adminSourceText),
+  false,
+  "admin module should use shadcn semantic tokens instead of custom admin or hardcoded color classes"
+);
+assert.equal(
+  /\[var\(--admin-|data-admin-/.test(adminSourceText),
+  false,
+  "admin module should not use a parallel admin styling system"
+);
+assert.equal(
+  /<(input|textarea|select|button|label)\b/.test(
+    `${adminSourceText}\n${loginFormSource}`
+  ),
+  false,
+  "admin module should use shadcn form primitives instead of raw form controls"
+);
 
 const publicConfigHandler = require("../api/public-config.js");
 const publicResponse = await invoke(publicConfigHandler, {
@@ -107,6 +209,29 @@ assert.equal(publicResponse.statusCode, 200);
 assert.equal(publicResponse.body.assistant.apiLimitPerVisitor, 20);
 
 const adminConfigHandler = require("../api/admin-config.js");
+const adminConfigSource = readFileSync(
+  new URL("../api/admin-config.js", import.meta.url),
+  "utf8"
+);
+assert.equal(
+  adminConfigSource.includes("getDeepSeekConfigStatus") &&
+    adminConfigSource.includes("providerStatus"),
+  true,
+  "admin config endpoint should expose DeepSeek environment status without exposing the API key"
+);
+assert.equal(
+  adminSourceText.includes("模型 API 状态") &&
+    adminSourceText.includes("DEEPSEEK_API_KEY"),
+  true,
+  "admin Prompt page should show where to configure the DeepSeek API key"
+);
+assert.equal(
+  adminSourceText.includes("apiKeyConfigured") &&
+    adminSourceText.includes("baseUrl") &&
+    adminSourceText.includes("model"),
+  true,
+  "admin Prompt page should display DeepSeek key status, base URL, and model"
+);
 const adminNoAuth = await invoke(adminConfigHandler, {
   method: "GET",
   headers: {},

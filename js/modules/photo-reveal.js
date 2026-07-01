@@ -179,7 +179,7 @@
 
       if (photoLinkHref) {
         const openPhotoLink = () => {
-          window.location.assign(photoLinkHref);
+          window.open(photoLinkHref, "_blank", "noopener,noreferrer");
         };
 
         hoverHitbox.addEventListener("click", (event) => {

@@ -64,6 +64,7 @@
     let hasHidden = false;
     let resourcesReady = false;
     let bootReady = Boolean(window.__siteBootStatus?.completedAt);
+    let bootGraceElapsed = bootReady;
     let minimumDisplayElapsed = false;
     const failedResources = [];
     const resourceProgress = new Map();
@@ -107,6 +108,7 @@
     };
 
     const updateProgress = () => {
+      bootReady = bootReady || Boolean(window.__siteBootStatus?.completedAt);
       const progressItems = Array.from(resourceProgress.values());
       const knownTotalBytes = progressItems.reduce((sum, item) => sum + (item.total || 0), 0);
       const knownLoadedBytes = progressItems.reduce((sum, item) => {
@@ -121,9 +123,10 @@
         : totalCount
           ? (loadedCount / totalCount) * 100
           : 100;
-      const percentage = resourcesReady && bootReady && minimumDisplayElapsed
+      const canComplete = resourcesReady && minimumDisplayElapsed && (bootReady || bootGraceElapsed);
+      const percentage = canComplete
         ? 100
-        : Math.min(99, rawPercentage);
+        : Math.min(98, rawPercentage);
       updateProgressTarget(percentage);
     };
 
@@ -184,7 +187,8 @@
     }
 
     const tryHidePreloader = () => {
-      if (!resourcesReady || !bootReady || !minimumDisplayElapsed) {
+      bootReady = bootReady || Boolean(window.__siteBootStatus?.completedAt);
+      if (!resourcesReady || !minimumDisplayElapsed || (!bootReady && !bootGraceElapsed)) {
         updateProgress();
         return;
       }
@@ -297,10 +301,16 @@
         "site:boot-complete",
         () => {
           bootReady = true;
+          bootGraceElapsed = true;
           tryHidePreloader();
         },
         { once: true }
       );
+
+      setTimeout(() => {
+        bootGraceElapsed = true;
+        tryHidePreloader();
+      }, siteUtils.getNumberOption(preloaderConfig, "bootGraceMs", 450));
 
       const loadBlockingResources = blockingResources.map((url) =>
         loadResource(url).then(() => {

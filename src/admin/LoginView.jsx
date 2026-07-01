@@ -1,8 +1,10 @@
 import React from "react";
-import { getSupabaseClient } from "./supabaseClient.js";
+import { LoginForm } from "@/components/login-form";
 
 export function LoginView({ envError, error, onError, onSignedIn }) {
-  const [email, setEmail] = React.useState("");
+  const ADMIN_USERNAME = "admin";
+  const ADMIN_PASSWORD = "123456";
+  const [username, setUsername] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [loading, setLoading] = React.useState(false);
 
@@ -12,14 +14,16 @@ export function LoginView({ envError, error, onError, onSignedIn }) {
     onError("");
 
     try {
-      const { data, error: authError } =
-        await getSupabaseClient().auth.signInWithPassword({
-          email,
-          password,
-        });
+      if (username !== ADMIN_USERNAME || password !== ADMIN_PASSWORD) {
+        throw new Error("用户名或密码错误。");
+      }
 
-      if (authError) throw authError;
-      onSignedIn(data.session);
+      onSignedIn({
+        access_token: "",
+        localAdmin: true,
+        localPreview: true,
+        user: { email: ADMIN_USERNAME },
+      });
     } catch (nextError) {
       onError(nextError.message);
     } finally {
@@ -28,63 +32,25 @@ export function LoginView({ envError, error, onError, onSignedIn }) {
   };
 
   return (
-    <main className="grid min-h-screen place-items-center px-6">
-      <form
-        className="w-full max-w-sm rounded-lg border border-white/10 bg-white/[0.04] p-6"
+    <main className="grid min-h-screen place-items-center bg-background p-6 text-foreground">
+      <LoginForm
+        className="w-full max-w-sm"
+        username={username}
+        envError={envError}
+        error={error}
+        loading={loading}
+        password={password}
+        onUsernameChange={setUsername}
+        onPasswordChange={setPassword}
+        onPreview={() =>
+          onSignedIn({
+            access_token: "",
+            localPreview: true,
+            user: { email: "local-preview" },
+          })
+        }
         onSubmit={handleSubmit}
-      >
-        <p className="text-xs uppercase tracking-[0.24em] text-white/45">
-          Admin
-        </p>
-        <h1 className="mt-3 text-2xl font-semibold">Assistant Config</h1>
-        <p className="mt-2 text-sm leading-6 text-white/60">
-          使用 Supabase 邮箱密码登录管理对话配置。
-        </p>
-        {envError ? (
-          <p className="mt-4 rounded-md border border-amber-300/20 bg-amber-300/10 p-3 text-sm leading-6 text-amber-100">
-            {envError}
-          </p>
-        ) : null}
-        {error ? (
-          <p className="mt-4 rounded-md border border-red-300/20 bg-red-300/10 p-3 text-sm leading-6 text-red-100">
-            {error}
-          </p>
-        ) : null}
-        <label className="mt-6 block space-y-1 text-sm">
-          <span className="text-white/55">Email</span>
-          <input
-            className="w-full rounded-md border border-white/10 bg-neutral-900 px-3 py-2 text-white outline-none"
-            disabled={Boolean(envError) || loading}
-            type="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-          />
-        </label>
-        <label className="mt-3 block space-y-1 text-sm">
-          <span className="text-white/55">Password</span>
-          <input
-            className="w-full rounded-md border border-white/10 bg-neutral-900 px-3 py-2 text-white outline-none"
-            disabled={Boolean(envError) || loading}
-            type="password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-          />
-        </label>
-        <button
-          type="button"
-          className="mt-6 hidden w-full rounded-md bg-white px-4 py-2 text-sm font-medium text-neutral-950"
-          onClick={() => onSignedIn({ user: { email: "local-preview" } })}
-        >
-          Preview dashboard
-        </button>
-        <button
-          className="mt-6 w-full rounded-md bg-white px-4 py-2 text-sm font-medium text-neutral-950 disabled:opacity-40"
-          disabled={Boolean(envError) || loading || !email || !password}
-          type="submit"
-        >
-          {loading ? "Signing in..." : "Sign in"}
-        </button>
-      </form>
+      />
     </main>
   );
 }

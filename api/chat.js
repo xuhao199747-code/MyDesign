@@ -15,6 +15,39 @@ function parseBody(req) {
   return req.body;
 }
 
+const normalize = (value) => String(value || "").trim().toLowerCase();
+
+const resumeKeywords = ["简历", "resume", "cv", "下载"];
+
+function detectResumeIntent(message) {
+  const normalized = normalize(message);
+  return resumeKeywords.some((keyword) => normalized.includes(keyword));
+}
+
+function findKnowledgeMatch(message, config) {
+  const normalized = normalize(message);
+  const items = Array.isArray(config?.knowledgeItems)
+    ? config.knowledgeItems
+    : [];
+
+  return (
+    items.find((item) => {
+      if (item.enabled === false) return false;
+      if (!Array.isArray(item.questionPatterns)) return false;
+
+      return item.questionPatterns.some((pattern) =>
+        normalized.includes(normalize(pattern))
+      );
+    }) || null
+  );
+}
+
+function getLatestUserMessage(messages) {
+  const userMessages = messages.filter((message) => message.role === "user");
+  const latest = userMessages.at(-1);
+  return latest?.content || latest?.text || "";
+}
+
 function toDeepSeekMessages(messages, config) {
   const knowledgeContext = (config.knowledgeItems || [])
     .filter((item) => item.enabled !== false && item.answer)
@@ -117,6 +150,27 @@ module.exports = async function handler(req, res) {
 
     const supabase = getServiceSupabaseClient();
     const config = await readAssistantConfig(supabase);
+    const latestUserMessage = getLatestUserMessage(messages);
+
+    if (detectResumeIntent(latestUserMessage)) {
+      json(res, 200, {
+        type: "resume",
+        text: "可以，下面是我的简历下载入口。",
+        resume: config.resume || null,
+      });
+      return;
+    }
+
+    const knowledgeMatch = findKnowledgeMatch(latestUserMessage, config);
+    if (knowledgeMatch) {
+      json(res, 200, {
+        type: "knowledge",
+        text: knowledgeMatch.answer,
+        knowledgeItemId: knowledgeMatch.id,
+      });
+      return;
+    }
+
     const limit = config.assistant.apiLimitPerVisitor || 20;
     const usage = await readVisitorUsage(supabase, visitorId);
     const used = usage?.api_call_count || 0;

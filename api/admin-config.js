@@ -1,9 +1,20 @@
 const { readAssistantConfig } = require("./_shared/assistant-config");
+const { getOptionalEnv } = require("./_shared/env");
 const { json, methodNotAllowed } = require("./_shared/http");
 const {
   getServiceSupabaseClient,
   requireAdmin,
 } = require("./_shared/supabase");
+
+function getDeepSeekConfigStatus() {
+  return {
+    deepSeek: {
+      apiKeyConfigured: Boolean(getOptionalEnv("DEEPSEEK_API_KEY")),
+      baseUrl: getOptionalEnv("DEEPSEEK_BASE_URL") || "https://api.deepseek.com",
+      model: getOptionalEnv("DEEPSEEK_MODEL") || "deepseek-chat",
+    },
+  };
+}
 
 async function replaceKnowledgeItems(supabase, items) {
   await supabase.from("knowledge_items").delete().neq("id", "00000000-0000-0000-0000-000000000000");
@@ -47,7 +58,10 @@ module.exports = async function handler(req, res) {
 
     if (req.method === "GET") {
       const config = await readAssistantConfig(supabase);
-      json(res, 200, config);
+      json(res, 200, {
+        ...config,
+        providerStatus: getDeepSeekConfigStatus(),
+      });
       return;
     }
 
@@ -90,7 +104,10 @@ module.exports = async function handler(req, res) {
     await replaceKnowledgeItems(supabase, knowledgeItems);
 
     const nextConfig = await readAssistantConfig(supabase);
-    json(res, 200, nextConfig);
+    json(res, 200, {
+      ...nextConfig,
+      providerStatus: getDeepSeekConfigStatus(),
+    });
   } catch (error) {
     json(res, error.statusCode || 500, {
       error: error.message || "admin_config_failed",

@@ -1,4 +1,24 @@
 import React from "react";
+import { Plus } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Field,
+  FieldContent,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 export function KnowledgeEditor({ items, onChange }) {
   const updateItem = (index, patch) => {
@@ -26,70 +46,90 @@ export function KnowledgeEditor({ items, onChange }) {
 
   return (
     <section className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">知识库</h2>
-        <button
-          type="button"
-          className="rounded-md bg-white px-3 py-2 text-sm font-medium text-neutral-950"
-          onClick={addItem}
-        >
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h2 className="text-lg font-semibold">知识库</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            命中这些关键词时直接使用配置答案，不消耗 DeepSeek 调用次数。
+          </p>
+        </div>
+        <Button type="button" size="sm" onClick={addItem}>
+          <Plus />
           Add
-        </button>
+        </Button>
       </div>
       <div className="space-y-3">
         {items.map((item, index) => (
-          <article
-            key={item.id || index}
-            className="space-y-3 rounded-lg border border-white/10 bg-white/[0.04] p-4"
-          >
-            <div className="grid gap-3 md:grid-cols-2">
-              <label className="space-y-1 text-sm">
-                <span className="text-white/55">标题</span>
-                <input
-                  className="w-full rounded-md border border-white/10 bg-neutral-900 px-3 py-2 text-white outline-none"
-                  value={item.title || ""}
-                  onChange={(event) =>
-                    updateItem(index, { title: event.target.value })
-                  }
-                />
-              </label>
-              <label className="space-y-1 text-sm">
-                <span className="text-white/55">匹配关键词，用逗号分隔</span>
-                <input
-                  className="w-full rounded-md border border-white/10 bg-neutral-900 px-3 py-2 text-white outline-none"
-                  value={(item.questionPatterns || []).join(", ")}
-                  onChange={(event) =>
-                    updateItem(index, {
-                      questionPatterns: event.target.value
-                        .split(",")
-                        .map((value) => value.trim())
-                        .filter(Boolean),
-                    })
-                  }
-                />
-              </label>
-            </div>
-            <label className="space-y-1 text-sm">
-              <span className="text-white/55">回答内容</span>
-              <textarea
-                className="min-h-28 w-full rounded-md border border-white/10 bg-neutral-900 px-3 py-2 text-white outline-none"
-                value={item.answer || ""}
-                onChange={(event) =>
-                  updateItem(index, { answer: event.target.value })
-                }
-              />
-            </label>
-            <label className="flex items-center gap-2 text-sm text-white/70">
-              <input
-                checked={item.enabled !== false}
-                type="checkbox"
-                onChange={(event) =>
-                  updateItem(index, { enabled: event.target.checked })
-                }
-              />
-              Enabled
-            </label>
-          </article>
+          <Card key={item.id || index}>
+            <CardHeader className="flex-row items-start justify-between gap-4">
+              <div className="space-y-1">
+                <CardTitle>{item.title || `条目 ${index + 1}`}</CardTitle>
+                <CardDescription>
+                  {(item.questionPatterns || []).length || 0} 个匹配关键词
+                </CardDescription>
+              </div>
+              <Badge variant={item.enabled !== false ? "secondary" : "outline"}>
+                {item.enabled !== false ? "Enabled" : "Disabled"}
+              </Badge>
+            </CardHeader>
+            <CardContent>
+              <FieldGroup>
+                <div className="grid gap-3 md:grid-cols-2">
+                  <Field>
+                    <FieldLabel>标题</FieldLabel>
+                    <Input
+                      value={item.title || ""}
+                      onChange={(event) =>
+                        updateItem(index, { title: event.target.value })
+                      }
+                    />
+                  </Field>
+                  <Field>
+                    <FieldLabel>匹配关键词</FieldLabel>
+                    <Input
+                      placeholder="用逗号分隔"
+                      value={(item.questionPatterns || []).join(", ")}
+                      onChange={(event) =>
+                        updateItem(index, {
+                          questionPatterns: event.target.value
+                            .split(",")
+                            .map((value) => value.trim())
+                            .filter(Boolean),
+                        })
+                      }
+                    />
+                  </Field>
+                </div>
+                <Field>
+                  <FieldLabel>回答内容</FieldLabel>
+                  <Textarea
+                    className="min-h-28"
+                    value={item.answer || ""}
+                    onChange={(event) =>
+                      updateItem(index, { answer: event.target.value })
+                    }
+                  />
+                </Field>
+                <Field orientation="horizontal">
+                  <Checkbox
+                    id={`knowledge-enabled-${item.id || index}`}
+                    checked={item.enabled !== false}
+                    onCheckedChange={(checked) =>
+                      updateItem(index, { enabled: checked === true })
+                    }
+                  />
+                  <FieldContent>
+                    <FieldLabel htmlFor={`knowledge-enabled-${item.id || index}`}>
+                      Enabled
+                    </FieldLabel>
+                    <FieldDescription>
+                      关闭后这条知识不会参与对话命中。
+                    </FieldDescription>
+                  </FieldContent>
+                </Field>
+              </FieldGroup>
+            </CardContent>
+          </Card>
         ))}
       </div>
     </section>

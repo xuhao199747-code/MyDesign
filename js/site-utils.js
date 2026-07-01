@@ -30,6 +30,14 @@
       return typeof value === "string" ? value : fallback;
     },
     clearTextSelection() {
+      const activeElement = document.activeElement;
+      if (
+        activeElement instanceof HTMLElement &&
+        (activeElement.matches("input, textarea, [contenteditable='true']") ||
+          activeElement.isContentEditable)
+      ) {
+        return;
+      }
       const selection = globalThis.getSelection?.();
       if (selection && selection.rangeCount > 0) {
         selection.removeAllRanges();

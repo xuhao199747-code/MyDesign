@@ -1,4 +1,7 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { SparklesIcon, XIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import {
   fallbackPublicConfig,
   fetchPublicAssistantConfig,
@@ -7,10 +10,6 @@ import {
 } from "./chatApi.js";
 import { ChatComposer } from "./ChatComposer.jsx";
 import { ChatMessages } from "./ChatMessages.jsx";
-import {
-  detectResumeIntent,
-  findKnowledgeMatch,
-} from "./knowledgeMatcher.js";
 import { getVisitorId } from "./visitorId.js";
 
 const createMessageId = (prefix) =>
@@ -22,14 +21,24 @@ export function ChatWidget() {
   const [config, setConfig] = useState(fallbackPublicConfig);
   const [status, setStatus] = useState("ready");
   const [usage, setUsage] = useState(null);
-  const [messages, setMessages] = useState([
-    {
-      id: "welcome",
-      role: "assistant",
-      text: "Hi, I can answer questions about my work, projects, and resume.",
-    },
-  ]);
+  const [welcomeMessage, setWelcomeMessage] = useState(
+    fallbackPublicConfig.assistant.welcomeMessage
+  );
+  const [messages, setMessages] = useState([]);
   const visitorIdRef = useRef(null);
+
+  const suggestions = useMemo(() => {
+    const items = Array.isArray(config?.knowledgeItems)
+      ? config.knowledgeItems
+      : [];
+    const fromKnowledge = items
+      .filter((item) => item.enabled !== false)
+      .map((item) => item.title || item.questionPatterns?.[0])
+      .filter(Boolean)
+      .slice(0, 2);
+
+    return [...fromKnowledge, "下载简历"].slice(0, 4);
+  }, [config]);
 
   useEffect(() => {
     visitorIdRef.current = getVisitorId();
@@ -42,13 +51,7 @@ export function ChatWidget() {
       if (!isMounted) return;
       setConfig(nextConfig);
       if (nextConfig?.assistant?.welcomeMessage) {
-        setMessages((current) =>
-          current.map((message) =>
-            message.id === "welcome"
-              ? { ...message, text: nextConfig.assistant.welcomeMessage }
-              : message
-          )
-        );
+        setWelcomeMessage(nextConfig.assistant.welcomeMessage);
       }
     });
 
@@ -57,9 +60,8 @@ export function ChatWidget() {
     };
   }, []);
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    const value = input.trim();
+  const sendValue = async (rawValue) => {
+    const value = rawValue.trim();
     if (!value || status === "submitted") return;
 
     const userMessage = {
@@ -67,34 +69,6 @@ export function ChatWidget() {
       role: "user",
       text: value,
     };
-
-    if (detectResumeIntent(value)) {
-      const resume = await fetchResumeDownload(config.resume);
-      const assistantMessage = {
-        id: createMessageId("assistant"),
-        role: "assistant",
-        type: "resume",
-        resume,
-      };
-      setMessages((current) => [...current, userMessage, assistantMessage]);
-      setInput("");
-      return;
-    }
-
-    const knowledgeMatch = findKnowledgeMatch(value, config);
-    if (knowledgeMatch) {
-      setMessages((current) => [
-        ...current,
-        userMessage,
-        {
-          id: createMessageId("assistant"),
-          role: "assistant",
-          text: knowledgeMatch.answer,
-        },
-      ]);
-      setInput("");
-      return;
-    }
 
     const pendingId = createMessageId("assistant");
     setInput("");
@@ -120,12 +94,20 @@ export function ChatWidget() {
       });
 
       setUsage(result.usage || null);
+
+      let resume = result.resume;
+      if (result.type === "resume") {
+        resume = await fetchResumeDownload(result.resume || config.resume);
+      }
+
       setMessages((current) =>
         current.map((message) =>
           message.id === pendingId
             ? {
                 ...message,
                 pending: false,
+                type: result.type,
+                resume,
                 text: result.text || "I could not generate an answer.",
               }
             : message
@@ -151,33 +133,60 @@ export function ChatWidget() {
     }
   };
 
+  const handleSubmit = async (value) => {
+    await sendValue(value || input);
+  };
+
+  const handleSuggestion = (suggestion) => {
+    void sendValue(suggestion);
+  };
+
+  const stopAssistantPointerEvent = (event) => {
+    event.stopPropagation();
+  };
+
   return (
-    <div className="pointer-events-none fixed right-6 bottom-6 z-[9999] font-sans">
+    <div
+      className="pointer-events-none fixed right-4 bottom-4 z-[9999] font-sans sm:right-5 sm:bottom-5"
+      onClick={stopAssistantPointerEvent}
+      onMouseDown={stopAssistantPointerEvent}
+      onMouseUp={stopAssistantPointerEvent}
+      onPointerDown={stopAssistantPointerEvent}
+      onPointerUp={stopAssistantPointerEvent}
+    >
       {isOpen ? (
-        <section
-          className="pointer-events-auto flex h-[min(560px,calc(100vh-48px))] w-[min(380px,calc(100vw-32px))] flex-col overflow-hidden rounded-2xl border border-black/10 bg-white shadow-2xl"
+        <Card
+          className="pointer-events-auto h-[min(590px,calc(100dvh-32px))] w-[min(390px,calc(100vw-32px))] gap-0 rounded-[32px] border border-white bg-card/80 py-0 shadow-2xl shadow-foreground/10 backdrop-blur-xl"
+          size="sm"
           aria-label="AI Assistant"
+          role="dialog"
         >
-          <header className="flex items-center justify-between border-b border-black/10 px-4 py-3">
-            <div>
-              <h2 className="text-sm font-semibold text-neutral-950">
-                AI Assistant
-              </h2>
-              <p className="text-xs text-neutral-500">
+          <div className="flex h-11 items-center gap-2 px-4">
+            <h2 className="flex min-w-0 flex-1 items-baseline gap-2 truncate text-base font-medium">
+              <span className="shrink-0">徐浩 Agent</span>
+              <span className="truncate text-xs font-normal text-muted-foreground">
                 {usage
-                  ? `${usage.remaining} / ${usage.limit} AI calls left`
-                  : `${config?.assistant?.apiLimitPerVisitor || 20} AI calls per visitor`}
-              </p>
-            </div>
-            <button
-              className="text-sm text-neutral-500"
+                  ? `剩余 ${usage.remaining} / ${usage.limit} 次 AI 对话`
+                  : `每位访客 ${config?.assistant?.apiLimitPerVisitor || 20} 次 AI 对话`}
+              </span>
+            </h2>
+            <Button
+              variant="ghost"
+              size="icon-sm"
               type="button"
               onClick={() => setIsOpen(false)}
+              aria-label="关闭对话"
             >
-              Close
-            </button>
-          </header>
-          <ChatMessages messages={messages} />
+              <XIcon className="size-4" />
+            </Button>
+          </div>
+          <ChatMessages
+            disabled={status === "submitted"}
+            messages={messages}
+            suggestions={suggestions}
+            welcomeMessage={welcomeMessage}
+            onSuggestion={handleSuggestion}
+          />
           <ChatComposer
             disabled={status === "submitted"}
             status={status}
@@ -185,15 +194,17 @@ export function ChatWidget() {
             onChange={setInput}
             onSubmit={handleSubmit}
           />
-        </section>
+        </Card>
       ) : (
-        <button
-          className="pointer-events-auto rounded-full bg-neutral-950 px-5 py-3 text-sm font-medium text-white shadow-xl"
+        <Button
+          className="pointer-events-auto rounded-full shadow-xl shadow-foreground/15"
+          size="lg"
           type="button"
           onClick={() => setIsOpen(true)}
         >
-          Chat
-        </button>
+          <SparklesIcon className="size-4" />
+          对话
+        </Button>
       )}
     </div>
   );

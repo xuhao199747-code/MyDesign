@@ -1,4 +1,20 @@
 import React, { useState } from "react";
+import { UploadCloud } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Field,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
 import { uploadResumeFile } from "./adminApi.js";
 
 export function ResumeEditor({ resume, session, onChange }) {
@@ -11,6 +27,11 @@ export function ResumeEditor({ resume, session, onChange }) {
     setFileName(file?.name || "");
     setUploadError("");
     if (!file) return;
+
+    if (session.localAdmin || session.localPreview) {
+      setUploadError("本地后台不能上传文件，请填写外链地址或 PDF 文件路径。");
+      return;
+    }
 
     if (file.type !== "application/pdf") {
       setUploadError("请选择 PDF 文件。");
@@ -32,62 +53,87 @@ export function ResumeEditor({ resume, session, onChange }) {
       setUploading(false);
     }
   };
+  const hasDownloadTarget = Boolean(
+    resume.filePath || resume.externalUrl || resume.url
+  );
 
   return (
     <section className="space-y-4">
-      <h2 className="text-lg font-semibold">简历配置</h2>
-      <label className="block space-y-1 text-sm">
-        <span className="text-white/55">显示名称</span>
-        <input
-          className="w-full rounded-md border border-white/10 bg-neutral-900 px-3 py-2 text-white outline-none"
-          value={resume.displayName || ""}
-          onChange={(event) =>
-            onChange({ ...resume, displayName: event.target.value })
-          }
-        />
-      </label>
-      <label className="block space-y-1 text-sm">
-        <span className="text-white/55">外链地址</span>
-        <input
-          className="w-full rounded-md border border-white/10 bg-neutral-900 px-3 py-2 text-white outline-none"
-          placeholder="https://..."
-          value={resume.externalUrl || ""}
-          onChange={(event) =>
-            onChange({ ...resume, externalUrl: event.target.value })
-          }
-        />
-      </label>
-      <label className="block space-y-1 text-sm">
-        <span className="text-white/55">PDF 文件路径</span>
-        <input
-          className="w-full rounded-md border border-white/10 bg-neutral-900 px-3 py-2 text-white outline-none"
-          placeholder="resume/xuhao.pdf"
-          value={resume.filePath || ""}
-          onChange={(event) =>
-            onChange({ ...resume, filePath: event.target.value })
-          }
-        />
-      </label>
-      <label className="block space-y-1 text-sm">
-        <span className="text-white/55">上传 PDF 到 Supabase Storage</span>
-        <input
-          accept="application/pdf"
-          className="w-full rounded-md border border-white/10 bg-neutral-900 px-3 py-2 text-white outline-none"
-          disabled={uploading}
-          type="file"
-          onChange={handleFileChange}
-        />
-      </label>
-      {fileName ? (
-        <p className="text-sm text-white/55">
-          {uploading ? "Uploading" : "Selected"}: {fileName}
+      <div>
+        <h2 className="text-lg font-semibold">简历配置</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          配置访客在对话中索取简历时拿到的文件或外链。
         </p>
-      ) : null}
-      {uploadError ? (
-        <p className="rounded-md border border-red-300/20 bg-red-300/10 p-3 text-sm leading-6 text-red-100">
-          {uploadError}
-        </p>
-      ) : null}
+      </div>
+      <Card>
+        <CardHeader className="flex-row items-start justify-between gap-4">
+          <div className="space-y-1">
+            <CardTitle>下载来源</CardTitle>
+            <CardDescription>优先使用上传 PDF，也可以保留外链。</CardDescription>
+          </div>
+          <Badge variant={hasDownloadTarget ? "secondary" : "outline"}>
+            {hasDownloadTarget ? "Ready" : "Not set"}
+          </Badge>
+        </CardHeader>
+        <CardContent>
+          <FieldGroup>
+            <Field>
+              <FieldLabel>显示名称</FieldLabel>
+              <Input
+                value={resume.displayName || ""}
+                onChange={(event) =>
+                  onChange({ ...resume, displayName: event.target.value })
+                }
+              />
+            </Field>
+            <Field>
+              <FieldLabel>外链地址</FieldLabel>
+              <Input
+                placeholder="https://..."
+                value={resume.externalUrl || ""}
+                onChange={(event) =>
+                  onChange({ ...resume, externalUrl: event.target.value })
+                }
+              />
+            </Field>
+            <Field>
+              <FieldLabel>PDF 文件路径</FieldLabel>
+              <Input
+                placeholder="resume/xuhao.pdf"
+                value={resume.filePath || ""}
+                onChange={(event) =>
+                  onChange({ ...resume, filePath: event.target.value })
+                }
+              />
+            </Field>
+          <Field>
+            <FieldLabel>上传 PDF 到 Supabase Storage</FieldLabel>
+            {(session.localAdmin || session.localPreview) ? (
+              <FieldDescription>
+                本地后台不能上传文件，请填写外链地址或 PDF 文件路径。
+              </FieldDescription>
+            ) : null}
+            <Input
+              accept="application/pdf"
+              disabled={uploading || session.localAdmin || session.localPreview}
+              type="file"
+              onChange={handleFileChange}
+            />
+            </Field>
+            {fileName ? (
+              <FieldDescription>
+                <UploadCloud className="mr-2 inline size-4" />
+                {uploading ? "Uploading" : "Selected"}: {fileName}
+              </FieldDescription>
+          ) : null}
+          {uploadError ? (
+            <FieldDescription className="text-destructive">
+              {uploadError}
+            </FieldDescription>
+          ) : null}
+          </FieldGroup>
+        </CardContent>
+      </Card>
     </section>
   );
 }

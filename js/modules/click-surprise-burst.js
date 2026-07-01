@@ -114,7 +114,8 @@
       }, selectionLockDuration);
     };
 
-    const clearCurrentSelection = () => {
+    const clearCurrentSelection = (target) => {
+      if (isInsideAssistant(target)) return;
       siteUtils.clearTextSelection();
     };
 
@@ -131,12 +132,14 @@
       },
       { passive: true }
     );
-    document.addEventListener("pointerup", clearCurrentSelection);
+    document.addEventListener("pointerup", (event) => {
+      clearCurrentSelection(event.target);
+    });
 
     document.addEventListener("click", (event) => {
       if (isInsideAssistant(event.target)) return;
       lockSelectionBriefly(event.target);
-      clearCurrentSelection();
+      clearCurrentSelection(event.target);
 
       const stickers = stickerSets[burstIndex % stickerSets.length];
       const bubbleText = messages[burstIndex % messages.length];
