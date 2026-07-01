@@ -117,11 +117,13 @@ Without Supabase environment variables, `/api/public-config` returns a safe fall
 Run:
 
 ```bash
+npm run verify:assistant
 npm run build
 ```
 
 Expected:
 
+- Assistant/admin behavior checks pass.
 - `dist/index.html` exists.
 - `dist/admin.html` exists.
 - `dist/assets/chatWidget.js` exists.
