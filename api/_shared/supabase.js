@@ -15,8 +15,33 @@ function getServiceSupabaseClient() {
   return serviceClient;
 }
 
+function validateBasicAdmin(req) {
+  const header = req.headers.authorization || "";
+  if (!header.startsWith("Basic ")) return null;
+
+  const credentials = Buffer.from(header.slice(6), "base64").toString("utf8");
+  const separatorIndex = credentials.indexOf(":");
+  if (separatorIndex === -1) return null;
+
+  const username = credentials.slice(0, separatorIndex);
+  const password = credentials.slice(separatorIndex + 1);
+  const adminUsername = getOptionalEnv("ADMIN_USERNAME") || "admin";
+  const adminPassword = getOptionalEnv("ADMIN_PASSWORD") || "123456";
+
+  if (username !== adminUsername || password !== adminPassword) {
+    const error = new Error("invalid_admin_credentials");
+    error.statusCode = 401;
+    throw error;
+  }
+
+  return { email: adminUsername, app_metadata: { provider: "basic-admin" } };
+}
+
 async function requireAdmin(req) {
   const header = req.headers.authorization || "";
+  const basicAdmin = validateBasicAdmin(req);
+  if (basicAdmin) return basicAdmin;
+
   const token = header.startsWith("Bearer ") ? header.slice(7) : "";
   if (!token) {
     const error = new Error("missing_bearer_token");

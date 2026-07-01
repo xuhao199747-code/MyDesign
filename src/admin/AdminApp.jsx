@@ -143,7 +143,7 @@ export function AdminApp() {
       onConfigChange={setConfig}
       onSave={handleSave}
       onSignOut={async () => {
-        if (!session.localAdmin) {
+        if (!session.localAdmin && !session.adminCredentials) {
           await getSupabaseClient().auth.signOut();
         }
         setError("");

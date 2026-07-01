@@ -136,6 +136,12 @@ assert.equal(
   "admin login should use fixed username admin and password 123456"
 );
 assert.equal(
+  loginViewSource.includes("adminCredentials") &&
+    loginViewSource.includes("window.btoa"),
+  true,
+  "fixed admin login should create server-recognized admin credentials"
+);
+assert.equal(
   loginViewSource.includes("signInWithPassword") ||
     loginViewSource.includes("getSupabaseClient"),
   false,
@@ -145,7 +151,7 @@ assert.equal(
   adminSourceText.includes("assistantAdminConfig") &&
     adminSourceText.includes("localStorage.setItem"),
   true,
-  "local admin mode should save config to localStorage"
+  "preview mode may still save config to localStorage"
 );
 assert.equal(
   adminSourceText.includes("setError(\"\")") &&
@@ -221,11 +227,32 @@ const adminConfigSource = readFileSync(
   new URL("../api/admin-config.js", import.meta.url),
   "utf8"
 );
+const supabaseHelperSource = readFileSync(
+  new URL("../api/_shared/supabase.js", import.meta.url),
+  "utf8"
+);
+const adminApiSource = readFileSync(
+  new URL("../src/admin/adminApi.js", import.meta.url),
+  "utf8"
+);
 assert.equal(
   adminConfigSource.includes("getDeepSeekConfigStatus") &&
     adminConfigSource.includes("providerStatus"),
   true,
   "admin config endpoint should expose DeepSeek environment status without exposing the API key"
+);
+assert.equal(
+  supabaseHelperSource.includes("validateBasicAdmin") &&
+    supabaseHelperSource.includes("ADMIN_USERNAME") &&
+    supabaseHelperSource.includes("ADMIN_PASSWORD"),
+  true,
+  "admin API should accept fixed admin credentials without requiring Supabase Auth"
+);
+assert.equal(
+  adminApiSource.includes("Basic ${session.adminCredentials}") &&
+    adminApiSource.includes("getAuthorizationHeader"),
+  true,
+  "admin browser API should send fixed admin credentials to server routes"
 );
 assert.equal(
   adminSourceText.includes("模型 API 状态") &&

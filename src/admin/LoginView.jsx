@@ -19,9 +19,7 @@ export function LoginView({ envError, error, onError, onSignedIn }) {
       }
 
       onSignedIn({
-        access_token: "",
-        localAdmin: true,
-        localPreview: true,
+        adminCredentials: window.btoa(`${username}:${password}`),
         user: { email: ADMIN_USERNAME },
       });
     } catch (nextError) {

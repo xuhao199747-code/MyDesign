@@ -8,10 +8,18 @@ async function parseResponse(response) {
   return data;
 }
 
+function getAuthorizationHeader(session) {
+  if (session.adminCredentials) {
+    return `Basic ${session.adminCredentials}`;
+  }
+
+  return `Bearer ${session.access_token}`;
+}
+
 export async function fetchAdminConfig(session) {
   const response = await fetch("/api/admin-config", {
     headers: {
-      Authorization: `Bearer ${session.access_token}`,
+      Authorization: getAuthorizationHeader(session),
     },
   });
 
@@ -22,7 +30,7 @@ export async function saveAdminConfig(session, payload) {
   const response = await fetch("/api/admin-config", {
     method: "PUT",
     headers: {
-      Authorization: `Bearer ${session.access_token}`,
+      Authorization: getAuthorizationHeader(session),
       "Content-Type": "application/json",
     },
     body: JSON.stringify(payload),
@@ -42,7 +50,7 @@ export async function uploadResumeFile(session, file) {
   const response = await fetch("/api/resume-upload", {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${session.access_token}`,
+      Authorization: getAuthorizationHeader(session),
       "Content-Type": "application/json",
     },
     body: JSON.stringify({

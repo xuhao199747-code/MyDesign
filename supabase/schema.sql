@@ -84,9 +84,34 @@ for select
 to anon, authenticated
 using (true);
 
--- Admin writes and visitor usage writes are performed through Vercel API
--- routes with SUPABASE_SERVICE_ROLE_KEY, which bypasses RLS. Restrict direct
--- browser writes by omitting insert/update/delete policies here.
+-- Visitor usage is written only by /api/chat in this app. Supabase's newer
+-- server-side secret keys still honor RLS, so these policies allow the API
+-- route to read and upsert usage counters.
+drop policy if exists "server can read visitor usage" on public.visitor_usage;
+create policy "server can read visitor usage"
+on public.visitor_usage
+for select
+to anon, authenticated
+using (true);
+
+drop policy if exists "server can insert visitor usage" on public.visitor_usage;
+create policy "server can insert visitor usage"
+on public.visitor_usage
+for insert
+to anon, authenticated
+with check (true);
+
+drop policy if exists "server can update visitor usage" on public.visitor_usage;
+create policy "server can update visitor usage"
+on public.visitor_usage
+for update
+to anon, authenticated
+using (true)
+with check (true);
+
+-- Admin writes are performed through Vercel API routes after fixed admin
+-- credential validation. No direct browser write policy is provided for admin
+-- configuration tables.
 
 insert into storage.buckets (id, name, public)
 values ('resumes', 'resumes', false)
