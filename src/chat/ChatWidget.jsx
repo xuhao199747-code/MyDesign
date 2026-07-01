@@ -1,6 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
+import { fetchPublicAssistantConfig, fallbackPublicConfig } from "./chatApi.js";
 import { ChatComposer } from "./ChatComposer.jsx";
 import { ChatMessages } from "./ChatMessages.jsx";
+import {
+  detectResumeIntent,
+  findKnowledgeMatch,
+} from "./knowledgeMatcher.js";
 import { getVisitorId } from "./visitorId.js";
 
 const createMessageId = (prefix) =>
@@ -9,6 +14,7 @@ const createMessageId = (prefix) =>
 export function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState("");
+  const [config, setConfig] = useState(fallbackPublicConfig);
   const [messages, setMessages] = useState([
     {
       id: "welcome",
@@ -22,20 +28,60 @@ export function ChatWidget() {
     visitorIdRef.current = getVisitorId();
   }, []);
 
+  useEffect(() => {
+    let isMounted = true;
+
+    fetchPublicAssistantConfig().then((nextConfig) => {
+      if (!isMounted) return;
+      setConfig(nextConfig);
+      if (nextConfig?.assistant?.welcomeMessage) {
+        setMessages((current) =>
+          current.map((message) =>
+            message.id === "welcome"
+              ? { ...message, text: nextConfig.assistant.welcomeMessage }
+              : message
+          )
+        );
+      }
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   const handleSubmit = (event) => {
     event.preventDefault();
     const value = input.trim();
     if (!value) return;
 
-    setMessages((current) => [
-      ...current,
-      { id: createMessageId("user"), role: "user", text: value },
-      {
+    const userMessage = {
+      id: createMessageId("user"),
+      role: "user",
+      text: value,
+    };
+
+    let assistantMessage;
+
+    if (detectResumeIntent(value)) {
+      assistantMessage = {
         id: createMessageId("assistant"),
         role: "assistant",
-        text: "The new assistant UI is mounted. API wiring comes next.",
-      },
-    ]);
+        type: "resume",
+        resume: config.resume,
+      };
+    } else {
+      const knowledgeMatch = findKnowledgeMatch(value, config);
+      assistantMessage = {
+        id: createMessageId("assistant"),
+        role: "assistant",
+        text:
+          knowledgeMatch?.answer ||
+          "The new assistant UI is mounted. DeepSeek wiring comes next.",
+      };
+    }
+
+    setMessages((current) => [...current, userMessage, assistantMessage]);
     setInput("");
   };
 
@@ -52,7 +98,8 @@ export function ChatWidget() {
                 AI Assistant
               </h2>
               <p className="text-xs text-neutral-500">
-                20 AI calls per visitor
+                {config?.assistant?.apiLimitPerVisitor || 20} AI calls per
+                visitor
               </p>
             </div>
             <button
