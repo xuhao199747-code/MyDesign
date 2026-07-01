@@ -16,6 +16,7 @@ const inputGroup = read("src/components/ui/input-group.jsx");
 const clickSurprise = read("js/modules/click-surprise-burst.js");
 const siteUtils = read("js/site-utils.js");
 const chatApi = read("api/chat.js");
+const viteConfig = read("vite.config.mjs");
 
 assert(
   bootstrap.includes('loadRuntimeEntry("chatWidget.js", "./chat/chat-entry.jsx")'),
@@ -110,6 +111,19 @@ assert(
 assert(
   chatApi.includes('type: "knowledge"') && chatApi.includes('type: "resume"'),
   "api/chat.js must return explicit knowledge and resume response types"
+);
+
+assert(
+  chatApi.includes("fallbackConfig") &&
+    chatApi.includes('mode: "local-preview"'),
+  "api/chat.js must answer with fallback config when Supabase is not configured"
+);
+
+assert(
+  viteConfig.includes("localApiRoutesPlugin") &&
+    viteConfig.includes("api") &&
+    viteConfig.includes("handler(req, res)"),
+  "vite dev server must route /api/* requests to local API handlers"
 );
 
 if (failures.length) {

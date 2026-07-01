@@ -1,16 +1,76 @@
 import path from 'node:path'
+import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
+const require = createRequire(import.meta.url)
 
-export default defineConfig({
+function readRequestBody(req) {
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    req.on('data', (chunk) => chunks.push(chunk));
+    req.on('error', reject);
+    req.on('end', () => {
+      const rawBody = Buffer.concat(chunks).toString('utf8');
+      if (!rawBody) {
+        resolve(undefined);
+        return;
+      }
+
+      try {
+        resolve(JSON.parse(rawBody));
+      } catch {
+        resolve(rawBody);
+      }
+    });
+  });
+}
+
+function localApiRoutesPlugin() {
+  return {
+    name: 'local-api-routes',
+    configureServer(server) {
+      server.middlewares.use(async (req, res, next) => {
+        const pathname = String(req.url || '').split('?')[0];
+        if (!pathname.startsWith('/api/')) {
+          next();
+          return;
+        }
+
+        const routeName = pathname.slice('/api/'.length);
+        const routePath = path.resolve(__dirname, 'api', `${routeName}.js`);
+
+        try {
+          req.body = await readRequestBody(req);
+          delete require.cache[require.resolve(routePath)];
+          const handler = require(routePath);
+          await handler(req, res);
+        } catch (error) {
+          res.statusCode = error.statusCode || 500;
+          res.setHeader('Content-Type', 'application/json; charset=utf-8');
+          res.end(JSON.stringify({ error: error.message || 'local_api_failed' }));
+        }
+      });
+    },
+  };
+}
+
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, __dirname, '');
+  for (const [key, value] of Object.entries(env)) {
+    if (process.env[key] === undefined) {
+      process.env[key] = value;
+    }
+  }
+
+  return {
   base: './',
   assetsInclude: ['**/*.glb'],
-  plugins: [react({ fastRefresh: false }), tailwindcss()],
+  plugins: [localApiRoutesPlugin(), react({ fastRefresh: false }), tailwindcss()],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src'),
@@ -69,4 +129,5 @@ export default defineConfig({
       },
     },
   },
+  };
 })

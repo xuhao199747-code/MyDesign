@@ -22,7 +22,7 @@ export function ChatComposer({ value, disabled, status, onChange, onSubmit }) {
   return (
     <div className="bg-transparent px-4 py-3">
       <PromptInput
-        inputGroupClassName="rounded-[24px] border-border bg-white/90 shadow-none focus-within:border-foreground has-[[data-slot=input-group-control]:focus-visible]:!border-foreground has-[[data-slot=input-group-control]:focus-visible]:!ring-0"
+        inputGroupClassName="rounded-[24px] border-black/10 bg-white shadow-none has-disabled:bg-white has-disabled:opacity-100 focus-within:border-foreground has-[[data-slot=input-group-control]:focus-visible]:!border-foreground has-[[data-slot=input-group-control]:focus-visible]:!ring-0"
         onMouseDown={handleFocusInput}
         onSubmit={handleSubmit}
       >

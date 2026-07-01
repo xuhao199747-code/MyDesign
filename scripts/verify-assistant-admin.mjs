@@ -53,6 +53,8 @@ function loadChatWithMocks({ used = 0, limit = 20 } = {}) {
   const supabasePath = require.resolve("../api/_shared/supabase.js");
   const configPath = require.resolve("../api/_shared/assistant-config.js");
 
+  process.env.SUPABASE_URL = "https://supabase.test";
+  process.env.SUPABASE_SERVICE_ROLE_KEY = "test-service-role";
   delete require.cache[chatPath];
 
   require.cache[supabasePath] = {
@@ -101,6 +103,12 @@ function loadChatWithMocks({ used = 0, limit = 20 } = {}) {
     },
   };
 
+  return require("../api/chat.js");
+}
+
+function loadChatWithoutSupabase() {
+  const chatPath = require.resolve("../api/chat.js");
+  delete require.cache[chatPath];
   return require("../api/chat.js");
 }
 
@@ -269,5 +277,51 @@ assert.equal(limitResponse.body.used, 20);
 restoreModule("../api/chat.js");
 restoreModule("../api/_shared/supabase.js");
 restoreModule("../api/_shared/assistant-config.js");
+
+const previousEnv = {
+  DEEPSEEK_API_KEY: process.env.DEEPSEEK_API_KEY,
+  DEEPSEEK_BASE_URL: process.env.DEEPSEEK_BASE_URL,
+  DEEPSEEK_MODEL: process.env.DEEPSEEK_MODEL,
+  SUPABASE_URL: process.env.SUPABASE_URL,
+  SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
+};
+const previousFetch = globalThis.fetch;
+process.env.DEEPSEEK_API_KEY = "test-key";
+process.env.DEEPSEEK_BASE_URL = "https://deepseek.test";
+process.env.DEEPSEEK_MODEL = "deepseek-chat";
+delete process.env.SUPABASE_URL;
+delete process.env.SUPABASE_SERVICE_ROLE_KEY;
+globalThis.fetch = async () => ({
+  ok: true,
+  async json() {
+    return {
+      choices: [{ message: { content: "fallback assistant reply" } }],
+    };
+  },
+});
+
+chatHandler = loadChatWithoutSupabase();
+const fallbackChatResponse = await invoke(chatHandler, {
+  method: "POST",
+  headers: {},
+  body: {
+    visitorId: "local-preview",
+    messages: [{ role: "user", content: "hello from local preview" }],
+  },
+});
+assert.equal(fallbackChatResponse.statusCode, 200);
+assert.equal(fallbackChatResponse.body.type, "assistant");
+assert.equal(fallbackChatResponse.body.text, "fallback assistant reply");
+assert.equal(fallbackChatResponse.body.usage.mode, "local-preview");
+
+for (const [key, value] of Object.entries(previousEnv)) {
+  if (value === undefined) {
+    delete process.env[key];
+  } else {
+    process.env[key] = value;
+  }
+}
+globalThis.fetch = previousFetch;
+restoreModule("../api/chat.js");
 
 console.log("assistant admin verification passed");

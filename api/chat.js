@@ -1,4 +1,4 @@
-const { readAssistantConfig } = require("./_shared/assistant-config");
+const { fallbackConfig, readAssistantConfig } = require("./_shared/assistant-config");
 const { getOptionalEnv, getRequiredEnv } = require("./_shared/env");
 const { json, methodNotAllowed } = require("./_shared/http");
 const { getServiceSupabaseClient } = require("./_shared/supabase");
@@ -71,6 +71,12 @@ function toDeepSeekMessages(messages, config) {
       }))
       .filter((message) => message.content),
   ];
+}
+
+function hasSupabaseConfig() {
+  return Boolean(
+    getOptionalEnv("SUPABASE_URL") && getOptionalEnv("SUPABASE_SERVICE_ROLE_KEY")
+  );
 }
 
 async function readVisitorUsage(supabase, visitorId) {
@@ -148,8 +154,9 @@ module.exports = async function handler(req, res) {
       return;
     }
 
-    const supabase = getServiceSupabaseClient();
-    const config = await readAssistantConfig(supabase);
+    const supabaseEnabled = hasSupabaseConfig();
+    const supabase = supabaseEnabled ? getServiceSupabaseClient() : null;
+    const config = supabase ? await readAssistantConfig(supabase) : fallbackConfig;
     const latestUserMessage = getLatestUserMessage(messages);
 
     if (detectResumeIntent(latestUserMessage)) {
@@ -172,6 +179,21 @@ module.exports = async function handler(req, res) {
     }
 
     const limit = config.assistant.apiLimitPerVisitor || 20;
+    if (!supabase) {
+      const answer = await callDeepSeek(toDeepSeekMessages(messages, config));
+      json(res, 200, {
+        type: "assistant",
+        text: answer,
+        usage: {
+          mode: "local-preview",
+          limit,
+          used: null,
+          remaining: null,
+        },
+      });
+      return;
+    }
+
     const usage = await readVisitorUsage(supabase, visitorId);
     const used = usage?.api_call_count || 0;
 
