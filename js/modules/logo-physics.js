@@ -54,8 +54,8 @@
 
     const resolveLogoCollisions = (particles, size) => {
       siteHelpers.resolveParticleCollisions(particles, size, {
-        minDistRatio: 0.86,
-        restitution: 0.32,
+        minDistRatio: siteUtils.getNumberOption(logoPhysicsConfig, "collisionMinDistRatio", 0.82),
+        restitution: siteUtils.getNumberOption(logoPhysicsConfig, "collisionRestitution", 0.18),
       });
     };
 
@@ -82,17 +82,25 @@
         ? siteUtils.getNumberOption(logoPhysicsConfig, "floorSafeMobile", 20)
         : siteUtils.getNumberOption(logoPhysicsConfig, "floorSafeDesktop", 44);
       const usableWidth = wallWidth - size - edgeSafe * 2;
-      const step = usableWidth / Math.max(logos.length - 1, 1);
+      const singleRowStep = usableWidth / Math.max(logos.length - 1, 1);
       const baseGround = wallHeight - size - floorSafe;
+      const spreadLift = isMobile
+        ? siteUtils.getNumberOption(logoPhysicsConfig, "mobileSpreadLift", 8)
+        : siteUtils.getNumberOption(logoPhysicsConfig, "desktopSpreadLift", 14);
 
       logoParticles = logos.map((el, index) => {
         const jitter = isMobile
-          ? siteUtils.randomInRange(-11, 11)
-          : siteUtils.randomInRange(-18, 18);
+          ? siteUtils.randomInRange(-2.5, 2.5)
+          : siteUtils.randomInRange(-8, 8);
         const x = siteUtils.clamp(
-          edgeSafe + index * step + jitter,
+          edgeSafe + index * singleRowStep + jitter,
           edgeSafe,
           wallWidth - size - edgeSafe
+        );
+        const ground = siteUtils.clamp(
+          baseGround - (index % 2) * spreadLift,
+          edgeSafe,
+          baseGround
         );
         const angle = siteUtils.randomInRange(-26, 26);
         const startY = isMobile
@@ -115,8 +123,8 @@
           vy: siteUtils.randomInRange(0, 20),
           angle,
           av: siteUtils.randomInRange(-120, 120),
-          ground: baseGround,
-          delay: siteUtils.randomInRange(0, 0.75),
+          ground,
+          delay: siteUtils.randomInRange(0, isMobile ? 0.42 : 0.75),
           active: false,
           settled: false,
         };
@@ -199,15 +207,15 @@
             particle.vx *= 0.9;
             particle.av *= rotationDamp;
 
-            if (Math.abs(particle.vy) < 24) {
+            if (Math.abs(particle.vy) < 36) {
               particle.vy = 0;
               particle.av *= 0.7;
             }
           }
 
           if (
-            Math.abs(particle.vx) < 3 &&
-            Math.abs(particle.vy) < 3 &&
+            Math.abs(particle.vx) < 7 &&
+            Math.abs(particle.vy) < 7 &&
             Math.abs(particle.y - particle.ground) < 0.5
           ) {
             particle.vx = 0;
@@ -224,7 +232,6 @@
             `translate3d(${particle.x}px, ${particle.y}px, 0) rotate(${particle.angle.toFixed(2)}deg)`;
         });
 
-        resolveLogoCollisions(logoParticles, size);
         resolveLogoCollisions(logoParticles, size);
 
         logoParticles.forEach((particle) => {

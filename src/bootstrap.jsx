@@ -32,10 +32,14 @@ function whenNavWechatLanyardRequested() {
     const loadLanyard = () => {
       if (isLoading || mount.dataset.reactMounted === "true") return;
       isLoading = true;
+      document.getElementById("navWechatDrop")?.classList.add("is-loading");
       loadRuntimeEntry("navWechatLanyard.js", "./nav-wechat-lanyard-entry.jsx")
         .then(({ mountNavWechatLanyard }) => {
           mountNavWechatLanyard();
-          if (document.getElementById("navWechatDrop")?.classList.contains("is-open")) {
+          const drop = document.getElementById("navWechatDrop");
+          drop?.classList.add("is-ready");
+          drop?.classList.remove("is-loading");
+          if (drop?.classList.contains("is-open")) {
             window.requestAnimationFrame(() => {
               window.dispatchEvent(new CustomEvent("nav-wechat-card-open"));
             });
@@ -53,6 +57,7 @@ function whenNavWechatLanyardRequested() {
       loadLanyard();
     };
 
+    whenBrowserIdle(loadLanyard, 700);
     document.addEventListener("pointerover", loadFromEvent, { passive: true });
     document.addEventListener("focusin", loadFromEvent);
     document.addEventListener("touchstart", loadFromEvent, { passive: true });
@@ -80,7 +85,7 @@ runBootstrapTasks([
   wrapBootstrapTask(
     whenBrowserIdle(
       whenElementPresent("chatWidgetRoot", () =>
-        loadRuntimeEntry("chatWidget.js", "./chat-widget-entry.jsx")
+        loadRuntimeEntry("chatWidget.js", "./chat/chat-entry.jsx")
           .then(({ mountChatWidget }) => mountChatWidget())
       ),
       260

@@ -231,7 +231,7 @@ export default function BounceCards({
 
   const openCardLink = (href) => {
     if (!href) return;
-    window.location.assign(href);
+    window.open(href, "_blank", "noopener,noreferrer");
   };
 
   useEffect(() => {
@@ -272,6 +272,8 @@ export default function BounceCards({
             cardRefs.current[idx] = node;
           }}
           href={item.href || `./project.html?slug=${item.slug}`}
+          target="_blank"
+          rel="noopener noreferrer"
           style={{
             transform: `translate(-50%, -50%) ${currentTransformStyles[idx] ?? "none"}`,
             top: "50%",

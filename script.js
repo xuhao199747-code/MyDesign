@@ -187,8 +187,21 @@ if (bootConfig.logSummary === true) {
   drop.dataset.wechatDropControllerReady = "true";
   let isOpen = false;
   let openScrollY = 0;
+  let scrollGuardUntil = 0;
   let scrollWatchFrame = null;
   let closeTimer = null;
+
+  const clearSectionNavState = () => {
+    window.__clearActiveNavLink?.();
+    document.querySelectorAll(".menu a[aria-current]").forEach((link) => {
+      link.removeAttribute("aria-current");
+    });
+  };
+
+  const restoreOpenScroll = () => {
+    if (Math.abs(window.scrollY - openScrollY) <= 1) return;
+    window.scrollTo({ top: openScrollY, behavior: "auto" });
+  };
 
   const syncTriggerState = (expanded) => {
     getTrigger()?.setAttribute("aria-expanded", expanded);
@@ -214,6 +227,7 @@ if (bootConfig.logSummary === true) {
     }
     drop.classList.remove("is-opening");
     drop.classList.add("is-closing");
+    drop.classList.remove("is-loading");
     syncTriggerState("false");
     closeTimer = window.setTimeout(() => {
       drop.classList.remove("is-open", "is-closing");
@@ -222,8 +236,28 @@ if (bootConfig.logSummary === true) {
     }, 360);
   };
 
+  const forceCloseCard = () => {
+    isOpen = false;
+    if (closeTimer) {
+      window.clearTimeout(closeTimer);
+      closeTimer = null;
+    }
+    if (scrollWatchFrame) {
+      window.cancelAnimationFrame(scrollWatchFrame);
+      scrollWatchFrame = null;
+    }
+    drop.classList.remove("is-open", "is-opening", "is-closing", "is-loading");
+    drop.setAttribute("aria-hidden", "true");
+    syncTriggerState("false");
+  };
+
   const watchScrollWhileOpen = () => {
     if (!isOpen) return;
+    if (performance.now() < scrollGuardUntil) {
+      restoreOpenScroll();
+      scrollWatchFrame = window.requestAnimationFrame(watchScrollWhileOpen);
+      return;
+    }
     if (Math.abs(window.scrollY - openScrollY) > 2) {
       closeCard();
       return;
@@ -234,12 +268,17 @@ if (bootConfig.logSummary === true) {
   const openCard = () => {
     updatePosition();
     isOpen = true;
+    clearSectionNavState();
     if (closeTimer) {
       window.clearTimeout(closeTimer);
       closeTimer = null;
     }
     openScrollY = window.scrollY;
+    scrollGuardUntil = performance.now() + 520;
     drop.classList.remove("is-closing", "is-opening");
+    if (!drop.classList.contains("is-ready")) {
+      drop.classList.add("is-loading");
+    }
     drop.setAttribute("aria-hidden", "false");
     syncTriggerState("true");
     void drop.offsetWidth;
@@ -281,9 +320,11 @@ if (bootConfig.logSummary === true) {
   syncTriggerState("false");
   window.__toggleNavWechatCard = toggleCard;
   window.__closeNavWechatCard = closeCard;
+  window.__forceCloseNavWechatCard = forceCloseCard;
 
   document.addEventListener("click", (event) => {
     if (!(event.target instanceof Element)) return;
+    if (event.target.closest('[data-shell-node="contact-trigger"]')) return;
     const clickedTrigger = event.target.closest(triggerSelector);
     if (!clickedTrigger) return;
     event.stopImmediatePropagation?.();
@@ -316,7 +357,12 @@ if (bootConfig.logSummary === true) {
   );
 
   window.addEventListener("scroll", () => {
-    if (isOpen) closeCard();
+    if (!isOpen) return;
+    if (performance.now() < scrollGuardUntil) {
+      restoreOpenScroll();
+      return;
+    }
+    closeCard();
   }, { passive: true });
 
   window.addEventListener("resize", () => {

@@ -650,7 +650,7 @@
 
       if (canNavigateFromTap && pressedCellHref) {
         suppressNextClickNavigation = true;
-        window.location.assign(pressedCellHref);
+        window.open(pressedCellHref, "_blank", "noopener,noreferrer");
         pressedCell = null;
         pressedCellHref = "";
         shouldNavigateOnPointerUp = false;
