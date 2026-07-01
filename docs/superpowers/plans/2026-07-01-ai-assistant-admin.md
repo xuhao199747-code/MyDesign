@@ -32,7 +32,7 @@
 Create:
 
 - `admin.html`: independent admin shell with `#adminRoot`.
-- `src/components/ai-elements/*`: installed ai-elements components used by chat/admin.
+- `src/components/ai-elements/*`: installed ai-elements components used by chat/admin. Current implementation uses ai-elements `conversation`, `prompt-input`, `shimmer`, and `suggestion`; message bubbles are lightweight React + Tailwind to avoid pulling the markdown/mermaid rendering chain into the homepage-adjacent chat bundle.
 - `src/chat/chat-entry.jsx`: chat entry point mounted by the existing lazy-load path.
 - `src/chat/ChatWidget.jsx`: floating visitor chat shell.
 - `src/chat/ChatMessages.jsx`: ai-elements-based message list.
@@ -82,7 +82,6 @@ Test:
 
 **Files:**
 - Create: `src/components/ai-elements/conversation.jsx`
-- Create: `src/components/ai-elements/message.jsx`
 - Create: `src/components/ai-elements/prompt-form.jsx`
 - Create: `src/components/ai-elements/prompt-input.jsx`
 - Create: `src/components/ai-elements/loader.jsx`
@@ -110,7 +109,7 @@ Expected: `package.json` and `package-lock.json` include `@supabase/supabase-js`
 Run:
 
 ```bash
-npx ai-elements@1.9.0 add conversation message prompt-form prompt-input loader response
+npx ai-elements@1.9.0 add conversation prompt-input suggestion shimmer
 ```
 
 Expected: components are generated under the configured components alias, usually `src/components/ai-elements/`.
@@ -123,7 +122,7 @@ Run:
 find src/components/ai-elements -maxdepth 1 -type f | sort
 ```
 
-Expected: the six generated ai-elements component files exist. If the CLI adds shadcn utility components under `src/components/ui`, keep them only if required by ai-elements and do not use them directly in app code.
+Expected: generated ai-elements component files exist. If the CLI adds shadcn utility components under `src/components/ui`, keep them only if required by ai-elements and do not use them directly in app code.
 
 - [ ] **Step 4: Build after component install**
 
@@ -353,12 +352,12 @@ export function getVisitorId() {
 
 - [ ] **Step 2: Create `src/chat/ChatMessages.jsx`**
 
-Use generated ai-elements imports:
+Use generated ai-elements conversation imports and lightweight Tailwind bubbles:
 
 ```jsx
 import React from "react";
 import { Conversation, ConversationContent } from "@/components/ai-elements/conversation";
-import { Message, MessageContent } from "@/components/ai-elements/message";
+import { Shimmer } from "@/components/ai-elements/shimmer";
 import { Response } from "@/components/ai-elements/response";
 import { ResumeDownloadMessage } from "./ResumeDownloadMessage.jsx";
 
