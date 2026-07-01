@@ -9,7 +9,7 @@ import {
   sendChatMessage,
 } from "./chatApi.js";
 import { ChatComposer } from "./ChatComposer.jsx";
-import { ChatMessages } from "./ChatMessages.jsx";
+import { ChatMessages, ChatSuggestions } from "./ChatMessages.jsx";
 import { getVisitorId } from "./visitorId.js";
 
 const createMessageId = (prefix) =>
@@ -25,6 +25,7 @@ export function ChatWidget() {
     fallbackPublicConfig.assistant.welcomeMessage
   );
   const [messages, setMessages] = useState([]);
+  const panelRef = useRef(null);
   const visitorIdRef = useRef(null);
 
   const suggestions = useMemo(() => {
@@ -59,6 +60,21 @@ export function ChatWidget() {
       isMounted = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (!isOpen) return undefined;
+
+    const handleOutsidePointerDown = (event) => {
+      if (panelRef.current?.contains(event.target)) return;
+      setIsOpen(false);
+    };
+
+    document.addEventListener("pointerdown", handleOutsidePointerDown, true);
+
+    return () => {
+      document.removeEventListener("pointerdown", handleOutsidePointerDown, true);
+    };
+  }, [isOpen]);
 
   const sendValue = async (rawValue) => {
     const value = rawValue.trim();
@@ -156,6 +172,7 @@ export function ChatWidget() {
     >
       {isOpen ? (
         <Card
+          ref={panelRef}
           className="pointer-events-auto h-[min(590px,calc(100dvh-32px))] w-[min(390px,calc(100vw-32px))] gap-0 rounded-[32px] border border-white bg-card/80 py-0 shadow-2xl shadow-foreground/10 backdrop-blur-xl"
           size="sm"
           aria-label="AI Assistant"
@@ -164,11 +181,6 @@ export function ChatWidget() {
           <div className="flex h-11 items-center gap-2 px-4">
             <h2 className="flex min-w-0 flex-1 items-baseline gap-2 truncate text-base font-medium">
               <span className="shrink-0">徐浩 Agent</span>
-              <span className="truncate text-xs font-normal text-muted-foreground">
-                {usage
-                  ? `剩余 ${usage.remaining} / ${usage.limit} 次 AI 对话`
-                  : `每位访客 ${config?.assistant?.apiLimitPerVisitor || 20} 次 AI 对话`}
-              </span>
             </h2>
             <Button
               variant="ghost"
@@ -181,10 +193,12 @@ export function ChatWidget() {
             </Button>
           </div>
           <ChatMessages
-            disabled={status === "submitted"}
             messages={messages}
-            suggestions={suggestions}
             welcomeMessage={welcomeMessage}
+          />
+          <ChatSuggestions
+            disabled={status === "submitted"}
+            suggestions={suggestions}
             onSuggestion={handleSuggestion}
           />
           <ChatComposer

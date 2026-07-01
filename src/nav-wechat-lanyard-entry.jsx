@@ -1,8 +1,12 @@
 import { createRoot } from "react-dom/client";
+import { useTexture } from "@react-three/drei";
 import Lanyard from "./components/Lanyard/Lanyard.jsx";
 
 import backPhoto from "../imag/photo1.webp?url";
 import wechatCard from "../imag/wechat-qr-placeholder.svg?url";
+
+useTexture.preload(wechatCard);
+useTexture.preload(backPhoto);
 
 export function mountNavWechatLanyard() {
   const mount = document.getElementById("navWechatLanyardMount");

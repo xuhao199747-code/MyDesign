@@ -50,9 +50,6 @@ function ChatBubble({ message }) {
 }
 
 function ChatEmptyState({
-  disabled,
-  onSuggestion,
-  suggestions,
   welcomeMessage,
 }) {
   return (
@@ -72,22 +69,35 @@ function ChatEmptyState({
           {welcomeMessage}
         </p>
       </div>
-      <div className="mt-4 space-y-0">
+    </div>
+  );
+}
+
+export function ChatSuggestions({
+  disabled,
+  onSuggestion,
+  suggestions = [],
+}) {
+  if (!suggestions.length) return null;
+
+  return (
+    <div className="bg-transparent px-4 pt-1 pb-0">
+      <div className="flex gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {suggestions.map((suggestion) => {
           const Icon = getSuggestionIcon(suggestion);
 
           return (
             <Suggestion
-              className="h-[34px] w-full justify-start gap-3 rounded-lg border-0 px-2 text-[15px] font-normal"
+              className="h-8 shrink-0 justify-start gap-1.5 rounded-full border border-black/10 bg-white px-3 text-[13px] font-normal text-foreground shadow-none hover:bg-white/90"
               disabled={disabled}
               key={suggestion}
               onClick={onSuggestion}
-              size="default"
+              size="sm"
               suggestion={suggestion}
-              variant="ghost"
+              variant="outline"
             >
-              <Icon className="size-4 text-muted-foreground" />
-              <span className="truncate">{suggestion}</span>
+              <Icon className="size-3.5 text-muted-foreground" />
+              <span className="whitespace-nowrap">{suggestion}</span>
             </Suggestion>
           );
         })}
@@ -97,18 +107,12 @@ function ChatEmptyState({
 }
 
 export function ChatMessages({
-  disabled,
   messages,
-  onSuggestion,
-  suggestions = [],
   welcomeMessage,
 }) {
   if (!messages.length) {
     return (
       <ChatEmptyState
-        disabled={disabled}
-        onSuggestion={onSuggestion}
-        suggestions={suggestions}
         welcomeMessage={welcomeMessage}
       />
     );

@@ -51,13 +51,16 @@ function whenNavWechatLanyardRequested() {
         });
     };
 
+    window.__loadNavWechatLanyard = loadLanyard;
+
     const loadFromEvent = (event) => {
       if (!(event.target instanceof Element)) return;
       if (!event.target.closest(triggerSelector)) return;
       loadLanyard();
     };
 
-    whenBrowserIdle(loadLanyard, 700);
+    whenBrowserIdle(loadLanyard, 240)();
+    window.setTimeout(loadLanyard, 1200);
     document.addEventListener("pointerover", loadFromEvent, { passive: true });
     document.addEventListener("focusin", loadFromEvent);
     document.addEventListener("touchstart", loadFromEvent, { passive: true });

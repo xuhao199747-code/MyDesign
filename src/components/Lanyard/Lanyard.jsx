@@ -19,6 +19,9 @@ import "./Lanyard.css";
 
 extend({ MeshLineGeometry, MeshLineMaterial });
 
+useGLTF.preload(cardGLB);
+useTexture.preload(lanyardTexture);
+
 const BLANK_PIXEL =
   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
 

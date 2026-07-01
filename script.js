@@ -266,6 +266,7 @@ if (bootConfig.logSummary === true) {
   };
 
   const openCard = () => {
+    window.__loadNavWechatLanyard?.();
     updatePosition();
     isOpen = true;
     clearSectionNavState();
