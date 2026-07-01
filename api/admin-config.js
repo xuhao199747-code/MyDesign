@@ -23,6 +23,18 @@ async function replaceKnowledgeItems(supabase, items) {
   if (error) throw error;
 }
 
+function parseBody(req) {
+  if (!req.body) return {};
+  if (typeof req.body === "string") {
+    try {
+      return JSON.parse(req.body);
+    } catch {
+      return {};
+    }
+  }
+  return req.body;
+}
+
 module.exports = async function handler(req, res) {
   if (req.method !== "GET" && req.method !== "PUT") {
     methodNotAllowed(res);
@@ -39,7 +51,7 @@ module.exports = async function handler(req, res) {
       return;
     }
 
-    const payload = req.body || {};
+    const payload = parseBody(req);
     const assistant = payload.assistant || {};
     const resume = payload.resume || {};
     const knowledgeItems = Array.isArray(payload.knowledgeItems)

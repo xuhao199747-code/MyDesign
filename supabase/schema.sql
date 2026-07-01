@@ -88,7 +88,14 @@ using (true);
 -- routes with SUPABASE_SERVICE_ROLE_KEY, which bypasses RLS. Restrict direct
 -- browser writes by omitting insert/update/delete policies here.
 
--- Create a private Supabase Storage bucket named "resumes" in the dashboard:
--- insert into storage.buckets (id, name, public)
--- values ('resumes', 'resumes', false)
--- on conflict (id) do nothing;
+insert into storage.buckets (id, name, public)
+values ('resumes', 'resumes', false)
+on conflict (id) do nothing;
+
+drop policy if exists "authenticated admins can manage resumes" on storage.objects;
+create policy "authenticated admins can manage resumes"
+on storage.objects
+for all
+to authenticated
+using (bucket_id = 'resumes')
+with check (bucket_id = 'resumes');
