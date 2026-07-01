@@ -42,3 +42,33 @@ export async function fetchPublicAssistantConfig() {
     return fallbackPublicConfig;
   }
 }
+
+export async function fetchResumeDownload(fallbackResume = {}) {
+  try {
+    const response = await fetch("/api/resume");
+    if (!response.ok) throw new Error("Failed to load resume");
+    return await response.json();
+  } catch {
+    return {
+      url: fallbackResume.url || fallbackResume.externalUrl || "",
+      displayName: fallbackResume.displayName || "简历",
+    };
+  }
+}
+
+export async function sendChatMessage(payload) {
+  const response = await fetch("/api/chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const error = new Error(data.error || "chat_request_failed");
+    error.data = data;
+    throw error;
+  }
+
+  return data;
+}

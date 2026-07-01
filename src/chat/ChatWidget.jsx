@@ -1,5 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
-import { fetchPublicAssistantConfig, fallbackPublicConfig } from "./chatApi.js";
+import {
+  fallbackPublicConfig,
+  fetchPublicAssistantConfig,
+  fetchResumeDownload,
+  sendChatMessage,
+} from "./chatApi.js";
 import { ChatComposer } from "./ChatComposer.jsx";
 import { ChatMessages } from "./ChatMessages.jsx";
 import {
@@ -15,6 +20,8 @@ export function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState("");
   const [config, setConfig] = useState(fallbackPublicConfig);
+  const [status, setStatus] = useState("ready");
+  const [usage, setUsage] = useState(null);
   const [messages, setMessages] = useState([
     {
       id: "welcome",
@@ -50,10 +57,10 @@ export function ChatWidget() {
     };
   }, []);
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     const value = input.trim();
-    if (!value) return;
+    if (!value || status === "submitted") return;
 
     const userMessage = {
       id: createMessageId("user"),
@@ -61,28 +68,87 @@ export function ChatWidget() {
       text: value,
     };
 
-    let assistantMessage;
-
     if (detectResumeIntent(value)) {
-      assistantMessage = {
+      const resume = await fetchResumeDownload(config.resume);
+      const assistantMessage = {
         id: createMessageId("assistant"),
         role: "assistant",
         type: "resume",
-        resume: config.resume,
+        resume,
       };
-    } else {
-      const knowledgeMatch = findKnowledgeMatch(value, config);
-      assistantMessage = {
-        id: createMessageId("assistant"),
-        role: "assistant",
-        text:
-          knowledgeMatch?.answer ||
-          "The new assistant UI is mounted. DeepSeek wiring comes next.",
-      };
+      setMessages((current) => [...current, userMessage, assistantMessage]);
+      setInput("");
+      return;
     }
 
-    setMessages((current) => [...current, userMessage, assistantMessage]);
+    const knowledgeMatch = findKnowledgeMatch(value, config);
+    if (knowledgeMatch) {
+      setMessages((current) => [
+        ...current,
+        userMessage,
+        {
+          id: createMessageId("assistant"),
+          role: "assistant",
+          text: knowledgeMatch.answer,
+        },
+      ]);
+      setInput("");
+      return;
+    }
+
+    const pendingId = createMessageId("assistant");
     setInput("");
+    setStatus("submitted");
+    setMessages((current) => [
+      ...current,
+      userMessage,
+      {
+        id: pendingId,
+        role: "assistant",
+        text: "",
+        pending: true,
+      },
+    ]);
+
+    try {
+      const result = await sendChatMessage({
+        visitorId: visitorIdRef.current || getVisitorId(),
+        messages: [...messages, userMessage].map((message) => ({
+          role: message.role,
+          content: message.text,
+        })),
+      });
+
+      setUsage(result.usage || null);
+      setMessages((current) =>
+        current.map((message) =>
+          message.id === pendingId
+            ? {
+                ...message,
+                pending: false,
+                text: result.text || "I could not generate an answer.",
+              }
+            : message
+        )
+      );
+    } catch (error) {
+      const isLimit = error.data?.error === "limit_reached";
+      setMessages((current) =>
+        current.map((message) =>
+          message.id === pendingId
+            ? {
+                ...message,
+                pending: false,
+                text: isLimit
+                  ? `你已经用完 ${error.data.limit || 20} 次 AI 对话次数。固定知识库内容和简历下载仍然可以继续使用。`
+                  : "AI 暂时没有连接成功，请稍后再试。",
+              }
+            : message
+        )
+      );
+    } finally {
+      setStatus("ready");
+    }
   };
 
   return (
@@ -98,8 +164,9 @@ export function ChatWidget() {
                 AI Assistant
               </h2>
               <p className="text-xs text-neutral-500">
-                {config?.assistant?.apiLimitPerVisitor || 20} AI calls per
-                visitor
+                {usage
+                  ? `${usage.remaining} / ${usage.limit} AI calls left`
+                  : `${config?.assistant?.apiLimitPerVisitor || 20} AI calls per visitor`}
               </p>
             </div>
             <button
@@ -112,6 +179,8 @@ export function ChatWidget() {
           </header>
           <ChatMessages messages={messages} />
           <ChatComposer
+            disabled={status === "submitted"}
+            status={status}
             value={input}
             onChange={setInput}
             onSubmit={handleSubmit}
