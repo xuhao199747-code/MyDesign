@@ -25,6 +25,7 @@ export default defineConfig({
 	      preserveEntrySignatures: 'exports-only',
 	      input: {
 	        index: path.resolve(__dirname, 'index.html'),
+	        admin: path.resolve(__dirname, 'admin.html'),
 	        navWechatLanyard: path.resolve(__dirname, 'src/nav-wechat-lanyard-entry.jsx'),
 	        portfolioBounceCards: path.resolve(__dirname, 'src/portfolio-bounce-cards.jsx'),
 	        ribbonsEntry: path.resolve(__dirname, 'src/ribbons-entry.jsx'),
