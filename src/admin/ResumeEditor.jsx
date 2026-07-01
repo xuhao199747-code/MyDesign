@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { getSupabaseClient } from "./supabaseClient.js";
+import { uploadResumeFile } from "./adminApi.js";
 
-export function ResumeEditor({ resume, onChange }) {
+export function ResumeEditor({ resume, session, onChange }) {
   const [fileName, setFileName] = useState("");
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
@@ -19,23 +19,11 @@ export function ResumeEditor({ resume, onChange }) {
 
     setUploading(true);
     try {
-      const safeName = file.name
-        .toLowerCase()
-        .replace(/[^a-z0-9._-]+/g, "-")
-        .replace(/^-+|-+$/g, "");
-      const path = `resume/${Date.now()}-${safeName || "resume.pdf"}`;
-      const { error } = await getSupabaseClient().storage
-        .from("resumes")
-        .upload(path, file, {
-          contentType: "application/pdf",
-          upsert: true,
-        });
-
-      if (error) throw error;
+      const result = await uploadResumeFile(session, file);
 
       onChange({
         ...resume,
-        filePath: path,
+        filePath: result.filePath,
         displayName: resume.displayName || file.name,
       });
     } catch (error) {

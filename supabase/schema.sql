@@ -92,10 +92,6 @@ insert into storage.buckets (id, name, public)
 values ('resumes', 'resumes', false)
 on conflict (id) do nothing;
 
-drop policy if exists "authenticated admins can manage resumes" on storage.objects;
-create policy "authenticated admins can manage resumes"
-on storage.objects
-for all
-to authenticated
-using (bucket_id = 'resumes')
-with check (bucket_id = 'resumes');
+-- Resume uploads are handled by /api/resume-upload with
+-- SUPABASE_SERVICE_ROLE_KEY after admin session validation. No direct browser
+-- storage write policy is needed.

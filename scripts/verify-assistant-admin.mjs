@@ -114,6 +114,19 @@ const adminNoAuth = await invoke(adminConfigHandler, {
 assert.equal(adminNoAuth.statusCode, 401);
 assert.equal(adminNoAuth.body.error, "missing_bearer_token");
 
+const resumeUploadHandler = require("../api/resume-upload.js");
+const resumeUploadNoAuth = await invoke(resumeUploadHandler, {
+  method: "POST",
+  headers: {},
+  body: {
+    fileName: "resume.pdf",
+    contentType: "application/pdf",
+    base64: "JVBERi0=",
+  },
+});
+assert.equal(resumeUploadNoAuth.statusCode, 401);
+assert.equal(resumeUploadNoAuth.body.error, "missing_bearer_token");
+
 let chatHandler = loadChatWithMocks({ used: 20, limit: 20 });
 const limitResponse = await invoke(chatHandler, {
   method: "POST",

@@ -71,7 +71,7 @@ visitor_usage
 resumes storage bucket
 ```
 
-The admin app uploads PDF resumes to the private `resumes` bucket. The public chat receives signed resume URLs from `/api/resume`.
+The admin app uploads PDF resumes through `/api/resume-upload`. The browser never gets direct Storage write permission. The public chat receives signed resume URLs from `/api/resume`.
 
 ## Admin Workflow
 

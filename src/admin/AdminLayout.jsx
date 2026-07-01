@@ -92,6 +92,7 @@ export function AdminLayout({
         {config && activeSection === "Resume" ? (
           <ResumeEditor
             resume={config.resume || {}}
+            session={session}
             onChange={(resume) => updateConfig({ resume })}
           />
         ) : null}
