@@ -1,6 +1,7 @@
 {
   "scripts": {
     "dev": "vite --host 127.0.0.1",
+    "dev:vercel": "vercel dev",
     "build": "vite build && vite build --config vite.project.config.mjs && node build-post.js"
   },
   "dependencies": {

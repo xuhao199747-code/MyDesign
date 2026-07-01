@@ -1,5 +1,5 @@
 const { createClient } = require("@supabase/supabase-js");
-const { getRequiredEnv } = require("./env");
+const { getOptionalEnv, getRequiredEnv } = require("./env");
 
 let serviceClient;
 
@@ -30,6 +30,20 @@ async function requireAdmin(req) {
     const authError = new Error("invalid_session");
     authError.statusCode = 401;
     throw authError;
+  }
+
+  const allowedEmails = getOptionalEnv("ADMIN_EMAILS")
+    .split(",")
+    .map((email) => email.trim().toLowerCase())
+    .filter(Boolean);
+
+  if (
+    allowedEmails.length > 0 &&
+    !allowedEmails.includes(String(data.user.email || "").toLowerCase())
+  ) {
+    const forbiddenError = new Error("admin_email_not_allowed");
+    forbiddenError.statusCode = 403;
+    throw forbiddenError;
   }
 
   return data.user;

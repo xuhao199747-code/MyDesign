@@ -19,6 +19,7 @@ VITE_SUPABASE_ANON_KEY=
 SUPABASE_URL=
 SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
+ADMIN_EMAILS=
 DEEPSEEK_API_KEY=
 DEEPSEEK_BASE_URL=https://api.deepseek.com
 DEEPSEEK_MODEL=deepseek-chat
@@ -43,6 +44,14 @@ DEEPSEEK_MODEL
 ```
 
 Do not expose `SUPABASE_SERVICE_ROLE_KEY` or `DEEPSEEK_API_KEY` in browser code.
+
+`ADMIN_EMAILS` is optional. Use a comma-separated list, such as:
+
+```text
+ADMIN_EMAILS=you@example.com,other-admin@example.com
+```
+
+When set, `/api/admin-config` only accepts Supabase sessions whose email is in that list.
 
 ## Supabase Setup
 
@@ -92,7 +101,7 @@ The limit only applies to DeepSeek calls. Fixed knowledge-base answers and resum
 Vite serves the frontend, but Vercel API routes need a serverless runtime. For local API testing, use:
 
 ```bash
-npx vercel dev
+npm run dev:vercel
 ```
 
 Then test:
