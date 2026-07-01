@@ -29,7 +29,7 @@ export default defineConfig({
 	        navWechatLanyard: path.resolve(__dirname, 'src/nav-wechat-lanyard-entry.jsx'),
 	        portfolioBounceCards: path.resolve(__dirname, 'src/portfolio-bounce-cards.jsx'),
 	        ribbonsEntry: path.resolve(__dirname, 'src/ribbons-entry.jsx'),
-	        chatWidget: path.resolve(__dirname, 'src/chat-widget-entry.jsx'),
+	        chatWidget: path.resolve(__dirname, 'src/chat/chat-entry.jsx'),
 	      },
 	      output: {
 	        entryFileNames(chunkInfo) {
