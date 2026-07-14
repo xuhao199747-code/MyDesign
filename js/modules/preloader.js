@@ -65,7 +65,8 @@
     let resourcesReady = false;
     let bootReady = Boolean(window.__siteBootStatus?.completedAt);
     let bootGraceElapsed = bootReady;
-    let minimumDisplayElapsed = false;
+    let minimumDisplayElapsed =
+      siteUtils.getNumberOption(preloaderConfig, "minimumDisplayMs", 0) <= 0;
     const failedResources = [];
     const resourceProgress = new Map();
     let targetProgress = 0;
@@ -82,29 +83,16 @@
     };
 
     const animateProgress = () => {
-      const delta = targetProgress - displayedProgress;
-      if (Math.abs(delta) < 0.2) {
-        displayedProgress = targetProgress;
-      } else {
-        displayedProgress += delta * 0.12;
-      }
-
+      displayedProgress = targetProgress;
       renderProgress(Math.round(displayedProgress));
-
-      if (!hasHidden && displayedProgress < targetProgress) {
-        progressFrame = requestAnimationFrame(animateProgress);
-        return;
-      }
-
       progressFrame = 0;
     };
 
     const updateProgressTarget = (nextProgress) => {
       if (hasHidden) return;
       targetProgress = Math.max(targetProgress, Math.min(100, nextProgress));
-      if (!progressFrame) {
-        progressFrame = requestAnimationFrame(animateProgress);
-      }
+      if (progressFrame) cancelAnimationFrame(progressFrame);
+      progressFrame = requestAnimationFrame(animateProgress);
     };
 
     const updateProgress = () => {
@@ -292,10 +280,12 @@
     window.__preloadedImages = preloadedImages;
 
     const startLoading = async () => {
-      setTimeout(() => {
-        minimumDisplayElapsed = true;
-        tryHidePreloader();
-      }, siteUtils.getNumberOption(preloaderConfig, "minimumDisplayMs", 900));
+      if (!minimumDisplayElapsed) {
+        setTimeout(() => {
+          minimumDisplayElapsed = true;
+          tryHidePreloader();
+        }, siteUtils.getNumberOption(preloaderConfig, "minimumDisplayMs", 0));
+      }
 
       window.addEventListener(
         "site:boot-complete",

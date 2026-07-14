@@ -755,7 +755,7 @@ body.is-click-surprise-active *::selection {
   pointer-events: none;
   box-sizing: border-box;
   overflow: visible;
-  padding-inline: clamp(48px, 7vw, 128px);
+  padding-inline: clamp(24px, 3.8vw, 72px);
 }
 
 .hero-nav__text {

@@ -78,6 +78,11 @@
 
   const heroCriticalResources = [
     "./imag/frame_front.webp",
+    "./imag/Frame 2085668692.webp",
+    "./font/ArchivoBlack-Regular.otf",
+    "./font/ArchivoBlack-Regular.ttf",
+    "./font/LuckiestGuy-Regular.ttf",
+    ...logoItems,
   ];
 
   const sharedImageResources = [
@@ -99,6 +104,7 @@
   ];
 
   const sharedFontResources = [
+    "./font/ArchivoBlack-Regular.otf",
     "./font/ArchivoBlack-Regular.ttf",
     "./font/LuckiestGuy-Regular.ttf",
   ];
@@ -203,9 +209,9 @@
         "Loading the full experience.",
       ],
       hideDelayMs: 260,
-      minimumDisplayMs: 120,
+      minimumDisplayMs: 0,
       maxDisplayMs: 5000,
-      bootGraceMs: 450,
+      bootGraceMs: 120,
       typePauseMs: 900,
       typeNextPhraseDelayMs: 220,
       typeForwardMs: 42,
@@ -321,7 +327,7 @@
       burstIntervalMax: 4200,
       mobileBreakpoint: 768,
       mobileEdgePadding: 6,
-      desktopEdgePadding: 54,
+      desktopEdgePadding: 34,
       mobileVerticalPadding: 8,
       desktopVerticalPadding: 10,
     },

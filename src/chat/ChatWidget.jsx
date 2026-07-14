@@ -171,7 +171,7 @@ export function ChatWidget() {
   return (
     <div
       ref={rootRef}
-      className="pointer-events-none fixed right-4 bottom-4 z-[9999] font-sans sm:right-5 sm:bottom-5"
+      className="pointer-events-none fixed right-4 bottom-4 z-[9999] font-sans sm:right-[100px] sm:bottom-[70px]"
       onClick={stopAssistantPointerEvent}
       onMouseDown={stopAssistantPointerEvent}
       onMouseUp={stopAssistantPointerEvent}
@@ -237,6 +237,8 @@ export function ChatWidget() {
               width: 56,
               height: 56,
               padding: 0,
+              "--glass-frost": 0.24,
+              "--glass-saturation": 1.08,
               "--filter-id": "url(#glass-filter)",
             }}
           />
