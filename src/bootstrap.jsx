@@ -88,7 +88,7 @@ runBootstrapTasks([
   wrapBootstrapTask(
     whenBrowserIdle(
       whenElementPresent("chatWidgetRoot", () =>
-        loadRuntimeEntry("chatWidget.js", "./chat/chat-entry.jsx")
+        loadRuntimeEntry("chatWidget.js?v=20260714-12", "./chat/chat-entry.jsx")
           .then(({ mountChatWidget }) => mountChatWidget())
       ),
       260

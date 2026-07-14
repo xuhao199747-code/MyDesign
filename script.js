@@ -188,6 +188,7 @@ if (bootConfig.logSummary === true) {
   let isOpen = false;
   let openScrollY = 0;
   let scrollGuardUntil = 0;
+  let dragClickGuardUntil = 0;
   let scrollWatchFrame = null;
   let closeTimer = null;
 
@@ -374,7 +375,15 @@ if (bootConfig.logSummary === true) {
     if (event.key === "Escape" && isOpen) closeCard();
   });
 
+  window.addEventListener("nav-wechat-card-dragged", () => {
+    dragClickGuardUntil = performance.now() + 520;
+  });
+
   document.addEventListener("click", (event) => {
+    if (performance.now() < dragClickGuardUntil) {
+      event.stopPropagation();
+      return;
+    }
     const currentTrigger = getTrigger() || trigger;
     const footerTrigger = getFooterTrigger();
     if (

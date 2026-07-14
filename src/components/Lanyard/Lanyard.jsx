@@ -203,6 +203,8 @@ function Band({
   );
   const [dragged, setDragged] = useState(false);
   const [hovered, setHovered] = useState(false);
+  const dragStartPointRef = useRef(null);
+  const hasMovedDuringDragRef = useRef(false);
 
   const placeBodies = (positions) => {
     positions.forEach(([ref, nextPosition]) => {
@@ -302,6 +304,12 @@ function Band({
       dir.copy(vec).sub(state.camera.position).normalize();
       vec.add(dir.multiplyScalar(state.camera.position.length()));
       [card, j1, j2, j3, fixed].forEach((ref) => ref.current?.wakeUp());
+      if (
+        dragStartPointRef.current &&
+        vec.distanceTo(dragStartPointRef.current) > 0.08
+      ) {
+        hasMovedDuringDragRef.current = true;
+      }
       card.current?.setNextKinematicTranslation({
         x: vec.x - dragged.x,
         y: vec.y - dragged.y,
@@ -383,10 +391,17 @@ function Band({
             onPointerOut={() => setHovered(false)}
             onPointerUp={(event) => {
               event.target.releasePointerCapture(event.pointerId);
+              if (hasMovedDuringDragRef.current) {
+                window.dispatchEvent(new CustomEvent("nav-wechat-card-dragged"));
+              }
+              dragStartPointRef.current = null;
+              hasMovedDuringDragRef.current = false;
               setDragged(false);
             }}
             onPointerDown={(event) => {
               event.target.setPointerCapture(event.pointerId);
+              dragStartPointRef.current = new THREE.Vector3().copy(event.point);
+              hasMovedDuringDragRef.current = false;
               setDragged(
                 new THREE.Vector3().copy(event.point).sub(vec.copy(card.current.translation()))
               );

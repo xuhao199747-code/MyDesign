@@ -114,11 +114,14 @@
         ? MOBILE_EDGE_PADDING
         : DESKTOP_EDGE_PADDING;
       const overscan = isMobileViewport ? Math.ceil(FUZZ_RANGE * 0.75) : FUZZ_RANGE;
+      const edgeGuard = isMobileViewport
+        ? 0
+        : Math.max(72, Math.ceil(parseFloat(style.fontSize) || 32));
       const fallbackFontSize = parseFloat(style.fontSize) || 32;
       const measuredLabelWidth =
         labelMeasureCache(data.label, style) +
         LETTER_SPACING * Math.max(0, data.label.length - 1);
-      const horizontalPadding = edgePadding * 2 + overscan * 2;
+      const horizontalPadding = edgePadding * 2 + overscan * 2 + edgeGuard;
       const fallbackWidth = measuredLabelWidth + horizontalPadding;
       const fallbackHeight = Math.ceil(fallbackFontSize * 1.24) + 20;
       const rect = text.getBoundingClientRect();
@@ -314,6 +317,9 @@
       );
       const drawHeight = Math.ceil(parseFloat(style.fontSize) * 1.12);
       const isRightAligned = text.classList.contains("hero-nav__text--right");
+      const edgeGuard = isMobileViewport
+        ? 0
+        : Math.max(72, Math.ceil(parseFloat(style.fontSize) || 32));
       const drawX = isRightAligned
         ? Math.max(edgePadding, width - glyphWidth - edgePadding)
         : edgePadding;

@@ -18,9 +18,11 @@ const siteUtils = read("js/site-utils.js");
 const chatApi = read("api/chat.js");
 const transcribeApi = read("api/transcribe.js");
 const viteConfig = read("vite.config.mjs");
+const globalStyles = read("styles.css");
+const strandsStyles = read("src/chat/Strands.css");
 
 assert(
-  bootstrap.includes('loadRuntimeEntry("chatWidget.js", "./chat/chat-entry.jsx")'),
+  bootstrap.includes('loadRuntimeEntry("chatWidget.js?v='),
   "dev bootstrap must load the same src/chat entry as the production chatWidget build"
 );
 
@@ -136,6 +138,27 @@ assert(
     chatWidget.includes("onPointerDown={stopAssistantPointerEvent}") &&
     chatWidget.includes("onPointerUp={stopAssistantPointerEvent}"),
   "chat widget root must isolate assistant pointer events from homepage global listeners"
+);
+
+assert(
+  chatWidget.includes("h-[56px] w-[56px]") &&
+    chatWidget.includes("rounded-none") &&
+    !chatWidget.includes("h-[56px] w-[100px]"),
+  "glass orb trigger must use a square click area"
+);
+
+assert(
+  chatWidget.includes('className="strands-orb-renderer"') &&
+    strandsStyles.includes(".strands-orb-renderer") &&
+    strandsStyles.includes("clip-path: circle(50% at 50% 50%)"),
+  "glass orb WebGL renderer must use an isolated circular viewport"
+);
+
+assert(
+  /img\s*\{[^}]*-webkit-user-drag:\s*none[^}]*-webkit-user-select:\s*none[^}]*user-select:\s*none[^}]*pointer-events:\s*none/s.test(
+    globalStyles
+  ),
+  "global image interaction styles must disable browser image drag/search affordances"
 );
 
 assert(

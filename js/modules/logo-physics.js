@@ -59,6 +59,21 @@
       });
     };
 
+    const applyLogoTransform = (particle, now = performance.now()) => {
+      const bounceStart = particle.clickBounceStart || 0;
+      const bounceUntil = particle.clickBounceUntil || 0;
+      const bounceDuration = Math.max(1, bounceUntil - bounceStart);
+      const bounceProgress =
+        bounceUntil > now ? Math.max(0, Math.min(1, (now - bounceStart) / bounceDuration)) : 1;
+      const bounce = bounceProgress < 1 ? Math.sin(bounceProgress * Math.PI) : 0;
+      const bounceY = -18 * bounce;
+      const bounceScale = 1 + 0.13 * bounce;
+
+      particle.el.style.transform =
+        `translate3d(${particle.x}px, ${particle.y + bounceY}px, 0) ` +
+        `rotate(${particle.angle.toFixed(2)}deg) scale(${bounceScale.toFixed(3)})`;
+    };
+
     const setupLogoParticles = () => {
       const logos = Array.from(logoWall.querySelectorAll("img"));
       if (!logos.length) {
@@ -113,9 +128,8 @@
             siteUtils.randomInRange(0, 120);
 
         el.style.opacity = "0";
-        el.style.transform = `translate3d(${x}px, ${startY}px, 0) rotate(${angle}deg)`;
 
-        return {
+        const particle = {
           el,
           x,
           y: startY,
@@ -128,6 +142,8 @@
           active: false,
           settled: false,
         };
+        applyLogoTransform(particle, 0);
+        return particle;
       });
     };
 
@@ -181,17 +197,22 @@
             return;
           }
 
-          if (particle.settled && !particle.interacting) {
+          const hasActiveClickBounce = (particle.clickBounceUntil || 0) > ts;
+          if (particle.settled && !particle.interacting && !hasActiveClickBounce) {
             return;
           }
 
-          particle.settled = false;
+          if (!hasActiveClickBounce) {
+            particle.settled = false;
+          }
 
-          particle.vy += gravity * dt;
-          particle.vx *= drag;
-          particle.x += particle.vx * dt;
-          particle.y += particle.vy * dt;
-          particle.angle += particle.av * dt;
+          if (!particle.settled || particle.interacting) {
+            particle.vy += gravity * dt;
+            particle.vx *= drag;
+            particle.x += particle.vx * dt;
+            particle.y += particle.vy * dt;
+            particle.angle += particle.av * dt;
+          }
 
           if (particle.x < edgeSafe) {
             particle.x = edgeSafe;
@@ -228,8 +249,10 @@
             allSettled = false;
           }
 
-          particle.el.style.transform =
-            `translate3d(${particle.x}px, ${particle.y}px, 0) rotate(${particle.angle.toFixed(2)}deg)`;
+          if (hasActiveClickBounce) {
+            allSettled = false;
+          }
+          applyLogoTransform(particle, ts);
         });
 
         resolveLogoCollisions(logoParticles, size);
@@ -242,8 +265,7 @@
           }
           if (particle.y > floorY) particle.y = floorY;
 
-          particle.el.style.transform =
-            `translate3d(${particle.x}px, ${particle.y}px, 0) rotate(${particle.angle.toFixed(2)}deg)`;
+          applyLogoTransform(particle, ts);
         });
 
         if (!allSettled) {
@@ -264,6 +286,9 @@
 
     const kickLogoParticles = (centerParticle) => {
       if (!centerParticle || !logoParticles.length) return;
+      const now = performance.now();
+      centerParticle.clickBounceStart = now;
+      centerParticle.clickBounceUntil = now + 560;
 
       const mobileBreakpoint = siteUtils.getNumberOption(
         logoPhysicsConfig,

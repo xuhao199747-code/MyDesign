@@ -247,7 +247,11 @@ export default function Strands({
       fragment: FRAG,
       uniforms: {
         uTime: { value: 0 },
-        uResolution: { value: [ctn.offsetWidth, ctn.offsetHeight] },
+        uResolution: {
+          value: className.includes("strands-orb-renderer")
+            ? [56, 56]
+            : [ctn.offsetWidth, ctn.offsetHeight],
+        },
         uColors: { value: buildPalette(propsRef.current.colors) },
         uColorCount: { value: Math.min(propsRef.current.colors.length, MAX_COLORS) },
         uStrandCount: { value: Math.min(propsRef.current.count, MAX_STRANDS) },
@@ -268,17 +272,20 @@ export default function Strands({
 
     const mesh = new Mesh(gl, { geometry, program });
 
-    const renderTarget = new RenderTarget(gl, {
-      width: ctn.offsetWidth,
-      height: ctn.offsetHeight,
+    const getRenderSize = () => ({
+      width: className.includes("strands-orb-renderer") ? 56 : ctn.offsetWidth,
+      height: className.includes("strands-orb-renderer") ? 56 : ctn.offsetHeight,
     });
+    const initialSize = getRenderSize();
+
+    const renderTarget = new RenderTarget(gl, initialSize);
 
     const glassProgram = new Program(gl, {
       vertex: VERT,
       fragment: GLASS_FRAG,
       uniforms: {
         uScene: { value: renderTarget.texture },
-        uResolution: { value: [ctn.offsetWidth, ctn.offsetHeight] },
+        uResolution: { value: [initialSize.width, initialSize.height] },
         uRadius: { value: 0.46 * glassSize },
         uRefraction: { value: refraction },
         uDispersion: { value: dispersion },
@@ -290,8 +297,7 @@ export default function Strands({
 
     function resize() {
       if (!ctn) return;
-      const width = ctn.offsetWidth;
-      const height = ctn.offsetHeight;
+      const { width, height } = getRenderSize();
       renderer.setSize(width, height);
       program.uniforms.uResolution.value = [width, height];
       renderTarget.setSize(width, height);
@@ -348,5 +354,9 @@ export default function Strands({
     };
   }, []);
 
-  return <div ref={ctnDom} className={`strands-container ${className}`} style={style} />;
+  const orbStyle = className.includes("strands-orb-renderer")
+    ? { ...style, width: 56, height: 56, maxWidth: 56, maxHeight: 56 }
+    : style;
+
+  return <div ref={ctnDom} className={`strands-container ${className}`} style={orbStyle} />;
 }

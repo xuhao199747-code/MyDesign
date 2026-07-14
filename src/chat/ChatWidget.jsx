@@ -220,7 +220,8 @@ export function ChatWidget() {
       ) : (
         <Button
           aria-label="打开对话"
-          className="pointer-events-auto relative h-[56px] w-[100px] overflow-visible rounded-[20px] border-0 bg-transparent p-0 text-transparent shadow-none transition-transform duration-200 hover:-translate-y-1 hover:scale-[1.04] hover:bg-transparent hover:shadow-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:translate-y-0 active:scale-[0.98]"
+          className="pointer-events-auto relative h-[56px] w-[56px] overflow-visible rounded-none border-0 bg-transparent p-0 text-transparent shadow-none outline-none transition-transform duration-200 hover:-translate-y-1 hover:scale-[1.04] hover:bg-transparent hover:shadow-none focus:border-0 focus:outline-none focus:ring-0 focus-visible:border-0 focus-visible:outline-none focus-visible:ring-0 active:translate-y-0 active:scale-[0.98]"
+          style={{ width: 56, height: 56, minWidth: 56, minHeight: 56, maxWidth: 56, maxHeight: 56 }}
           type="button"
           variant="ghost"
           onMouseEnter={() => setIsTriggerHovered(true)}
@@ -229,32 +230,45 @@ export function ChatWidget() {
           onBlur={() => setIsTriggerHovered(false)}
           onClick={() => setIsOpen(true)}
         >
-          <span className="absolute inset-0 z-10 drop-shadow-[0_8px_10px_rgba(15,23,42,0.14)] transition duration-200 group-hover/button:brightness-110 group-hover/button:saturate-115 group-hover/button:drop-shadow-[0_12px_14px_rgba(15,23,42,0.18)]">
-            <span className="absolute inset-0 overflow-hidden rounded-[20px]">
-              <Strands
-                colors={["#FF4FD8", "#12B8FF", "#F6E77A"]}
-                count={3}
-                speed={isTriggerHovered ? 1.85 : 0.72}
-                amplitude={1.85}
-                waviness={1.18}
-                thickness={0.86}
-                glow={1.68}
-                taper={2.7}
-                spread={1.15}
-                intensity={0.66}
-                saturation={1.9}
-                opacity={1}
-                scale={1.42}
-                glass
-                refraction={0.24}
-                dispersion={0.85}
-                glassSize={1.06}
-                hueShift={0.12}
-              />
-              <span className="strands-glass-orb strands-glass-orb--inner" />
-            </span>
-          </span>
-          <span className="strands-glass-orb z-20" />
+          <span
+            aria-hidden="true"
+            className="strands-glass-front navbar navbar--scrolled glass-surface glass-surface--svg"
+            style={{
+              width: 56,
+              height: 56,
+              padding: 0,
+              "--filter-id": "url(#glass-filter)",
+            }}
+          />
+          <Strands
+            className="strands-orb-renderer"
+            style={{
+              width: 56,
+              height: 56,
+              maxWidth: 56,
+              maxHeight: 56,
+              backdropFilter: "blur(2px)",
+              WebkitBackdropFilter: "blur(2px)",
+            }}
+              colors={["#F97316", "#7C3AED", "#06B6D4"]}
+              count={3}
+              speed={isTriggerHovered ? 1.2 : 0.8}
+              amplitude={1.2}
+              waviness={2.2}
+              thickness={1.1}
+              glow={1.2}
+              taper={4.9}
+              spread={1.8}
+              intensity={0.6}
+              saturation={2}
+              opacity={1}
+              scale={1.6}
+              glass
+              refraction={1}
+              dispersion={2.65}
+              glassSize={1}
+              hueShift={0.39}
+          />
           <span className="sr-only">打开对话</span>
         </Button>
       )}
