@@ -2,6 +2,7 @@ import "./app.tailwind.css";
 import "./BounceCards.css";
 import "./CursorRing.css";
 import "./components/Lanyard/Lanyard.css";
+import "./chat/Strands.css";
 
 import {
   runBootstrapTasks,
