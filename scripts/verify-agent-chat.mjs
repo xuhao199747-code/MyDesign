@@ -16,6 +16,7 @@ const inputGroup = read("src/components/ui/input-group.jsx");
 const clickSurprise = read("js/modules/click-surprise-burst.js");
 const siteUtils = read("js/site-utils.js");
 const chatApi = read("api/chat.js");
+const transcribeApi = read("api/transcribe.js");
 const viteConfig = read("vite.config.mjs");
 
 assert(
@@ -39,6 +40,43 @@ assert(
     !chatComposer.includes("<textarea") &&
     !chatComposer.includes("<input"),
   "chat composer must use ai-elements prompt-input instead of raw form controls"
+);
+
+assert(
+  chatComposer.includes("@/components/ai-elements/speech-input") &&
+    chatComposer.includes("onTranscriptionChange={handleTranscriptionChange}") &&
+    chatComposer.includes("onAudioRecorded={transcribeAudioBlob}") &&
+    chatComposer.includes('recorderMimeType="audio/wav"'),
+  "chat composer must use ai-elements SpeechInput with Tencent ASR recorded-audio transcription"
+);
+
+const speechInput = read("src/components/ai-elements/speech-input.jsx");
+
+assert(
+  speechInput.includes("currentBrowserUnsupportedMessage") &&
+    speechInput.includes("当前浏览器不支持语音转文字") &&
+    speechInput.includes("preferAudioRecorded") &&
+    speechInput.indexOf('if ("SpeechRecognition"') >= 0 &&
+    speechInput.indexOf('if ("SpeechRecognition"') < speechInput.indexOf("preferAudioRecorded &&") &&
+    speechInput.includes("continuous = false") &&
+    speechInput.includes("interimResults = false") &&
+    speechInput.includes("maxAlternatives = 1") &&
+    speechInput.includes("preferAudioRecorded: Boolean(onAudioRecorded)") &&
+    speechInput.includes("encodeWav") &&
+    speechInput.includes("resampleAudio") &&
+    speechInput.includes("resampledSamples") &&
+    speechInput.includes("encodeWav(resampledSamples, 16000)") &&
+    speechInput.includes("audioPeak") &&
+    speechInput.includes("decodeAudioData"),
+  "speech input must prefer recorded-audio transcription when a server ASR callback is provided"
+);
+
+assert(
+  transcribeApi.includes("tencentcloud-sdk-nodejs-asr") &&
+    transcribeApi.includes("SentenceRecognition") &&
+    transcribeApi.includes("TENCENTCLOUD_SECRET_ID") &&
+    transcribeApi.includes("TENCENTCLOUD_SECRET_KEY"),
+  "api/transcribe.js must provide a server-only Tencent Cloud ASR transcription fallback"
 );
 
 assert(

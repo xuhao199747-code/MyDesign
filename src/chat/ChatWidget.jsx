@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { SparklesIcon, XIcon } from "lucide-react";
+import { XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -10,6 +10,7 @@ import {
 } from "./chatApi.js";
 import { ChatComposer } from "./ChatComposer.jsx";
 import { ChatMessages, ChatSuggestions } from "./ChatMessages.jsx";
+import Strands from "./Strands.jsx";
 import { getVisitorId } from "./visitorId.js";
 
 const createMessageId = (prefix) =>
@@ -21,10 +22,12 @@ export function ChatWidget() {
   const [config, setConfig] = useState(fallbackPublicConfig);
   const [status, setStatus] = useState("ready");
   const [usage, setUsage] = useState(null);
+  const [isTriggerHovered, setIsTriggerHovered] = useState(false);
   const [welcomeMessage, setWelcomeMessage] = useState(
     fallbackPublicConfig.assistant.welcomeMessage
   );
   const [messages, setMessages] = useState([]);
+  const rootRef = useRef(null);
   const panelRef = useRef(null);
   const visitorIdRef = useRef(null);
 
@@ -65,13 +68,17 @@ export function ChatWidget() {
     if (!isOpen) return undefined;
 
     const handleOutsidePointerDown = (event) => {
+      if (rootRef.current?.contains(event.target)) return;
       if (panelRef.current?.contains(event.target)) return;
       setIsOpen(false);
     };
 
-    document.addEventListener("pointerdown", handleOutsidePointerDown, true);
+    const listenerId = window.setTimeout(() => {
+      document.addEventListener("pointerdown", handleOutsidePointerDown, true);
+    }, 0);
 
     return () => {
+      window.clearTimeout(listenerId);
       document.removeEventListener("pointerdown", handleOutsidePointerDown, true);
     };
   }, [isOpen]);
@@ -163,6 +170,7 @@ export function ChatWidget() {
 
   return (
     <div
+      ref={rootRef}
       className="pointer-events-none fixed right-4 bottom-4 z-[9999] font-sans sm:right-5 sm:bottom-5"
       onClick={stopAssistantPointerEvent}
       onMouseDown={stopAssistantPointerEvent}
@@ -211,13 +219,43 @@ export function ChatWidget() {
         </Card>
       ) : (
         <Button
-          className="pointer-events-auto rounded-full shadow-xl shadow-foreground/15"
-          size="lg"
+          aria-label="打开对话"
+          className="pointer-events-auto relative h-[56px] w-[100px] overflow-visible rounded-[20px] border-0 bg-transparent p-0 text-transparent shadow-none transition-transform duration-200 hover:-translate-y-1 hover:scale-[1.04] hover:bg-transparent hover:shadow-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:translate-y-0 active:scale-[0.98]"
           type="button"
+          variant="ghost"
+          onMouseEnter={() => setIsTriggerHovered(true)}
+          onMouseLeave={() => setIsTriggerHovered(false)}
+          onFocus={() => setIsTriggerHovered(true)}
+          onBlur={() => setIsTriggerHovered(false)}
           onClick={() => setIsOpen(true)}
         >
-          <SparklesIcon className="size-4" />
-          对话
+          <span className="absolute inset-0 z-10 drop-shadow-[0_8px_10px_rgba(15,23,42,0.14)] transition duration-200 group-hover/button:brightness-110 group-hover/button:saturate-115 group-hover/button:drop-shadow-[0_12px_14px_rgba(15,23,42,0.18)]">
+            <span className="absolute inset-0 overflow-hidden rounded-[20px]">
+              <Strands
+                colors={["#FF4FD8", "#12B8FF", "#F6E77A"]}
+                count={3}
+                speed={isTriggerHovered ? 1.85 : 0.72}
+                amplitude={1.85}
+                waviness={1.18}
+                thickness={0.86}
+                glow={1.68}
+                taper={2.7}
+                spread={1.15}
+                intensity={0.66}
+                saturation={1.9}
+                opacity={1}
+                scale={1.42}
+                glass
+                refraction={0.24}
+                dispersion={0.85}
+                glassSize={1.06}
+                hueShift={0.12}
+              />
+              <span className="strands-glass-orb strands-glass-orb--inner" />
+            </span>
+          </span>
+          <span className="strands-glass-orb z-20" />
+          <span className="sr-only">打开对话</span>
         </Button>
       )}
     </div>

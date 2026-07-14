@@ -107,7 +107,7 @@ export function AdminLayout({
     <TooltipProvider>
       <SidebarProvider>
         <Sidebar className="border-sidebar-border" collapsible="icon">
-        <SidebarHeader className="p-3 pb-2">
+        <SidebarHeader className="p-3 pb-2 group-data-[collapsible=icon]:px-2">
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton
@@ -131,7 +131,7 @@ export function AdminLayout({
           </SidebarMenu>
         </SidebarHeader>
         <SidebarContent>
-          <SidebarGroup className="px-3 pt-3">
+          <SidebarGroup className="px-3 pt-3 group-data-[collapsible=icon]:px-2">
             <SidebarGroupLabel>Assistant</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu className="gap-1">
@@ -155,7 +155,7 @@ export function AdminLayout({
         </Sidebar>
 
         <SidebarInset>
-        <header className="flex h-14 shrink-0 items-center gap-3 border-b border-border px-4">
+        <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-3 border-b border-border bg-background px-4">
           <SidebarTrigger />
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">

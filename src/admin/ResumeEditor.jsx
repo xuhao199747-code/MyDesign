@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { UploadCloud } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -18,6 +19,7 @@ import { Input } from "@/components/ui/input";
 import { uploadResumeFile } from "./adminApi.js";
 
 export function ResumeEditor({ resume, session, onChange }) {
+  const fileInputRef = useRef(null);
   const [fileName, setFileName] = useState("");
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
@@ -113,12 +115,29 @@ export function ResumeEditor({ resume, session, onChange }) {
                 本地后台不能上传文件，请填写外链地址或 PDF 文件路径。
               </FieldDescription>
             ) : null}
-            <Input
-              accept="application/pdf"
-              disabled={uploading || session.localAdmin || session.localPreview}
-              type="file"
-              onChange={handleFileChange}
-            />
+            <div className="flex flex-wrap items-center gap-3">
+              <Input
+                id="resume-pdf-upload"
+                ref={fileInputRef}
+                className="sr-only"
+                accept="application/pdf"
+                disabled={uploading || session.localAdmin || session.localPreview}
+                type="file"
+                onChange={handleFileChange}
+              />
+              <Button
+                disabled={uploading || session.localAdmin || session.localPreview}
+                type="button"
+                variant="outline"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <UploadCloud />
+                {uploading ? "上传中..." : "选择 PDF"}
+              </Button>
+              <span className="text-sm text-muted-foreground">
+                {fileName || "未选择任何文件"}
+              </span>
+            </div>
             </Field>
             {fileName ? (
               <FieldDescription>

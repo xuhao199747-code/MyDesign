@@ -780,9 +780,9 @@ body.is-click-surprise-active *::selection {
 
 .hero-nav__canvas {
   position: absolute;
-  inset: -0.14em;
-  width: calc(100% + 0.28em);
-  height: calc(100% + 0.28em);
+  inset: -0.22em -0.34em;
+  width: calc(100% + 0.68em);
+  height: calc(100% + 0.44em);
   pointer-events: none;
   display: block;
   mix-blend-mode: difference;
@@ -790,13 +790,13 @@ body.is-click-surprise-active *::selection {
 }
 
 .hero-nav__text--left .hero-nav__canvas {
-  left: -0.14em;
+  left: -0.22em;
   right: auto;
 }
 
 .hero-nav__text--right .hero-nav__canvas {
   left: auto;
-  right: -0.14em;
+  right: -0.22em;
 }
 
 .hero-nav__text--left {
@@ -1723,6 +1723,7 @@ body.is-click-surprise-active *::selection {
 .more-work-grid {
   --more-card-radius: clamp(20px, 2.2vw, 34px);
   --more-card-shadow: 0 30px 74px rgba(15, 23, 42, 0.15);
+  --more-card-hover-ease: cubic-bezier(0.16, 1, 0.3, 1);
   --more-card-x: 0px;
   --more-card-y: 0px;
   --more-card-title-height: 31px;
@@ -1752,9 +1753,9 @@ body.is-click-surprise-active *::selection {
     rotate(var(--card-start-rotate, 0deg))
     scale(0.96);
   transition:
-    opacity 0.74s ease,
+    opacity 0.74s var(--more-card-hover-ease),
     transform 0.74s cubic-bezier(0.18, 1.18, 0.22, 1),
-    filter 0.28s ease;
+    filter 0.42s var(--more-card-hover-ease);
   transition-delay: calc(var(--more-card-index, 0) * 70ms);
   will-change: transform, opacity;
 }
@@ -1793,6 +1794,10 @@ body.is-click-surprise-active *::selection {
   transform: translate3d(12px, -18px, -1px) rotate(-1.5deg);
   box-shadow: 0 22px 48px rgba(0, 0, 0, 0.28);
   opacity: 0;
+  transition:
+    opacity 0.46s var(--more-card-hover-ease),
+    transform 0.56s var(--more-card-hover-ease),
+    box-shadow 0.46s var(--more-card-hover-ease);
 }
 
 .more-work-card__surface {
@@ -1801,8 +1806,10 @@ body.is-click-surprise-active *::selection {
   box-shadow: var(--more-card-shadow);
   transform: translateZ(0);
   transition:
-    background 0.32s ease,
-    box-shadow 0.32s ease;
+    background 0.46s var(--more-card-hover-ease),
+    box-shadow 0.46s var(--more-card-hover-ease),
+    padding 0.46s var(--more-card-hover-ease),
+    gap 0.46s var(--more-card-hover-ease);
 }
 
 .more-work-card__surface img {
@@ -1814,12 +1821,12 @@ body.is-click-surprise-active *::selection {
   filter: none;
   border-radius: inherit;
   transition:
-    inset 0.38s cubic-bezier(0.2, 0.9, 0.2, 1),
-    width 0.38s cubic-bezier(0.2, 0.9, 0.2, 1),
-    height 0.38s cubic-bezier(0.2, 0.9, 0.2, 1),
-    border-radius 0.38s cubic-bezier(0.2, 0.9, 0.2, 1),
-    filter 0.3s ease,
-    transform 0.38s cubic-bezier(0.2, 0.9, 0.2, 1);
+    inset 0.5s var(--more-card-hover-ease),
+    width 0.5s var(--more-card-hover-ease),
+    height 0.5s var(--more-card-hover-ease),
+    border-radius 0.5s var(--more-card-hover-ease),
+    filter 0.42s var(--more-card-hover-ease),
+    transform 0.5s var(--more-card-hover-ease);
 }
 
 .more-work-card__surface::before,
@@ -1830,8 +1837,8 @@ body.is-click-surprise-active *::selection {
   opacity: 0;
   transform: translate3d(0, 12px, 0);
   transition:
-    opacity 0.28s ease,
-    transform 0.34s cubic-bezier(0.2, 0.9, 0.2, 1);
+    opacity 0.36s var(--more-card-hover-ease),
+    transform 0.48s var(--more-card-hover-ease);
   pointer-events: none;
 }
 
