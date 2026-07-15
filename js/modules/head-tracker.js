@@ -49,6 +49,28 @@
     if (tracker.dataset.headTrackerReady === "true") return;
     tracker.dataset.headTrackerReady = "true";
 
+    const mobileBreakpoint = siteUtils.getNumberOption(headTrackerConfig, "mobileBreakpoint", 768);
+    const disableInteractiveOnMobile =
+      headTrackerConfig.disableInteractiveOnMobile !== false;
+    const isCoarsePointer = window.matchMedia?.("(pointer: coarse)").matches;
+    const isMobileViewport = window.matchMedia?.(`(max-width: ${mobileBreakpoint - 1}px)`).matches;
+    const prefersReducedData = Boolean(navigator.connection?.saveData);
+
+    if (
+      disableInteractiveOnMobile &&
+      (isCoarsePointer || isMobileViewport || prefersReducedData)
+    ) {
+      const canvasNode =
+        homeElements.trackerCanvas || tracker.querySelector(".head-tracker__sprite");
+      if (canvasNode) {
+        canvasNode.style.display = "none";
+        canvasNode.setAttribute("aria-hidden", "true");
+      }
+      tracker.classList.add("is-ready", "is-static-mobile");
+      window.dispatchEvent(new CustomEvent("hero:first-frame-ready"));
+      return;
+    }
+
     const canvas =
       homeElements.trackerCanvas || tracker.querySelector(".head-tracker__sprite");
     if (!(canvas instanceof HTMLCanvasElement)) return;

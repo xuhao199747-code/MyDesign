@@ -12,6 +12,8 @@ import {
 } from "./lib/bootstrap-page.js";
 
 const nativeImport = (url) => new Function("url", "return import(url)")(url);
+const isMobileViewport = () => window.matchMedia?.("(max-width: 767px)").matches;
+const prefersReducedData = () => Boolean(navigator.connection?.saveData);
 
 function loadRuntimeEntry(prodFileName, devPath) {
   if (import.meta.env.PROD) {
@@ -87,13 +89,19 @@ runBootstrapTasks([
     )
   ),
   wrapBootstrapTask(
-    whenBrowserIdle(
-      whenElementPresent("chatWidgetRoot", () =>
-        loadRuntimeEntry("chatWidget.js?v=20260714-12", "./chat/chat-entry.jsx")
-          .then(({ mountChatWidget }) => mountChatWidget())
-      ),
-      260
-    )
+    (() => {
+      const chatTask = whenElementPresent("chatWidgetRoot", () =>
+        loadRuntimeEntry("chatWidget.js?v=20260714-12", "./chat/chat-entry.jsx").then(
+          ({ mountChatWidget }) => mountChatWidget()
+        )
+      );
+
+      if (isMobileViewport() || prefersReducedData()) {
+        return chatTask();
+      }
+
+      return whenBrowserIdle(chatTask, 260)();
+    })
   ),
   wrapBootstrapTask(
     whenNavWechatLanyardRequested()

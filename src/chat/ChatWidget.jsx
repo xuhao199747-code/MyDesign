@@ -12,11 +12,13 @@ import { ChatComposer } from "./ChatComposer.jsx";
 import { ChatMessages, ChatSuggestions } from "./ChatMessages.jsx";
 import Strands from "./Strands.jsx";
 import { getVisitorId } from "./visitorId.js";
+import { useIsMobile } from "@/hooks/use-mobile.js";
 
 const createMessageId = (prefix) =>
   `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
 export function ChatWidget() {
+  const isMobile = useIsMobile();
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState("");
   const [config, setConfig] = useState(fallbackPublicConfig);
@@ -181,7 +183,7 @@ export function ChatWidget() {
       {isOpen ? (
         <Card
           ref={panelRef}
-          className="pointer-events-auto h-[min(590px,calc(100dvh-32px))] w-[min(390px,calc(100vw-32px))] gap-0 rounded-[32px] border border-white bg-card/80 py-0 shadow-2xl shadow-foreground/10 backdrop-blur-xl"
+          className="pointer-events-auto h-[min(590px,calc(100dvh-32px))] w-[min(390px,calc(100vw-32px))] gap-0 rounded-[32px] border border-white bg-card/80 py-0 shadow-2xl shadow-foreground/10 backdrop-blur-xl max-sm:h-[min(72dvh,560px)] max-sm:w-[calc(100vw-24px)] max-sm:rounded-[24px]"
           size="sm"
           aria-label="AI Assistant"
           role="dialog"
@@ -220,8 +222,17 @@ export function ChatWidget() {
       ) : (
         <Button
           aria-label="打开对话"
-          className="pointer-events-auto relative h-[56px] w-[56px] overflow-visible rounded-none border-0 bg-transparent p-0 text-transparent shadow-none outline-none transition-transform duration-200 hover:-translate-y-1 hover:scale-[1.04] hover:bg-transparent hover:shadow-none focus:border-0 focus:outline-none focus:ring-0 focus-visible:border-0 focus-visible:outline-none focus-visible:ring-0 active:translate-y-0 active:scale-[0.98]"
-          style={{ width: 56, height: 56, minWidth: 56, minHeight: 56, maxWidth: 56, maxHeight: 56 }}
+          className={[
+            "pointer-events-auto relative overflow-visible border-0 p-0 shadow-none outline-none transition-transform duration-200 hover:bg-transparent hover:shadow-none focus:border-0 focus:outline-none focus:ring-0 focus-visible:border-0 focus-visible:outline-none focus-visible:ring-0 active:translate-y-0 active:scale-[0.98]",
+            isMobile
+              ? "h-12 min-h-12 min-w-[112px] rounded-full bg-[#111111] px-5 text-white shadow-[0_18px_40px_rgba(15,23,42,0.22)]"
+              : "h-[56px] w-[56px] rounded-none bg-transparent text-transparent hover:-translate-y-1 hover:scale-[1.04]",
+          ].join(" ")}
+          style={
+            isMobile
+              ? undefined
+              : { width: 56, height: 56, minWidth: 56, minHeight: 56, maxWidth: 56, maxHeight: 56 }
+          }
           type="button"
           variant="ghost"
           onMouseEnter={() => setIsTriggerHovered(true)}
@@ -230,47 +241,53 @@ export function ChatWidget() {
           onBlur={() => setIsTriggerHovered(false)}
           onClick={() => setIsOpen(true)}
         >
-          <span
-            aria-hidden="true"
-            className="strands-glass-front navbar navbar--scrolled glass-surface glass-surface--svg"
-            style={{
-              width: 56,
-              height: 56,
-              padding: 0,
-              "--glass-frost": 0.24,
-              "--glass-saturation": 1.08,
-              "--filter-id": "url(#glass-filter)",
-            }}
-          />
-          <Strands
-            className="strands-orb-renderer"
-            style={{
-              width: 56,
-              height: 56,
-              maxWidth: 56,
-              maxHeight: 56,
-              backdropFilter: "blur(2px)",
-              WebkitBackdropFilter: "blur(2px)",
-            }}
-              colors={["#F97316", "#7C3AED", "#06B6D4"]}
-              count={3}
-              speed={isTriggerHovered ? 1.2 : 0.8}
-              amplitude={1.2}
-              waviness={2.2}
-              thickness={1.1}
-              glow={1.2}
-              taper={4.9}
-              spread={1.8}
-              intensity={0.6}
-              saturation={2}
-              opacity={1}
-              scale={1.6}
-              glass
-              refraction={1}
-              dispersion={2.65}
-              glassSize={1}
-              hueShift={0.39}
-          />
+          {isMobile ? (
+            <span className="text-sm font-medium leading-none text-white">AI 对话</span>
+          ) : (
+            <>
+              <span
+                aria-hidden="true"
+                className="strands-glass-front navbar navbar--scrolled glass-surface glass-surface--svg"
+                style={{
+                  width: 56,
+                  height: 56,
+                  padding: 0,
+                  "--glass-frost": 0.24,
+                  "--glass-saturation": 1.08,
+                  "--filter-id": "url(#glass-filter)",
+                }}
+              />
+              <Strands
+                className="strands-orb-renderer"
+                style={{
+                  width: 56,
+                  height: 56,
+                  maxWidth: 56,
+                  maxHeight: 56,
+                  backdropFilter: "blur(2px)",
+                  WebkitBackdropFilter: "blur(2px)",
+                }}
+                colors={["#F97316", "#7C3AED", "#06B6D4"]}
+                count={3}
+                speed={isTriggerHovered ? 1.2 : 0.8}
+                amplitude={1.2}
+                waviness={2.2}
+                thickness={1.1}
+                glow={1.2}
+                taper={4.9}
+                spread={1.8}
+                intensity={0.6}
+                saturation={2}
+                opacity={1}
+                scale={1.6}
+                glass
+                refraction={1}
+                dispersion={2.65}
+                glassSize={1}
+                hueShift={0.39}
+              />
+            </>
+          )}
           <span className="sr-only">打开对话</span>
         </Button>
       )}

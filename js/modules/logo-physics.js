@@ -104,6 +104,7 @@
         : siteUtils.getNumberOption(logoPhysicsConfig, "desktopSpreadLift", 14);
 
       logoParticles = logos.map((el, index) => {
+        el.draggable = false;
         const jitter = isMobile
           ? siteUtils.randomInRange(-2.5, 2.5)
           : siteUtils.randomInRange(-8, 8);
@@ -391,6 +392,10 @@
 
       const centerParticle = logoParticles.find((particle) => particle.el === target);
       kickLogoParticles(centerParticle);
+    });
+
+    logoWall.addEventListener("dragstart", (event) => {
+      event.preventDefault();
     });
 
     let resizeTimer;

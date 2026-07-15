@@ -38,17 +38,23 @@
     if (preloader.dataset.preloaderReady === "true") return;
     preloader.dataset.preloaderReady = "true";
 
+    const mobileBreakpoint = siteUtils.getNumberOption(preloaderConfig, "mobileBreakpoint", 768);
+    const isMobileViewport = window.matchMedia?.(`(max-width: ${mobileBreakpoint - 1}px)`).matches;
+    const prefersReducedData = Boolean(navigator.connection?.saveData);
+    const useMobileResourceList = isMobileViewport || prefersReducedData;
+    let heroReady = useMobileResourceList;
+
     // 关键资源：首屏必须加载完才显示
     const criticalResources = siteUtils.getArrayOption(
       preloaderConfig,
-      "criticalResources",
+      useMobileResourceList ? "mobileCriticalResources" : "criticalResources",
       []
     );
 
     // 非关键资源：后台并行加载，不阻塞首屏显示
     const nonCriticalResources = siteUtils.getArrayOption(
       preloaderConfig,
-      "nonCriticalResources",
+      useMobileResourceList ? "mobileNonCriticalResources" : "nonCriticalResources",
       []
     );
 
@@ -111,7 +117,11 @@
         : totalCount
           ? (loadedCount / totalCount) * 100
           : 100;
-      const canComplete = resourcesReady && minimumDisplayElapsed && (bootReady || bootGraceElapsed);
+      const canComplete =
+        resourcesReady &&
+        heroReady &&
+        minimumDisplayElapsed &&
+        (bootReady || bootGraceElapsed);
       const percentage = canComplete
         ? 100
         : Math.min(98, rawPercentage);
@@ -176,7 +186,12 @@
 
     const tryHidePreloader = () => {
       bootReady = bootReady || Boolean(window.__siteBootStatus?.completedAt);
-      if (!resourcesReady || !minimumDisplayElapsed || (!bootReady && !bootGraceElapsed)) {
+      if (
+        !resourcesReady ||
+        !heroReady ||
+        !minimumDisplayElapsed ||
+        (!bootReady && !bootGraceElapsed)
+      ) {
         updateProgress();
         return;
       }
@@ -228,19 +243,34 @@
       return new Blob(chunks);
     };
 
-    const decodeImageBlob = (url, blob) =>
+    const loadImageResource = (url) =>
       new Promise((resolve, reject) => {
-        const objectUrl = URL.createObjectURL(blob);
         const img = new Image();
-        img.onload = () => {
-          preloadedImages.set(url, img);
-          resolve();
+        img.decoding = "async";
+        try {
+          img.fetchPriority = "high";
+        } catch {}
+        img.onload = async () => {
+          try {
+            if (typeof img.decode === "function") {
+              await img.decode().catch(() => {});
+            }
+          } finally {
+            preloadedImages.set(url, img);
+            const progress = resourceProgress.get(url);
+            if (progress) {
+              progress.loaded = progress.total || 1;
+              progress.total = progress.total || 1;
+              progress.done = true;
+            }
+            updateProgress();
+            resolve();
+          }
         };
         img.onerror = () => {
-          URL.revokeObjectURL(objectUrl);
-          reject(new Error(`Failed to decode image ${url}`));
+          reject(new Error(`Failed to preload image ${url}`));
         };
-        img.src = objectUrl;
+        img.src = url;
       });
 
     const loadResource = (url) => {
@@ -253,13 +283,15 @@
         resourceProgress.set(url, { loaded: 0, total: 0, done: false });
 
         try {
-          const blob = await readResourceBytes(url);
           if (url.endsWith(".ttf") || url.endsWith(".otf")) {
+            const blob = await readResourceBytes(url);
             const font = new FontFace("PreloadFont", await blob.arrayBuffer());
             const loadedFont = await font.load();
             document.fonts?.add?.(loadedFont);
           } else if (url.match(/\.(png|jpe?g|webp|gif|svg)$/i)) {
-            await decodeImageBlob(url, blob);
+            await loadImageResource(url);
+          } else {
+            await readResourceBytes(url);
           }
           resolve({ url, status: "loaded" });
         } catch (_error) {
@@ -292,6 +324,15 @@
         () => {
           bootReady = true;
           bootGraceElapsed = true;
+          tryHidePreloader();
+        },
+        { once: true }
+      );
+
+      window.addEventListener(
+        "hero:first-frame-ready",
+        () => {
+          heroReady = true;
           tryHidePreloader();
         },
         { once: true }

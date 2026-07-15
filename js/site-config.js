@@ -78,6 +78,7 @@
 
   const heroCriticalResources = [
     "./imag/frame_front.webp",
+    "./imag/sprite.webp",
     "./imag/Frame 2085668692.webp",
     "./font/ArchivoBlack-Regular.otf",
     "./font/ArchivoBlack-Regular.ttf",
@@ -107,6 +108,25 @@
     "./font/ArchivoBlack-Regular.otf",
     "./font/ArchivoBlack-Regular.ttf",
     "./font/LuckiestGuy-Regular.ttf",
+  ];
+
+  const mobileCriticalResources = [
+    "./imag/frame_front.webp",
+    "./imag/Frame 2085668692.webp",
+    ...sharedFontResources,
+  ];
+
+  const mobileNonCriticalResources = [
+    "./imag/photo1.webp",
+    "./imag/photo2.webp",
+    "./imag/portfolio-cards1.webp",
+    "./imag/Group 1940698323.webp",
+    "./imag/Group 1940699207.webp",
+    "./imag/Group 1940699208.webp",
+    "./imag/Group 1940699211.webp",
+    "./imag/xuhao-main-avatar.webp",
+    "./imag/wechat-qr-placeholder.svg",
+    "./imag/灯泡 1.webp",
   ];
 
   const siteConfig = {
@@ -203,6 +223,9 @@
     preloader: {
       criticalResources: heroCriticalResources,
       nonCriticalResources: [...sharedImageResources, ...sharedFontResources],
+      mobileBreakpoint: 768,
+      mobileCriticalResources,
+      mobileNonCriticalResources,
       waitForAllResources: false,
       phrases: [
         "Please wait a moment.",
@@ -281,6 +304,8 @@
 
     // Hero sprite tracking.
     headTracker: {
+      mobileBreakpoint: 768,
+      disableInteractiveOnMobile: true,
       frameCount: 240,
       frameCols: 12,
       framesPerSheet: 60,
