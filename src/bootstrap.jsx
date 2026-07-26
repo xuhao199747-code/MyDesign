@@ -25,6 +25,10 @@ function loadRuntimeEntry(prodFileName, devPath) {
 }
 
 function whenNavWechatLanyardRequested() {
+  if (isMobileViewport()) {
+    return () => null;
+  }
+
   return () => {
     const mount = document.getElementById("navWechatLanyardMount");
     if (!mount) return null;

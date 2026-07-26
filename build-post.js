@@ -40,7 +40,7 @@ function copyFile(src, dest) {
 
 function buildProjectHtml() {
   const templatePath = './project.html';
-  const manifestPath = './dist/.vite/project-manifest.json';
+  const manifestPath = './dist/project-manifest.json';
   const outputPath = './dist/project.html';
 
   if (!fs.existsSync(templatePath) || !fs.existsSync(manifestPath)) return;

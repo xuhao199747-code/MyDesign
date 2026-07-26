@@ -74,6 +74,7 @@
     "./imag/logo/logo17.webp",
     "./imag/logo/logo18.webp",
     "./imag/logo/logo19.webp",
+    "./imag/logo/logo20.png",
   ];
 
   const heroCriticalResources = [
@@ -255,10 +256,10 @@
     homeContent: {
       about: {
         introAriaLabel:
-          "大家好，我是徐浩，从事AI产品经理工作，专注于把用户需求、业务目标和AI能力，转化为可落地的产品体验。",
+          "大家好，我是徐浩，从事AI产品工作，专注于把用户需求、业务目标和AI能力，转化为可落地的产品体验。",
         introGreeting: "大家好，我是",
         introName: "徐浩",
-        introRole: "从事AI产品经理工作💻，",
+        introRole: "从事AI产品工作💻，",
         introFocusPrefix: "专注于把用户需求、业务目标和",
         introFocusProducts: "AI能力🌐，",
         introFocusBrand: "转化为可落地的产品体验❤️。",
@@ -269,7 +270,7 @@
         metaLeftLabel: "BASED",
         metaLeftValue: "杭州",
         metaRightLabel: "Designer",
-        metaRightValue: "AI产品经理",
+        metaRightValue: "AI产品",
         copyPrimary: "用逻辑构建界面，以温度传递品牌基因！",
         copySecondary: "让界面更有逻辑，让设计更有温度!",
       },

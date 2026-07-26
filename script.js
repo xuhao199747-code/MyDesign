@@ -185,6 +185,62 @@ if (bootConfig.logSummary === true) {
   if (!trigger || !drop || drop.dataset.wechatDropControllerReady === "true") return;
 
   drop.dataset.wechatDropControllerReady = "true";
+  const mobilePopup = document.getElementById("mobileContactPopup");
+  const isMobile = window.matchMedia?.("(max-width: 767px)").matches;
+
+  if (isMobile && mobilePopup) {
+    const wechatCard = mobilePopup.querySelector(".mobile-contact-popup__wechat");
+    let isMobilePopupOpen = false;
+
+    const closeMobilePopup = () => {
+      isMobilePopupOpen = false;
+      mobilePopup.classList.remove("is-open");
+      mobilePopup.setAttribute("aria-hidden", "true");
+    };
+
+    const openMobilePopup = () => {
+      isMobilePopupOpen = true;
+      if (wechatCard) wechatCard.hidden = false;
+      mobilePopup.classList.add("is-open");
+      mobilePopup.setAttribute("aria-hidden", "false");
+    };
+
+    window.__closeNavWechatCard = closeMobilePopup;
+    window.__forceCloseNavWechatCard = closeMobilePopup;
+
+    window.addEventListener("click", (event) => {
+      if (!(event.target instanceof Element)) return;
+      const closeTarget = event.target.closest("[data-mobile-contact-close]");
+      const wechatTarget = event.target.closest(triggerSelector);
+      const phoneTarget = event.target.closest(
+        '[data-section-node="footer-phone-value"], [data-shell-node="phone-trigger"], [data-shell-node="contact-trigger"]'
+      );
+
+      if (closeTarget) {
+        event.preventDefault();
+        closeMobilePopup();
+        return;
+      }
+      if (wechatTarget) {
+        event.preventDefault();
+        event.stopImmediatePropagation?.();
+        openMobilePopup();
+        return;
+      }
+      if (phoneTarget) {
+        event.preventDefault();
+        event.stopImmediatePropagation?.();
+        openMobilePopup();
+      }
+    }, true);
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && isMobilePopupOpen) closeMobilePopup();
+    });
+
+    return;
+  }
+
   let isOpen = false;
   let openScrollY = 0;
   let scrollGuardUntil = 0;
@@ -324,7 +380,7 @@ if (bootConfig.logSummary === true) {
   window.__closeNavWechatCard = closeCard;
   window.__forceCloseNavWechatCard = forceCloseCard;
 
-  document.addEventListener("click", (event) => {
+    window.addEventListener("click", (event) => {
     if (!(event.target instanceof Element)) return;
     if (event.target.closest('[data-shell-node="contact-trigger"]')) return;
     const clickedTrigger = event.target.closest(triggerSelector);

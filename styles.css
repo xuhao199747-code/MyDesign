@@ -545,6 +545,83 @@ body.is-click-surprise-active *::selection {
   pointer-events: none;
 }
 
+.mobile-contact-popup {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .mobile-contact-popup {
+    position: fixed;
+    inset: 0;
+    z-index: 260;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+  }
+
+  .mobile-contact-popup.is-open {
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .mobile-contact-popup__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.42);
+    backdrop-filter: blur(8px);
+  }
+
+  .mobile-contact-popup__card {
+    position: relative;
+    width: min(100%, 320px);
+    overflow: hidden;
+    border-radius: 24px;
+    background: #f8fafc;
+    box-shadow: 0 24px 70px rgba(15, 23, 42, 0.28);
+    transform: translateY(12px) scale(0.96);
+    transition: transform 0.24s ease;
+  }
+
+  .mobile-contact-popup.is-open .mobile-contact-popup__card {
+    transform: translateY(0) scale(1);
+  }
+
+  .mobile-contact-popup__close {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    z-index: 1;
+    width: 34px;
+    height: 34px;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.82);
+    color: #0f172a;
+    font-size: 25px;
+    line-height: 1;
+  }
+
+  .mobile-contact-popup__title {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+
+  .mobile-contact-popup__wechat {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+}
+
 .nav-wechat-drop.is-open .nav-wechat-drop__lanyard,
 .nav-wechat-drop.is-open .nav-wechat-drop__lanyard .lanyard-wrapper,
 .nav-wechat-drop.is-open .nav-wechat-drop__lanyard canvas {

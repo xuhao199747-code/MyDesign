@@ -12,7 +12,7 @@
     />
     <link rel="stylesheet" href="./styles.css" />
   </head>
-  <body class="min-h-screen bg-[var(--color-surface)]">
+  <body class="min-h-screen bg-[var(--color-surface)]" data-site-page="project">
     <svg class="liquid-glass-filter" aria-hidden="true" focusable="false">
       <defs>
         <linearGradient id="red-grad" x1="100%" y1="0%" x2="0%" y2="0%">
@@ -68,17 +68,18 @@
       </defs>
     </svg>
 
-    <header class="navbar">
-      <a class="brand" href="./index.html#home" aria-label="XHDESIGN 棣栭〉">
+    <header class="navbar" data-site-shell="primary">
+      <a class="brand" data-shell-node="brand" href="./index.html#home" aria-label="XHDESIGN 首页">
         <img src="./favicon.png" alt="XHDESIGN" decoding="async" />
       </a>
-      <button class="menu-toggle" id="menuToggle" aria-label="鍒囨崲瀵艰埅鑿滃崟">
+      <button class="menu-toggle" id="menuToggle" data-shell-node="menu-toggle" aria-label="切换导航菜单">
         <span class="menu-toggle__icon" id="menuToggleIcon" aria-hidden="true"></span>
       </button>
-      <nav class="menu-wrap" id="menuWrap" aria-label="主导航">
+      <nav class="menu-wrap" id="menuWrap" data-shell-node="menu-wrap" aria-label="主导航">
         <ul class="menu">
-          <li><a href="./index.html#about">关于</a></li>
+          <li><a href="./project.html?slug=profile">简历</a></li>
           <li><a href="./index.html#portfolio">作品</a></li>
+          <li><a href="./index.html#contact">微信</a></li>
           <li><a href="./index.html#contact">联系</a></li>
         </ul>
       </nav>
@@ -98,9 +99,9 @@
         <a class="inline-flex w-fit items-center justify-center rounded-full bg-[var(--color-text)] px-[18px] py-3 text-[14px] font-semibold text-[var(--color-on-dark)] no-underline" href="./index.html#portfolio">Back To Home</a>
       </section>
     </main>
+    <script src="./js/site-navbar.js"></script>
     <script type="module" src="./src/project-page-entry.jsx"></script>
   </body>
 </html>
-
 
 

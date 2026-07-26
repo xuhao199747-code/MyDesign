@@ -129,6 +129,14 @@
     <div id="navWechatDrop" class="nav-wechat-drop" aria-hidden="true">
       <div id="navWechatLanyardMount" class="nav-wechat-drop__lanyard" aria-hidden="true"></div>
     </div>
+    <div id="mobileContactPopup" class="mobile-contact-popup" aria-hidden="true">
+      <div class="mobile-contact-popup__backdrop" data-mobile-contact-close></div>
+      <section class="mobile-contact-popup__card" role="dialog" aria-modal="true" aria-labelledby="mobileContactPopupTitle">
+        <button class="mobile-contact-popup__close" type="button" aria-label="关闭" data-mobile-contact-close>×</button>
+        <h2 id="mobileContactPopupTitle" class="mobile-contact-popup__title">WECHAT</h2>
+        <img class="mobile-contact-popup__wechat" src="./imag/wechat-qr-placeholder.svg" alt="微信二维码" />
+      </section>
+    </div>
     <main class="site-main">
       <!-- 内容区域0：角色特写首屏；鼠标方向控制转头 -->
       <section id="home" data-site-section="home" class="head-hero relative isolate w-full overflow-hidden bg-[var(--sprite-stage-bg)] h-[100svh] min-h-[620px] mt-[-64px] max-md:min-h-[560px] max-md:mt-[calc((env(safe-area-inset-top,0px)+48px+clamp(32px,6vw,56px))*-1)]" aria-label="角色特写首屏">
@@ -168,7 +176,7 @@
       <!-- 内容区域2：介绍与技能 -->
       <section id="about" data-site-section="about" class="container section-two flex w-[var(--page-frame-width)] flex-col items-center justify-center" aria-labelledby="aboutIntro">
         <div class="section-two-head flex w-full items-center justify-center" data-section-node="about-head">
-          <p id="aboutIntro" data-section-node="about-intro" class="section-two-intro m-0 w-full max-w-[1200px] font-black leading-[1.34] text-[color:var(--color-title)] text-[clamp(28px,2.65vw,40px)]" aria-label="大家好，我是徐浩，从事AI产品经理工作，专注于把用户需求、业务目标和AI能力，转化为可落地的产品体验。">
+          <p id="aboutIntro" data-section-node="about-intro" class="section-two-intro m-0 w-full max-w-[1200px] font-black leading-[1.34] text-[color:var(--color-title)] text-[clamp(28px,2.65vw,40px)]" aria-label="大家好，我是徐浩，从事AI产品工作，专注于把用户需求、业务目标和AI能力，转化为可落地的产品体验。">
             大家好， 我是
             <img
               data-section-node="about-intro-avatar"
@@ -187,7 +195,7 @@
               loading="lazy"
               decoding="async"
             />，
-            <span class="section-two-intro__nowrap">从事AI产品经理工作💻，</span>
+            <span class="section-two-intro__nowrap">从事AI产品工作💻，</span>
             专注于把用户需求、业务目标和<span class="section-two-intro__nowrap">AI能力🌐，</span>
             <span class="section-two-intro__nowrap">转化为可落地的产品体验❤️。</span>
           </p>
@@ -212,6 +220,7 @@
           <img class="absolute left-0 top-0 block h-16 w-16 object-contain opacity-0 [transform:translate3d(0,-260px,0)_rotate(-8deg)] [will-change:transform,opacity]" src="./imag/logo/logo17.webp" alt="工具图标 17" loading="lazy" decoding="async" />
           <img class="absolute left-0 top-0 block h-16 w-16 object-contain opacity-0 [transform:translate3d(0,-260px,0)_rotate(-8deg)] [will-change:transform,opacity]" src="./imag/logo/logo18.webp" alt="工具图标 18" loading="lazy" decoding="async" />
           <img class="absolute left-0 top-0 block h-16 w-16 object-contain opacity-0 [transform:translate3d(0,-260px,0)_rotate(-8deg)] [will-change:transform,opacity]" src="./imag/logo/logo19.webp" alt="工具图标 19" loading="lazy" decoding="async" />
+          <img class="absolute left-0 top-0 block h-16 w-16 object-contain opacity-0 [transform:translate3d(0,-260px,0)_rotate(-8deg)] [will-change:transform,opacity]" src="./imag/logo/logo20.png" alt="工具图标 20" loading="lazy" decoding="async" />
         </div>
       </section>
 
@@ -241,7 +250,7 @@
           </div>
           <dl data-section-node="photo-meta-right" class="photo-meta m-0 flex flex-col items-start justify-center gap-2 p-0">
             <dt data-section-node="photo-meta-right-label" class="m-0 w-full text-left text-[12px] font-normal leading-[1.33] text-[var(--color-muted)]">Designer</dt>
-            <dd data-section-node="photo-meta-right-value" class="m-0 w-full text-left text-[14px] font-medium leading-[1.43] text-[var(--color-text)]">AI产品经理</dd>
+              <dd data-section-node="photo-meta-right-value" class="m-0 w-full text-left text-[14px] font-medium leading-[1.43] text-[var(--color-text)]">AI产品</dd>
           </dl>
         </div>
         <div class="photo-content-bottom mt-0 flex w-full flex-col items-center gap-2" data-section-node="photo-copy">
@@ -477,6 +486,7 @@
     <script src="./js/modules/click-surprise-burst.js"></script>
     <script src="./js/modules/logo-physics.js"></script>
     <script src="./js/modules/footer-morph-panel.js"></script>
+    <script src="./js/site-navbar.js"></script>
     <script type="module" src="./src/bootstrap.jsx"></script>
     <script src="./script.js"></script>
   </body>
