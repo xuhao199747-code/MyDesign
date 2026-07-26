@@ -287,6 +287,18 @@ const resumeUploadNoAuth = await invoke(resumeUploadHandler, {
 assert.equal(resumeUploadNoAuth.statusCode, 401);
 assert.equal(resumeUploadNoAuth.body.error, "missing_bearer_token");
 
+const limitTestFetch = globalThis.fetch;
+const limitTestApiKey = process.env.DEEPSEEK_API_KEY;
+process.env.DEEPSEEK_API_KEY = "test-key";
+globalThis.fetch = async () => ({
+  ok: true,
+  async json() {
+    return {
+      choices: [{ message: { content: "unlimited assistant reply" } }],
+    };
+  },
+});
+
 let chatHandler = loadChatWithMocks({ used: 20, limit: 20 });
 const limitResponse = await invoke(chatHandler, {
   method: "POST",
@@ -296,10 +308,17 @@ const limitResponse = await invoke(chatHandler, {
     messages: [{ role: "user", content: "hello" }],
   },
 });
-assert.equal(limitResponse.statusCode, 429);
-assert.equal(limitResponse.body.error, "limit_reached");
-assert.equal(limitResponse.body.limit, 20);
-assert.equal(limitResponse.body.used, 20);
+assert.equal(limitResponse.statusCode, 200);
+assert.equal(limitResponse.body.type, "assistant");
+assert.equal(limitResponse.body.text, "unlimited assistant reply");
+assert.equal(limitResponse.body.usage.used, 21);
+
+if (limitTestApiKey === undefined) {
+  delete process.env.DEEPSEEK_API_KEY;
+} else {
+  process.env.DEEPSEEK_API_KEY = limitTestApiKey;
+}
+globalThis.fetch = limitTestFetch;
 
 restoreModule("../api/chat.js");
 restoreModule("../api/_shared/supabase.js");

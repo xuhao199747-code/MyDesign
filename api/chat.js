@@ -178,7 +178,6 @@ module.exports = async function handler(req, res) {
       return;
     }
 
-    const limit = config.assistant.apiLimitPerVisitor || 20;
     if (!supabase) {
       const answer = await callDeepSeek(toDeepSeekMessages(messages, config));
       json(res, 200, {
@@ -186,7 +185,6 @@ module.exports = async function handler(req, res) {
         text: answer,
         usage: {
           mode: "local-preview",
-          limit,
           used: null,
           remaining: null,
         },
@@ -197,15 +195,6 @@ module.exports = async function handler(req, res) {
     const usage = await readVisitorUsage(supabase, visitorId);
     const used = usage?.api_call_count || 0;
 
-    if (used >= limit) {
-      json(res, 429, {
-        error: "limit_reached",
-        limit,
-        used,
-      });
-      return;
-    }
-
     const answer = await callDeepSeek(toDeepSeekMessages(messages, config));
     const nextUsed = await incrementVisitorUsage(supabase, visitorId, used);
 
@@ -213,9 +202,8 @@ module.exports = async function handler(req, res) {
       type: "assistant",
       text: answer,
       usage: {
-        limit,
         used: nextUsed,
-        remaining: Math.max(0, limit - nextUsed),
+        remaining: null,
       },
     });
   } catch (error) {
