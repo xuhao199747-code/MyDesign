@@ -805,6 +805,9 @@ body.is-click-surprise-active *::selection {
   --head-sprite-rows: 20;
   --head-col: 0;
   --head-row: 0;
+  --hero-poster-x: 0px;
+  --hero-poster-y: 0px;
+  --hero-poster-rotate: 0deg;
   pointer-events: auto;
 }
 
@@ -817,6 +820,25 @@ body.is-click-surprise-active *::selection {
 
 .head-tracker__poster {
   z-index: 0;
+  /* 海报直接铺满 stage，避免全局 img 规则和 left/translate 叠加造成半屏空白。 */
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  object-fit: cover;
+  transform: translate3d(var(--hero-poster-x), var(--hero-poster-y), 0) rotate(var(--hero-poster-rotate));
+  transition: transform 180ms ease-out, opacity 180ms ease;
+  will-change: transform;
+}
+
+/* 预加载层还在时保持首屏海报完全静止，避免渐隐阶段提前触发跟随位移。 */
+.preloader:not(.preloader--hidden) ~ .site-main .head-tracker__poster {
+  transform: translate3d(0, 0, 0) rotate(0deg) !important;
+  transition: none !important;
 }
 
 .head-tracker__sprite {
@@ -1625,35 +1647,40 @@ body.is-click-surprise-active *::selection {
 
 @media (max-width: 768px) {
   #portfolio-featured.section-portfolio-featured {
-    min-height: 0;
+    /* 移动端保留最后一屏的滚动舞台，让波浪遮罩有足够的进度区间播放。 */
+    min-height: 260svh;
     background: var(--color-surface);
+    /* content-visibility 会让该区块内部的 sticky 舞台失效，导致尾屏后出现整段空白。 */
+    content-visibility: visible;
   }
 
   .mydesign-morph__pin {
-    position: relative;
-    height: auto;
+    position: sticky;
+    top: 0;
+    height: 100svh;
     min-height: 0;
-    display: block;
+    display: flex;
     background: var(--color-surface);
   }
 
   .mydesign-morph__first {
-    opacity: 1 !important;
-    transform: none !important;
-    pointer-events: auto !important;
+    position: relative;
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+    pointer-events: auto;
   }
 
   .mydesign-morph__overlay {
-    display: none;
+    display: block;
   }
 
   .mydesign-second-screen {
-    position: relative;
-    inset: auto;
+    position: absolute;
+    inset: 0;
     min-height: auto;
-    opacity: 1 !important;
-    transform: none !important;
-    pointer-events: auto !important;
+    opacity: 0;
+    transform: translate3d(0, 48px, 0);
+    pointer-events: none;
     overflow: visible;
   }
 
@@ -2810,7 +2837,7 @@ body.is-click-surprise-active *::selection {
     flex-direction: column;
     align-items: stretch;
     width: 100%;
-    overflow-x: hidden;
+    overflow-x: clip;
     max-width: 100%;
     /* fixed 顶栏不占文档流：safe + 栏高 + 与原 main 一致的顶距（对齐原先 sticky+padding） */
     padding-top: calc(

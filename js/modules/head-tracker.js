@@ -55,7 +55,10 @@
     const isCoarsePointer = window.matchMedia?.("(pointer: coarse)").matches;
     const isMobileViewport = window.matchMedia?.(`(max-width: ${mobileBreakpoint - 1}px)`).matches;
     const prefersReducedData = Boolean(navigator.connection?.saveData);
-
+    const isPreloading = () => {
+      const preloader = document.getElementById("preloader");
+      return Boolean(preloader && !preloader.classList.contains("preloader--hidden"));
+    };
     if (
       disableInteractiveOnMobile &&
       (isCoarsePointer || isMobileViewport || prefersReducedData)
@@ -73,6 +76,8 @@
 
     const canvas =
       homeElements.trackerCanvas || tracker.querySelector(".head-tracker__sprite");
+    const poster =
+      homeElements.trackerPoster || tracker.querySelector(".head-tracker__poster");
     if (!(canvas instanceof HTMLCanvasElement)) return;
 
     const context = canvas.getContext("2d", { alpha: false });
@@ -113,6 +118,7 @@
     let queuedPoint = null;
     let hasPaintedFrame = false;
     let isTrackerActive = true;
+    let hasPosterInteracted = false;
 
     const preloadedCache = window.__preloadedImages || new Map();
     const spriteImages = spriteSrcs.map((src) => {
@@ -265,6 +271,29 @@
       setTargetFrame(key.frame, key.direction);
     };
 
+    // 大型精灵图解码前先让首屏产生即时反馈，真正的逐帧转头准备好后再无缝接管。
+    const updatePosterInteraction = (clientX, clientY) => {
+      if (!poster) return;
+      if (isPreloading()) return;
+      const rect = tracker.getBoundingClientRect();
+      const x = Math.max(-1, Math.min(1, ((clientX - rect.left) / rect.width - 0.5) * 2));
+      const y = Math.max(-1, Math.min(1, ((clientY - rect.top) / rect.height - 0.5) * 2));
+      poster.style.setProperty("--hero-poster-x", `${(x * 10).toFixed(2)}px`);
+      poster.style.setProperty("--hero-poster-y", `${(y * 7).toFixed(2)}px`);
+      poster.style.setProperty("--hero-poster-rotate", `${(x * 0.7).toFixed(2)}deg`);
+      if (!hasPosterInteracted) {
+        hasPosterInteracted = true;
+        window.dispatchEvent(new CustomEvent("hero:poster-interaction"));
+      }
+    };
+
+    const resetPosterInteraction = () => {
+      if (!poster) return;
+      poster.style.setProperty("--hero-poster-x", "0px");
+      poster.style.setProperty("--hero-poster-y", "0px");
+      poster.style.setProperty("--hero-poster-rotate", "0deg");
+    };
+
     const queueUpdateFromPoint = (clientX, clientY) => {
       if (!isTrackerActive) return;
       queuedPoint = { clientX, clientY };
@@ -380,6 +409,7 @@
     homeSection.addEventListener(
       "pointermove",
       (event) => {
+        updatePosterInteraction(event.clientX, event.clientY);
         loadRemainingSprites();
         queueUpdateFromPoint(event.clientX, event.clientY);
       },
@@ -388,6 +418,7 @@
     homeSection.addEventListener(
       "pointerleave",
       () => {
+        resetPosterInteraction();
         queuedPoint = null;
         setTargetFrame(frontFrame, "center");
       },

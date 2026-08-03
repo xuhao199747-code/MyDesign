@@ -79,12 +79,6 @@
 
   const heroCriticalResources = [
     "./imag/frame_front.webp",
-    "./imag/sprite.webp",
-    "./imag/Frame 2085668692.webp",
-    "./font/ArchivoBlack-Regular.otf",
-    "./font/ArchivoBlack-Regular.ttf",
-    "./font/LuckiestGuy-Regular.ttf",
-    ...logoItems,
   ];
 
   const sharedImageResources = [
@@ -98,6 +92,14 @@
       "./imag/Bottom information.webp",
       "./imag/photo Top.webp",
       "./imag/design top.webp",
+      "./imag/frame_front.webp",
+      "./imag/sprite.webp",
+      "./imag/sprite_2.webp",
+      "./imag/sprite_3.webp",
+      "./imag/sprite_4.webp",
+      "./imag/loding-app-card.webp",
+      "./imag/loding-five-card.webp",
+      "./imag/pigpig-card.webp",
       "./imag/xuhao-main-avatar.webp",
       "./imag/wechat-qr-placeholder.svg",
       "./imag/灯泡 1.webp",
@@ -113,22 +115,9 @@
 
   const mobileCriticalResources = [
     "./imag/frame_front.webp",
-    "./imag/Frame 2085668692.webp",
-    ...sharedFontResources,
   ];
 
-  const mobileNonCriticalResources = [
-    "./imag/photo1.webp",
-    "./imag/photo2.webp",
-    "./imag/portfolio-cards1.webp",
-    "./imag/Group 1940698323.webp",
-    "./imag/Group 1940699207.webp",
-    "./imag/Group 1940699208.webp",
-    "./imag/Group 1940699211.webp",
-    "./imag/xuhao-main-avatar.webp",
-    "./imag/wechat-qr-placeholder.svg",
-    "./imag/灯泡 1.webp",
-  ];
+  const mobileNonCriticalResources = [...sharedImageResources, ...sharedFontResources];
 
   const siteConfig = {
 
@@ -227,15 +216,16 @@
       mobileBreakpoint: 768,
       mobileCriticalResources,
       mobileNonCriticalResources,
-      waitForAllResources: false,
+      waitForAllResources: true,
       phrases: [
         "Please wait a moment.",
         "Loading the full experience.",
       ],
       hideDelayMs: 260,
       minimumDisplayMs: 0,
-      maxDisplayMs: 5000,
-      bootGraceMs: 120,
+      maxDisplayMs: 0,
+      // 必须等配置中的全部图片、字体和精灵图完成后才进入页面。
+      bootGraceMs: 0,
       typePauseMs: 900,
       typeNextPhraseDelayMs: 220,
       typeForwardMs: 42,

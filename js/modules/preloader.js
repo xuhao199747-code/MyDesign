@@ -42,7 +42,25 @@
     const isMobileViewport = window.matchMedia?.(`(max-width: ${mobileBreakpoint - 1}px)`).matches;
     const prefersReducedData = Boolean(navigator.connection?.saveData);
     const useMobileResourceList = isMobileViewport || prefersReducedData;
-    let heroReady = useMobileResourceList;
+    const heroTracker = queryElement("[data-head-tracker]");
+    const heroCanvas = queryElement("[data-section-node='head-tracker-canvas']");
+    let heroReady =
+      useMobileResourceList ||
+      !heroTracker ||
+      !heroCanvas ||
+      heroTracker.classList.contains("is-ready");
+    let staticReady = false;
+    const preloadStatus = (window.__sitePreloadStatus = window.__sitePreloadStatus || {
+      phase: "loading",
+      startedAt: performance.now(),
+      staticReady: false,
+      heroReady,
+      complete: false,
+    });
+    const setPreloadPhase = (phase, extra = {}) => {
+      Object.assign(preloadStatus, extra, { phase, updatedAt: performance.now() });
+      window.dispatchEvent(new CustomEvent("site:preload-phase", { detail: { phase, ...extra } }));
+    };
 
     // 关键资源：首屏必须加载完才显示
     const criticalResources = siteUtils.getArrayOption(
@@ -79,6 +97,17 @@
     let displayedProgress = 0;
     let progressFrame = 0;
 
+    // 首屏模块可能比预加载器晚初始化，也可能已经在监听器注册前完成首帧。
+    // 每次检查时同步 DOM 状态，避免错过 hero:first-frame-ready 后只能等兜底计时器。
+    const syncHeroReady = () => {
+      if (heroReady) return true;
+      if (!heroTracker || !heroCanvas || heroTracker.classList.contains("is-ready")) {
+        heroReady = true;
+        setPreloadPhase("hero-ready", { heroReady: true });
+      }
+      return heroReady;
+    };
+
     const renderProgress = (percentage) => {
       if (progressBar) {
         progressBar.style.width = `${percentage}%`;
@@ -103,6 +132,7 @@
 
     const updateProgress = () => {
       bootReady = bootReady || Boolean(window.__siteBootStatus?.completedAt);
+      syncHeroReady();
       const progressItems = Array.from(resourceProgress.values());
       const knownTotalBytes = progressItems.reduce((sum, item) => sum + (item.total || 0), 0);
       const knownLoadedBytes = progressItems.reduce((sum, item) => {
@@ -119,7 +149,7 @@
           : 100;
       const canComplete =
         resourcesReady &&
-        heroReady &&
+        staticReady &&
         minimumDisplayElapsed &&
         (bootReady || bootGraceElapsed);
       const percentage = canComplete
@@ -135,6 +165,8 @@
       targetProgress = 100;
       renderProgress(100);
       hasHidden = true;
+      preloadStatus.complete = true;
+      setPreloadPhase("complete", { staticReady: true, complete: true });
       preloader.classList.add("preloader--hidden");
       setTimeout(() => {
         preloader.remove();
@@ -188,7 +220,7 @@
       bootReady = bootReady || Boolean(window.__siteBootStatus?.completedAt);
       if (
         !resourcesReady ||
-        !heroReady ||
+        !staticReady ||
         !minimumDisplayElapsed ||
         (!bootReady && !bootGraceElapsed)
       ) {
@@ -333,15 +365,37 @@
         "hero:first-frame-ready",
         () => {
           heroReady = true;
+          setPreloadPhase("hero-ready", { heroReady: true });
           tryHidePreloader();
         },
         { once: true }
       );
 
+      // 兼容模块启动顺序变化：如果事件已错过，短轮询读取首屏真实状态。
+      const pollHeroReady = () => {
+        if (hasHidden || syncHeroReady()) {
+          tryHidePreloader();
+          return;
+        }
+        window.setTimeout(pollHeroReady, 50);
+      };
+      pollHeroReady();
+
       setTimeout(() => {
         bootGraceElapsed = true;
         tryHidePreloader();
       }, siteUtils.getNumberOption(preloaderConfig, "bootGraceMs", 450));
+
+      // 首屏海报已经由 HTML 的 <img fetchpriority="high"> 开始加载。
+      // 不要再创建第二个 Image 重复下载/解码，否则海报已经可见时预加载层仍会等待。
+      const poster = queryElement("[data-section-node='head-tracker-poster']");
+      if (poster?.complete && poster.naturalWidth > 0) {
+        const posterUrl = new URL(poster.currentSrc || poster.src, document.baseURI).href;
+        blockingResources.forEach((url) => {
+          const resourceUrl = new URL(url, document.baseURI).href;
+          if (resourceUrl === posterUrl) preloadedImages.set(url, poster);
+        });
+      }
 
       const loadBlockingResources = blockingResources.map((url) =>
         loadResource(url).then(() => {
@@ -357,6 +411,8 @@
           console.warn("[preloader] some resources failed to load", failedResources);
         }
         resourcesReady = true;
+        staticReady = true;
+        setPreloadPhase("static-ready", { staticReady: true });
         updateProgress();
         tryHidePreloader();
         return;
@@ -365,24 +421,29 @@
       // 优化模式：只等待首屏关键资源；其他素材在页面可进入后空闲加载。
       await Promise.all(loadBlockingResources);
       resourcesReady = true;
+      staticReady = true;
+      setPreloadPhase("static-ready", { staticReady: true });
       updateProgress();
       tryHidePreloader();
 
       if (!backgroundResources.length) return;
 
       const loadBackgroundResources = () => {
-        Promise.all(backgroundResources.map((url) => loadResource(url))).then(() => {
+        // 图片由 near-viewport loader 按滚动距离接管；这里仅预热字体等轻量资源，
+        // 避免首屏后立刻把整站图片塞进网络队列，反而拖慢精灵图和用户正在看的内容。
+        const warmResources = backgroundResources.filter(
+          (url) => !url.match(/\.(png|jpe?g|webp|gif|svg)$/i)
+        );
+        Promise.all(warmResources.map((url) => loadResource(url))).then(() => {
           if (failedResources.length) {
             console.warn("[preloader] some resources failed to load", failedResources);
           }
         });
       };
 
-      if ("requestIdleCallback" in window) {
-        window.requestIdleCallback(loadBackgroundResources, { timeout: 2200 });
-        return;
-      }
-      window.setTimeout(loadBackgroundResources, 450);
+      // 不依赖 requestIdleCallback：首屏动画持续运行时，空闲回调可能长期得不到执行，
+      // 结果就是后续图片一直保持 lazy 未加载状态。
+      window.setTimeout(loadBackgroundResources, 240);
     };
 
     if (document.readyState === "loading") {
@@ -391,13 +452,17 @@
       startLoading();
     }
 
-    // 安全兜底：资源异常时最多等待 15 秒，避免页面永久卡在加载层。
-    setTimeout(() => {
-      resourcesReady = true;
-      bootReady = true;
-      minimumDisplayElapsed = true;
-      hidePreloader();
-    }, siteUtils.getNumberOption(preloaderConfig, "maxDisplayMs", 15000));
+    // 可选安全兜底。配置为 0 时不跳过资源等待，确保“全部素材加载完才能进入”。
+    const maxDisplayMs = siteUtils.getNumberOption(preloaderConfig, "maxDisplayMs", 15000);
+    if (maxDisplayMs > 0) {
+      setTimeout(() => {
+        resourcesReady = true;
+        bootReady = true;
+        minimumDisplayElapsed = true;
+        staticReady = true;
+        hidePreloader();
+      }, maxDisplayMs);
+    }
   }
 
   registerSiteModule("initPreloaderModule", initPreloader);
