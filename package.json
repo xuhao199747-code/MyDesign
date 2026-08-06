@@ -2,7 +2,7 @@
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "dev:vercel": "vercel dev",
-    "build": "vite build && vite build --config vite.project.config.mjs && node build-post.js",
+    "build": "vite build && node build-post.js",
     "test:first-load": "node --test tests/first-load-contract.test.mjs",
     "verify:assistant": "node --no-warnings scripts/verify-assistant-admin.mjs && node --no-warnings scripts/verify-agent-chat.mjs"
   },

@@ -229,11 +229,6 @@ export default function BounceCards({
   const isMobileInteraction = () =>
     isMobileLayout;
 
-  const openCardLink = (href) => {
-    if (!href) return;
-    window.open(href, "_blank", "noopener,noreferrer");
-  };
-
   useEffect(() => {
     if (!containerRef.current) return;
     entries.forEach((_, i) => {
@@ -265,15 +260,13 @@ export default function BounceCards({
       ref={containerRef}
     >
       {entries.map((item, idx) => (
-        <a
+        <button
+          type="button"
           key={item.slug || item.image}
           className={`card card-${idx} absolute left-1/2 top-1/2 origin-center cursor-pointer no-underline [will-change:transform] max-md:rounded-[clamp(10px,2.5vw,14px)]`}
           ref={(node) => {
             cardRefs.current[idx] = node;
           }}
-          href={item.href || `./project.html?slug=${item.slug}`}
-          target="_blank"
-          rel="noopener noreferrer"
           style={{
             transform: `translate(-50%, -50%) ${currentTransformStyles[idx] ?? "none"}`,
             top: "50%",
@@ -314,11 +307,6 @@ export default function BounceCards({
               window.clearTimeout(navigationTimerRef.current);
             }
 
-            const { href } = event.currentTarget;
-            navigationTimerRef.current = window.setTimeout(() => {
-              openCardLink(href);
-              navigationTimerRef.current = null;
-            }, 360);
           }}
         >
           <div className="cardTiltSurface h-full w-full overflow-hidden rounded-[inherit] bg-slate-50 shadow-[0_22px_60px_rgba(15,23,42,0.16)]">
@@ -330,7 +318,7 @@ export default function BounceCards({
               decoding="async"
             />
           </div>
-        </a>
+        </button>
       ))}
     </div>
   );

@@ -1690,8 +1690,8 @@ body.is-click-surprise-active *::selection {
   }
 
   .mydesign-second-screen__scene {
-    min-height: min(100svh, 760px);
-    height: auto;
+    min-height: 100%;
+    height: 100%;
     grid-template-rows: minmax(0, 1fr) auto;
     align-content: stretch;
     gap: clamp(10px, 2vh, 18px);
@@ -2418,7 +2418,7 @@ body.is-click-surprise-active *::selection {
 
 .portfolio-featured {
   --featured-card-w: min(430px, 28vw);
-  --featured-gap: clamp(42px, 6vw, 112px);
+  --featured-gap: clamp(24px, 4vw, 72px);
   align-self: center;
   margin-left: 0;
   box-sizing: border-box;
@@ -2466,9 +2466,9 @@ body.is-click-surprise-active *::selection {
   opacity: 1;
   pointer-events: auto;
   transform:
-    translate3d(0, var(--featured-curve-y, 0px), 0)
+    translate3d(var(--featured-cell-x, 0px), var(--featured-cell-y, 0px), 0)
     rotate(var(--featured-rotation, 0deg));
-  transform-origin: 50% 64vw;
+  transform-origin: center;
   transition: filter 0.7s ease;
   will-change: transform;
 }
@@ -2507,6 +2507,34 @@ body.is-click-surprise-active *::selection {
   height: 100%;
   object-fit: cover;
   pointer-events: none;
+}
+
+.portfolio-featured__description {
+  position: absolute;
+  inset: auto 14px 14px;
+  z-index: 2;
+  max-height: 5.2em;
+  overflow: hidden;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.78);
+  color: #fff;
+  font-family: var(--body-font);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.45;
+  text-align: left;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.22s ease, transform 0.22s ease;
+  pointer-events: none;
+}
+
+.portfolio-featured__cell:hover .portfolio-featured__description,
+.portfolio-featured__cell:focus-visible .portfolio-featured__description {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .portfolio-featured__badge {
@@ -3493,7 +3521,7 @@ body.is-click-surprise-active *::selection {
 
   .portfolio-featured {
     --featured-card-w: min(220px, 58vw);
-    --featured-gap: clamp(34px, 11vw, 62px);
+    --featured-gap: clamp(20px, 6vw, 44px);
     min-height: 0;
     height: auto;
     overflow: visible;

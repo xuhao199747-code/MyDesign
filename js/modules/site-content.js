@@ -135,6 +135,7 @@
     card.dataset.featuredCard = "";
     card.dataset.index = String(index);
     card.dataset.title = item.title || "";
+    card.dataset.description = item.description || "";
     card.dataset.href = item.href || "#portfolio";
     card.setAttribute("aria-label", `查看 ${item.title || `Project ${index + 1}`}`);
 
@@ -162,7 +163,7 @@
       .filter(Boolean)
       .map((item) => ({
         title: item.title,
-        href: `./project.html?slug=${item.slug}`,
+        href: "#portfolio",
         image: item.image,
         alt: `${item.title} 项目`,
       }));

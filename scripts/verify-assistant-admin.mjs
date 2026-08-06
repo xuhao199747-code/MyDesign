@@ -119,8 +119,8 @@ function restoreModule(modulePath) {
 assert.equal(detectResumeIntent("可以下载你的简历吗"), true);
 assert.equal(detectResumeIntent("tell me about projects"), false);
 
-const workMatch = findKnowledgeMatch("你做过什么工作", fallbackPublicConfig);
-assert.equal(workMatch?.id, "work");
+const workMatch = findKnowledgeMatch("介绍一下徐浩", fallbackPublicConfig);
+assert.equal(workMatch?.id, "intro");
 assert.equal(findKnowledgeMatch("完全不匹配的问题", fallbackPublicConfig), null);
 assert.equal(
   loginViewSource.includes("disabled={Boolean(envError) || loading}"),

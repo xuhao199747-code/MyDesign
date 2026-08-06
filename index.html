@@ -89,8 +89,8 @@
         </button>
         <nav class="menu-wrap" id="menuWrap" data-shell-node="menu-wrap" aria-label="主导航">
           <ul class="menu pointer-events-none relative m-0 flex h-auto w-min min-w-full flex-wrap items-start justify-center gap-x-3 gap-y-[14px] p-0 md:pointer-events-auto md:w-auto md:min-w-0 md:flex-nowrap md:items-center md:gap-4">
-            <li><a href="./project.html?slug=profile" target="_blank" rel="noopener noreferrer">简历</a></li>
-            <li><a href="#portfolio">作品</a></li>
+            <li><a href="#photo">简历</a></li>
+            <li><a href="#portfolio-featured">作品</a></li>
             <li>
               <a href="#" data-shell-node="wechat-trigger" aria-label="打开微信名片">
                 <svg
@@ -232,7 +232,7 @@
             <dt data-section-node="photo-meta-left-label" class="m-0 w-full text-left text-[12px] font-normal leading-[1.33] text-[var(--color-muted)]">BASED</dt>
             <dd data-section-node="photo-meta-left-value" class="m-0 w-full text-left text-[14px] font-medium leading-[1.43] text-[var(--color-text)]">杭州</dd>
           </dl>
-          <div data-section-node="photo-images" class="photo-images relative z-[1] m-0 block h-[var(--photo-card-height)] w-[var(--photo-card-width)] overflow-hidden rounded-[var(--radius-card)] [transform-origin:center]" data-href="./project.html?slug=profile" data-link-label="查看 Profile">
+          <div data-section-node="photo-images" class="photo-images relative z-[1] m-0 block h-[var(--photo-card-height)] w-[var(--photo-card-width)] overflow-hidden rounded-[var(--radius-card)] [transform-origin:center]">
             <img
               class="photo-image photo-image-front absolute inset-0 h-full w-full object-cover"
               src="./imag/photo1.webp"
@@ -263,7 +263,7 @@
       <section
         id="portfolio"
         data-site-section="portfolio"
-        class="section-portfolio portfolio-cards-section relative flex w-full flex-col items-center justify-center overflow-visible max-md:h-auto max-md:max-h-none max-md:gap-[var(--mobile-card-gap)] max-md:mb-0 max-md:mt-0 max-md:pb-[env(safe-area-inset-bottom,0)] max-md:pt-12"
+        class="section-portfolio portfolio-cards-section hidden relative flex w-full flex-col items-center justify-center overflow-visible max-md:h-auto max-md:max-h-none max-md:gap-[var(--mobile-card-gap)] max-md:mb-0 max-md:mt-0 max-md:pb-[env(safe-area-inset-bottom,0)] max-md:pt-12"
         aria-labelledby="portfolioTitle"
       >
         <h2 id="portfolioTitle" data-section-node="photo-title-copy" class="section-title portfolio-top relative z-10 flex items-center justify-center pt-0 text-[var(--portfolio-title-size)] text-[color:var(--color-title)] max-md:mb-0 max-md:mt-0 max-md:h-auto max-md:flex-[0_1_auto] max-md:items-end max-md:justify-center max-md:pt-[0.18em] max-md:text-[var(--mobile-section-title-size)]">LET'S WORK</h2>
@@ -276,10 +276,10 @@
       <section
         id="portfolio-copy"
         data-site-section="portfolio-copy"
-        class="section-portfolio portfolio-cards-section relative flex w-full flex-col items-center justify-center overflow-visible max-md:h-auto max-md:max-h-none max-md:gap-[var(--mobile-card-gap)] max-md:mb-0 max-md:mt-0 max-md:pb-[env(safe-area-inset-bottom,0)] max-md:pt-12"
+        class="section-portfolio portfolio-cards-section hidden relative flex w-full flex-col items-center justify-center overflow-visible max-md:h-auto max-md:max-h-none max-md:gap-[var(--mobile-card-gap)] max-md:mb-0 max-md:mt-0 max-md:pb-[env(safe-area-inset-bottom,0)] max-md:pt-12"
         aria-labelledby="portfolioCopyTitle"
       >
-        <h2 id="portfolioCopyTitle" data-section-node="portfolio-title" class="section-title portfolio-top relative z-10 flex items-center justify-center pt-0 text-[var(--portfolio-title-size)] text-[color:var(--color-title)] max-md:mb-0 max-md:mt-0 max-md:h-auto max-md:flex-[0_1_auto] max-md:items-end max-md:justify-center max-md:pt-[0.18em] max-md:text-[var(--mobile-section-title-size)]">VIBE CODING</h2>
+        <h2 id="portfolioCopyTitle" data-section-node="portfolio-title" class="section-title portfolio-top relative z-10 flex items-center justify-center pt-0 text-[var(--portfolio-title-size)] text-[color:var(--color-title)] max-md:mb-0 max-md:mt-0 max-md:h-auto max-md:flex-[0_1_auto] max-md:items-end max-md:justify-center max-md:pt-[0.18em] max-md:text-[var(--mobile-section-title-size)]">MY DESIGN</h2>
         <div data-section-node="portfolio-gallery" class="portfolio-gallery portfolio-gallery--more-work relative flex w-full max-w-none items-center justify-center overflow-visible bg-[var(--color-surface)] isolate [transform:translateZ(0)]">
           <div class="more-work-grid" data-more-work-grid>
             <a class="more-work-card more-work-card--large more-work-card--lime" href="https://shadcn-docs-six.vercel.app/" aria-label="打开 shadcn docs 应用" target="_blank" rel="noopener noreferrer">
@@ -297,21 +297,21 @@
                 <img src="./imag/loding-five-card.webp" alt="" loading="lazy" decoding="async" />
               </span>
             </a>
-            <a class="more-work-card more-work-card--blue" href="./project.html?slug=portrait" aria-label="查看 Portrait 项目" target="_blank" rel="noopener noreferrer">
+            <div class="more-work-card more-work-card--blue" aria-label="Portrait 项目">
               <span class="more-work-card__surface" data-card-title="PORTRAIT" data-card-desc="人物视觉实验，突出氛围、裁切和轻交互反馈。">
                 <img src="./imag/photo2.webp" alt="" loading="lazy" decoding="async" />
               </span>
-            </a>
-            <a class="more-work-card more-work-card--mint" href="./project.html?slug=about" aria-label="查看 内容版式项目" target="_blank" rel="noopener noreferrer">
+            </div>
+            <div class="more-work-card more-work-card--mint" aria-label="内容版式项目">
               <span class="more-work-card__surface" data-card-title="BRAIN UI" data-card-desc="把抽象想法视觉化，形成更有识别度的内容表达。">
                 <img src="./imag/frame_front.webp" alt="" loading="lazy" decoding="async" />
               </span>
-            </a>
-            <a class="more-work-card more-work-card--sand" href="./project.html?slug=sneakers" aria-label="查看 视觉实验项目" target="_blank" rel="noopener noreferrer">
+            </div>
+            <div class="more-work-card more-work-card--sand" aria-label="视觉实验项目">
               <span class="more-work-card__surface" data-card-title="SNEAKERS" data-card-desc="电商活动视觉概念，强调产品节奏和转化路径。">
                 <img src="./imag/design top.webp" alt="" loading="lazy" decoding="async" />
               </span>
-            </a>
+            </div>
           </div>
         </div>
       </section>
@@ -326,47 +326,35 @@
           <div data-section-node="featured-pin" class="mydesign-morph__pin">
             <div data-section-node="featured-first-screen" class="mydesign-morph__first">
               <header class="portfolio-featured__head m-0 box-border flex w-screen max-w-none items-center justify-center self-center px-0 pt-0 text-center max-md:my-0" data-section-node="featured-head">
-                <h2 id="portfolioFeaturedTitle" data-section-node="featured-title" class="m-0 font-[var(--title-font)] text-[var(--portfolio-title-size)] font-normal uppercase leading-[0.86] text-[color:var(--color-title)] max-md:mt-0 max-md:box-border max-md:pt-[0.18em] max-md:text-[var(--mobile-section-title-size)] max-md:leading-[0.9]">MY DESIGN</h2>
+                <h2 id="portfolioFeaturedTitle" data-section-node="featured-title" class="m-0 font-[var(--title-font)] text-[var(--portfolio-title-size)] font-normal uppercase leading-[0.86] text-[color:var(--color-title)] max-md:mt-0 max-md:box-border max-md:pt-[0.18em] max-md:text-[var(--mobile-section-title-size)] max-md:leading-[0.9]">VIBE CODING</h2>
               </header>
               <div
                 data-section-node="featured-root"
-                class="portfolio-featured relative left-auto h-[clamp(360px,var(--module-media-space),560px)] w-screen overflow-visible p-0 touch-pan-y [--featured-card-w:min(430px,28vw)] [--featured-gap:clamp(42px,6vw,112px)] [overscroll-behavior-x:none] max-md:h-auto max-md:min-h-0 max-md:overflow-visible max-md:[--featured-card-w:min(280px,72vw)] max-md:[--featured-gap:24px]"
+                class="portfolio-featured relative left-auto h-[clamp(360px,var(--module-media-space),560px)] w-screen overflow-visible p-0 touch-pan-y [--featured-card-w:min(350px,23vw)] [--featured-gap:clamp(24px,4vw,72px)] [overscroll-behavior-x:none] max-md:h-auto max-md:min-h-0 max-md:overflow-visible max-md:[--featured-card-w:min(240px,62vw)] max-md:[--featured-gap:20px]"
                 aria-label="作品展示对比版本"
                 data-active-index="0"
               >
                 <div data-section-node="featured-stage" class="portfolio-featured__stage relative h-[min(100%,520px)] w-full overflow-visible max-md:mt-[var(--module-content-gap-sm)] max-md:h-[clamp(260px,72vw,340px)] max-md:overflow-visible">
-                  <button
-                    type="button"
-                    class="portfolio-featured__card"
-                    data-featured-card
-                    data-index="0"
-                    data-title="Sneakers"
-                    data-href="./project.html?slug=sneakers"
-                    aria-label="查看 Sneakers"
-                  >
-                    <img class="pointer-events-none block h-full w-full object-cover" src="./imag/portfolio-cards1.webp" alt="Sneakers 项目" loading="lazy" decoding="async" />
+                  <button type="button" class="portfolio-featured__card" data-featured-card data-index="0" data-title="组件库" data-href="https://shadcn-docs-six.vercel.app/" aria-label="查看组件库">
+                    <img class="pointer-events-none block h-full w-full object-cover" src="./imag/loding-app-card.webp" alt="组件库项目" loading="lazy" decoding="async" />
                   </button>
-                  <button
-                    type="button"
-                    class="portfolio-featured__card"
-                    data-featured-card
-                    data-index="1"
-                    data-title="Profile"
-                    data-href="./project.html?slug=profile"
-                    aria-label="查看 Profile"
-                  >
-                    <img class="pointer-events-none block h-full w-full object-cover" src="./imag/photo1.webp" alt="Profile 项目" loading="lazy" decoding="async" />
+                  <button type="button" class="portfolio-featured__card" data-featured-card data-index="1" data-title="猪猪黄昏" data-href="https://pigpig.vercel.app/" aria-label="查看猪猪黄昏">
+                    <img class="pointer-events-none block h-full w-full object-cover" src="./imag/pigpig-card.webp" alt="猪猪黄昏项目" loading="lazy" decoding="async" />
                   </button>
-                  <button
-                    type="button"
-                    class="portfolio-featured__card"
-                    data-featured-card
-                    data-index="2"
-                    data-title="About"
-                    data-href="./project.html?slug=about"
-                    aria-label="查看 About"
-                  >
-                    <img class="pointer-events-none block h-full w-full object-cover" src="./imag/Image2.webp" alt="About 项目" loading="lazy" decoding="async" />
+                  <button type="button" class="portfolio-featured__card" data-featured-card data-index="2" data-title="LODING" data-href="https://loding-five.vercel.app/" aria-label="查看 LODING">
+                    <img class="pointer-events-none block h-full w-full object-cover" src="./imag/loding-five-card.webp" alt="LODING 项目" loading="lazy" decoding="async" />
+                  </button>
+                  <button type="button" class="portfolio-featured__card" data-featured-card data-index="3" data-title="PORTRAIT" data-href="#portfolio-featured" aria-label="查看 PORTRAIT">
+                    <img class="pointer-events-none block h-full w-full object-cover" src="./imag/photo2.webp" alt="PORTRAIT 项目" loading="lazy" decoding="async" />
+                  </button>
+                  <button type="button" class="portfolio-featured__card" data-featured-card data-index="4" data-title="BRAIN UI" data-href="#portfolio-featured" aria-label="查看 BRAIN UI">
+                    <img class="pointer-events-none block h-full w-full object-cover" src="./imag/frame_front.webp" alt="BRAIN UI 项目" loading="lazy" decoding="async" />
+                  </button>
+                  <button type="button" class="portfolio-featured__card" data-featured-card data-index="5" data-title="SNEAKERS" data-href="#portfolio-featured" aria-label="查看 SNEAKERS">
+                    <img class="pointer-events-none block h-full w-full object-cover" src="./imag/design top.webp" alt="SNEAKERS 项目" loading="lazy" decoding="async" />
+                  </button>
+                  <button type="button" class="portfolio-featured__card" data-featured-card data-index="6" data-title="Agent执行流程" data-href="https://logic-flow-diagram.vercel.app/" aria-label="查看 Agent执行流程">
+                    <img class="pointer-events-none block h-full w-full object-cover" src="./imag/agent-flow-card.png" alt="Agent执行流程项目" loading="lazy" decoding="async" />
                   </button>
                 </div>
                 <div data-section-node="featured-actions" class="portfolio-featured__actions hidden">
@@ -380,12 +368,12 @@
                   </button>
                   <a
                     data-section-node="featured-title-link"
-                    href="./project.html?slug=sneakers"
+                    href="#portfolio-featured"
                     target="_blank"
                     rel="noopener noreferrer"
                     class="portfolio-featured__title inline-flex items-center justify-center rounded-[var(--radius-pill)] bg-black px-5 py-2 text-[14px] font-medium text-white no-underline"
                   >
-                    Sneakers
+                    组件库
                   </a>
                   <button
                     type="button"

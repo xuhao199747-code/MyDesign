@@ -41,8 +41,8 @@
       const sectionNode = title.getAttribute("data-section-node");
       const isPhotoTitle = sectionNode === "photo-title" || sectionNode === "photo-title-copy";
       const isResumeTitle = sectionNode === "photo-title" && accessibleText === "MY RESUME";
-      const isPortfolioTitle = sectionNode === "portfolio-title";
-      const isFeaturedTitle = sectionNode === "featured-title";
+      const isVibeCodingTitle = accessibleText === "VIBE CODING";
+      const isMyDesignTitle = accessibleText === "MY DESIGN";
       let charIndex = 0;
       let iCountForPortfolio = 0;
 
@@ -95,7 +95,7 @@
             return;
           }
 
-          if (isPortfolioTitle && char === "I") {
+          if (isVibeCodingTitle && char === "I") {
             iCountForPortfolio += 1;
             if (iCountForPortfolio === 2) {
               const group = document.createElement("span");
@@ -124,7 +124,7 @@
             }
           }
 
-          if (isFeaturedTitle && char === "I") {
+          if (isMyDesignTitle && char === "I") {
             const group = document.createElement("span");
             const charSpan = document.createElement("span");
             const sticker = document.createElement("span");

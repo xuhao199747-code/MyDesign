@@ -6,7 +6,6 @@
 @import "@fontsource-variable/geist";
 
 @source "../index.html";
-@source "../project.html";
 @source "./**/*.{js,jsx}";
 
 @custom-variant dark (&:is(.dark *));

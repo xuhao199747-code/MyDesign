@@ -44,6 +44,7 @@
         return {
           index,
           title: card.dataset.title || `Project ${index + 1}`,
+          description: card.dataset.description || "",
           href: card.dataset.href || "#portfolio",
           src: image?.getAttribute("src") || "",
           alt: image?.getAttribute("alt") || "",
@@ -91,25 +92,30 @@
 
     const cells = Array.from({ length: items.length * loopCopies }, (_, slot) => {
       const item = items[wrapIndex(slot)];
-      const cell = document.createElement("a");
+      const cell = document.createElement("button");
+      cell.type = "button";
       cell.className = "portfolio-featured__cell";
       cell.dataset.slot = String(slot);
       cell.dataset.itemIndex = String(item.index);
-      cell.dataset.href = item.href;
       cell.dataset.title = item.title;
-      cell.href = item.href;
+      cell.dataset.description = item.description;
+      cell.dataset.href = item.href;
       cell.draggable = false;
       cell.setAttribute("aria-label", `查看 ${item.title}`);
       cell.innerHTML =
-        '<span class="portfolio-featured__tilt"><span class="portfolio-featured__media"><img alt="" /></span></span><span class="portfolio-featured__badge"></span>';
+        '<span class="portfolio-featured__tilt"><span class="portfolio-featured__media"><img alt="" /><span class="portfolio-featured__description"></span></span></span><span class="portfolio-featured__badge"></span>';
       const image = cell.querySelector("img");
       const badge = cell.querySelector(".portfolio-featured__badge");
+      const description = cell.querySelector(".portfolio-featured__description");
       if (image) {
         image.setAttribute("src", item.src);
         image.setAttribute("alt", item.alt);
       }
       if (badge) {
         badge.textContent = item.title;
+      }
+      if (description) {
+        description.textContent = item.description;
       }
       track.appendChild(cell);
       return cell;
@@ -138,37 +144,29 @@
     function updateCellMotion() {
       const slotPitch = getSlotPitch();
       const isMobileViewport = window.innerWidth <= mobileBreakpoint;
+      const gearAngleStep = isMobileViewport ? Math.PI / 5 : Math.PI / 6;
+      const arcRadius = isMobileViewport
+        ? slotPitch * 0.32
+        : slotPitch / (2 * Math.sin(gearAngleStep / 2));
       cells.forEach((cell, slot) => {
         const offset = slot - activeSlot;
         const distance = offset * slotPitch;
-        const rotationStrength = isMobileViewport
-          ? siteUtils.getNumberOption(featuredConfig, "mobileRotationStrength", 0.056)
-          : siteUtils.getNumberOption(featuredConfig, "desktopRotationStrength", 0.042);
-        const rotationLimit = isMobileViewport
-          ? siteUtils.getNumberOption(featuredConfig, "mobileRotationLimit", 32)
-          : siteUtils.getNumberOption(featuredConfig, "desktopRotationLimit", 25);
-        const curveBase = isMobileViewport
-          ? siteUtils.getNumberOption(featuredConfig, "mobileCurveBase", 10)
-          : siteUtils.getNumberOption(featuredConfig, "desktopCurveBase", 6);
-        const curveStrength = isMobileViewport
-          ? siteUtils.getNumberOption(featuredConfig, "mobileCurveStrength", 96)
-          : siteUtils.getNumberOption(featuredConfig, "desktopCurveStrength", 66);
-        const curveRange = isMobileViewport
-          ? siteUtils.getNumberOption(featuredConfig, "mobileCurveRange", 420)
-          : siteUtils.getNumberOption(featuredConfig, "desktopCurveRange", 560);
-        const rotation = Math.max(
-          -rotationLimit,
-          Math.min(rotationLimit, distance * rotationStrength)
-        );
-        const normalizedDistance = Math.min(1.35, Math.abs(distance) / curveRange);
-        const curveY = curveBase + normalizedDistance * normalizedDistance * curveStrength;
+        const gearAngle = offset * gearAngleStep;
+        const arcX = Math.sin(gearAngle) * arcRadius;
+        const arcY = arcRadius * (1 - Math.cos(gearAngle));
+        const rotation = (gearAngle * 180) / Math.PI * 0.55;
+        // The flex track already places each cell at `offset * slotPitch`.
+        // Only add the arc correction here; subtracting the track position
+        // collapses every card toward the active card and causes overlap.
+        const cellX = arcX;
         const badgeOpacity = Math.max(0, Math.min(1, Math.cos(distance * Math.PI / 600)));
         const badgeY = (1 - badgeOpacity) * 14;
         const badgeScale = 0.94 + badgeOpacity * 0.06;
         const badgeBlur = (1 - badgeOpacity) * 0.8;
 
         cell.style.setProperty("--featured-rotation", `${rotation.toFixed(3)}deg`);
-        cell.style.setProperty("--featured-curve-y", `${curveY.toFixed(3)}px`);
+        cell.style.setProperty("--featured-cell-x", `${cellX.toFixed(3)}px`);
+        cell.style.setProperty("--featured-cell-y", `${arcY.toFixed(3)}px`);
         cell.style.setProperty("--featured-badge-opacity", badgeOpacity.toFixed(3));
         cell.style.setProperty("--featured-badge-y", `${badgeY.toFixed(3)}px`);
         cell.style.setProperty("--featured-badge-scale", `${badgeScale.toFixed(3)}`);
