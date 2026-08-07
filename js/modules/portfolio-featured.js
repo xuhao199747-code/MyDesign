@@ -146,15 +146,16 @@
       const isMobileViewport = window.innerWidth <= mobileBreakpoint;
       const gearAngleStep = isMobileViewport ? Math.PI / 5 : Math.PI / 6;
       const arcRadius = isMobileViewport
-        ? slotPitch * 0.32
+        ? slotPitch * 0.42
         : slotPitch / (2 * Math.sin(gearAngleStep / 2));
+      const rotationScale = isMobileViewport ? 0.46 : 0.55;
       cells.forEach((cell, slot) => {
         const offset = slot - activeSlot;
         const distance = offset * slotPitch;
         const gearAngle = offset * gearAngleStep;
         const arcX = Math.sin(gearAngle) * arcRadius;
-        const arcY = arcRadius * (1 - Math.cos(gearAngle));
-        const rotation = (gearAngle * 180) / Math.PI * 0.55;
+        const arcY = arcRadius * (1 - Math.cos(gearAngle)) * (isMobileViewport ? 2.1 : 1);
+        const rotation = (gearAngle * 180) / Math.PI * rotationScale;
         // The flex track already places each cell at `offset * slotPitch`.
         // Only add the arc correction here; subtracting the track position
         // collapses every card toward the active card and causes overlap.

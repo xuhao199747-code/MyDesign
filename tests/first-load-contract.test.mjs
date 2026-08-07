@@ -27,6 +27,8 @@ test("preloader exposes staged status for diagnostics", () => {
   assert.match(preloader, /static-ready/);
   assert.match(preloader, /hero-ready/);
   assert.match(preloader, /loadBlockingResources/);
+  assert.match(preloader, /!useMobileResourceList/);
+  assert.match(preloader, /preloader-active/);
 });
 
 test("hero keeps PC poster feedback while mobile stays static", () => {
@@ -111,22 +113,27 @@ test("featured carousel uses the VIBE CODING project cards and labels", () => {
     ["组件库", "loding-app-card.webp"],
     ["猪猪黄昏", "pigpig-card.webp"],
     ["LODING", "loding-five-card.webp"],
-    ["PORTRAIT", "photo2.webp"],
-    ["BRAIN UI", "frame_front.webp"],
-    ["SNEAKERS", "design top.webp"],
     ["Agent执行流程", "agent-flow-card.png"],
+    ["AlphaRank GEO", "alpharank-geo-card.png"],
   ].forEach(([title, image]) => {
     assert.match(featuredSection, new RegExp(`data-title="${title}"`));
     assert.match(featuredSection, new RegExp(`src="\\./imag/${image.replace(" ", "\\s")}"`));
   });
   assert.doesNotMatch(featuredSection, /data-title="Profile"/);
   assert.doesNotMatch(featuredSection, /data-title="About"/);
+  assert.doesNotMatch(featuredSection, /data-title="PORTRAIT"/);
+  assert.doesNotMatch(featuredSection, /data-title="BRAIN UI"/);
+  assert.doesNotMatch(featuredSection, /data-title="SNEAKERS"/);
   assert.match(config, /featured:\s*\{[\s\S]*?cards:\s*\[[\s\S]*?loding-app-card\.webp/);
   assert.match(config, /cards:\s*\[[\s\S]*?title:\s*"组件库"[\s\S]*?title:\s*"猪猪黄昏"[\s\S]*?title:\s*"LODING"/);
   assert.match(config, /title:\s*"Agent执行流程"[\s\S]*?logic-flow-diagram\.vercel\.app/);
   assert.match(config, /title:\s*"组件库"[\s\S]*?shadcn-docs-six\.vercel\.app/);
   assert.match(config, /title:\s*"猪猪黄昏"[\s\S]*?pigpig\.vercel\.app/);
   assert.match(config, /title:\s*"LODING"[\s\S]*?loding-five\.vercel\.app/);
+  assert.doesNotMatch(config, /title:\s*"PORTRAIT"/);
+  assert.doesNotMatch(config, /title:\s*"BRAIN UI"/);
+  assert.doesNotMatch(config, /title:\s*"SNEAKERS"/);
+  assert.match(config, /title:\s*"AlphaRank GEO"[\s\S]*?alpharank-geo-demo\.vercel\.app/);
 });
 
 test("featured cards expose hover descriptions", () => {

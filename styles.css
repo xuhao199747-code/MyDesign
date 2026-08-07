@@ -15,6 +15,20 @@
   pointer-events: none;
 }
 
+@media (max-width: 768px) {
+  html.preloader-active,
+  body.preloader-active {
+    overflow: hidden !important;
+    overscroll-behavior: none;
+  }
+
+  .preloader {
+    width: 100%;
+    min-height: 100dvh;
+    height: 100dvh;
+  }
+}
+
 .preloader__content {
   display: flex;
   flex-direction: column;

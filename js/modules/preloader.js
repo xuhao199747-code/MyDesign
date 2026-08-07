@@ -42,6 +42,8 @@
     const isMobileViewport = window.matchMedia?.(`(max-width: ${mobileBreakpoint - 1}px)`).matches;
     const prefersReducedData = Boolean(navigator.connection?.saveData);
     const useMobileResourceList = isMobileViewport || prefersReducedData;
+    document.documentElement.classList.add("preloader-active");
+    document.body.classList.add("preloader-active");
     const heroTracker = queryElement("[data-head-tracker]");
     const heroCanvas = queryElement("[data-section-node='head-tracker-canvas']");
     let heroReady =
@@ -76,7 +78,8 @@
       []
     );
 
-    const waitForAllResources = preloaderConfig.waitForAllResources !== false;
+    const waitForAllResources =
+      preloaderConfig.waitForAllResources !== false && !useMobileResourceList;
     const allResources = [...new Set([...criticalResources, ...nonCriticalResources])];
     const criticalResourceSet = new Set(criticalResources);
     const blockingResources = waitForAllResources ? allResources : [...new Set(criticalResources)];
@@ -168,6 +171,8 @@
       preloadStatus.complete = true;
       setPreloadPhase("complete", { staticReady: true, complete: true });
       preloader.classList.add("preloader--hidden");
+      document.documentElement.classList.remove("preloader-active");
+      document.body.classList.remove("preloader-active");
       setTimeout(() => {
         preloader.remove();
       }, siteUtils.getNumberOption(preloaderConfig, "hideDelayMs", 600));
