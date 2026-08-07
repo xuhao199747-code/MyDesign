@@ -99,6 +99,8 @@
     let targetProgress = 0;
     let displayedProgress = 0;
     let progressFrame = 0;
+    let mobileProgressPulseFrame = 0;
+    const preloadStartedAt = performance.now();
 
     // 首屏模块可能比预加载器晚初始化，也可能已经在监听器注册前完成首帧。
     // 每次检查时同步 DOM 状态，避免错过 hero:first-frame-ready 后只能等兜底计时器。
@@ -161,6 +163,18 @@
       updateProgressTarget(percentage);
     };
 
+    // 移动端首屏图片通过 Image 解码，加载过程中没有可读取的字节进度。
+    // 用平滑的等待进度避免百分比停在 0，真实资源完成后仍由 updateProgress 决定完成状态。
+    const pulseMobileProgress = () => {
+      if (hasHidden || !useMobileResourceList) return;
+      if (!resourcesReady) {
+        const elapsed = performance.now() - preloadStartedAt;
+        const waitingProgress = Math.min(90, 8 + elapsed / 120);
+        updateProgressTarget(waitingProgress);
+      }
+      mobileProgressPulseFrame = requestAnimationFrame(pulseMobileProgress);
+    };
+
     const hidePreloader = () => {
       if (!preloader || hasHidden) return;
       updateProgressTarget(100);
@@ -171,6 +185,10 @@
       preloadStatus.complete = true;
       setPreloadPhase("complete", { staticReady: true, complete: true });
       preloader.classList.add("preloader--hidden");
+      if (mobileProgressPulseFrame) {
+        cancelAnimationFrame(mobileProgressPulseFrame);
+        mobileProgressPulseFrame = 0;
+      }
       document.documentElement.classList.remove("preloader-active");
       document.body.classList.remove("preloader-active");
       setTimeout(() => {
@@ -349,6 +367,9 @@
     window.__preloadedImages = preloadedImages;
 
     const startLoading = async () => {
+      if (useMobileResourceList) {
+        mobileProgressPulseFrame = requestAnimationFrame(pulseMobileProgress);
+      }
       if (!minimumDisplayElapsed) {
         setTimeout(() => {
           minimumDisplayElapsed = true;

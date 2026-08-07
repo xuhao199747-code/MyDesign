@@ -2545,8 +2545,7 @@ body.is-click-surprise-active *::selection {
   pointer-events: none;
 }
 
-.portfolio-featured__cell:hover .portfolio-featured__description,
-.portfolio-featured__cell:focus-visible .portfolio-featured__description {
+.portfolio-featured__cell.is-active .portfolio-featured__description {
   opacity: 1;
   transform: translateY(0);
 }

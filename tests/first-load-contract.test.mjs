@@ -29,6 +29,7 @@ test("preloader exposes staged status for diagnostics", () => {
   assert.match(preloader, /loadBlockingResources/);
   assert.match(preloader, /!useMobileResourceList/);
   assert.match(preloader, /preloader-active/);
+  assert.match(preloader, /pulseMobileProgress/);
 });
 
 test("hero keeps PC poster feedback while mobile stays static", () => {
@@ -136,14 +137,15 @@ test("featured carousel uses the VIBE CODING project cards and labels", () => {
   assert.match(config, /title:\s*"AlphaRank GEO"[\s\S]*?alpharank-geo-demo\.vercel\.app/);
 });
 
-test("featured cards expose hover descriptions", () => {
+test("featured cards reveal descriptions when active", () => {
   const module = read("js/modules/portfolio-featured.js");
   const styles = read("styles.css");
 
   assert.match(module, /description:\s*card\.dataset\.description/);
   assert.match(module, /portfolio-featured__description/);
   assert.match(styles, /\.portfolio-featured__description[\s\S]*?opacity: 0/);
-  assert.match(styles, /\.portfolio-featured__cell:hover \.portfolio-featured__description/);
+  assert.match(styles, /\.portfolio-featured__cell\.is-active \.portfolio-featured__description/);
+  assert.doesNotMatch(styles, /\.portfolio-featured__cell:hover \.portfolio-featured__description/);
 });
 
 test("featured card taps open project links in a new tab", () => {
