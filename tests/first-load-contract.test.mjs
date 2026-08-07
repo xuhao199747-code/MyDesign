@@ -148,6 +148,18 @@ test("featured cards reveal descriptions when active", () => {
   assert.doesNotMatch(styles, /\.portfolio-featured__cell:hover \.portfolio-featured__description/);
 });
 
+test("featured carousel keeps narrow screens away from the viewport edge", () => {
+  const html = read("index.html");
+  const styles = read("styles.css");
+
+  assert.match(html, /max-md:\[--featured-card-w:min\(220px,56vw\)\]/);
+  assert.match(html, /max-md:px-\[12px\]/);
+  assert.match(styles, /\.portfolio-featured__description[\s\S]*?inset: auto 12px 12px/);
+  assert.doesNotMatch(styles, /\.portfolio-featured__description\s*\{[^}]*max-height:/);
+  assert.doesNotMatch(styles, /\.portfolio-featured__description\s*\{[^}]*overflow: hidden/);
+  assert.match(styles, /@media[\s\S]*?\.portfolio-featured__description[\s\S]*?font-size: 12px/);
+});
+
 test("featured card taps open project links in a new tab", () => {
   const module = read("js/modules/portfolio-featured.js");
 
@@ -177,7 +189,7 @@ test("featured gear layout preserves each card's track position", () => {
   assert.match(module, /const cellX = arcX;/);
   assert.doesNotMatch(module, /const cellX = arcX - offset \* slotPitch;/);
   assert.match(html, /--featured-card-w:min\(350px,23vw\)/);
-  assert.match(html, /max-md:\[--featured-card-w:min\(240px,62vw\)\]/);
+  assert.match(html, /max-md:\[--featured-card-w:min\(220px,56vw\)\]/);
 });
 
 test("vibe coding title uses the bulb decoration while my design uses fire", () => {

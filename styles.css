@@ -2525,10 +2525,8 @@ body.is-click-surprise-active *::selection {
 
 .portfolio-featured__description {
   position: absolute;
-  inset: auto 14px 14px;
+  inset: auto 12px 12px;
   z-index: 2;
-  max-height: 5.2em;
-  overflow: hidden;
   padding: 10px 12px;
   border: 1px solid rgba(255, 255, 255, 0.42);
   border-radius: 14px;
@@ -2548,6 +2546,12 @@ body.is-click-surprise-active *::selection {
 .portfolio-featured__cell.is-active .portfolio-featured__description {
   opacity: 1;
   transform: translateY(0);
+}
+
+@media (max-width: 768px) {
+  .portfolio-featured__description {
+    font-size: 12px;
+  }
 }
 
 .portfolio-featured__badge {
